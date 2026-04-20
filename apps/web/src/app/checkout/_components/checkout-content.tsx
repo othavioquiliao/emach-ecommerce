@@ -5,30 +5,21 @@ import { Input } from "@emach/ui/components/input";
 import { Label } from "@emach/ui/components/label";
 import { Separator } from "@emach/ui/components/separator";
 import { useForm } from "@tanstack/react-form";
-import Image from "next/image";
+import type { Route } from "next";
+import NextImage from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { useEffect, useMemo, useRef } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import { formatPrice, products } from "@/lib/mock-data";
 
-const firstProduct = products[0];
-const secondProduct = products[1];
-
-const orderItems = [
-	...(firstProduct ? [{ product: firstProduct, quantity: 1 }] : []),
-	...(secondProduct ? [{ product: secondProduct, quantity: 2 }] : []),
-];
-const subtotal = orderItems.reduce(
-	(sum, item) => sum + item.product.price * item.quantity,
-	0
-);
-const shipping = subtotal > 50_000 ? 0 : 2990;
-const total = subtotal + shipping;
+import { useCart } from "@/lib/cart-context";
+import { formatPrice } from "@/lib/mock-data";
 
 const checkoutSchema = z.object({
 	firstName: z.string().min(2, "Nome é obrigatório"),
 	lastName: z.string().min(2, "Sobrenome é obrigatório"),
-	email: z.string().email("E-mail inválido"),
+	email: z.email("E-mail inválido"),
 	phone: z.string().min(10, "Telefone inválido"),
 	address: z.string().min(5, "Endereço é obrigatório"),
 	city: z.string().min(2, "Cidade é obrigatória"),
@@ -37,6 +28,30 @@ const checkoutSchema = z.object({
 });
 
 export function CheckoutContent() {
+	const router = useRouter();
+	const { items, clear } = useCart();
+	const submittedRef = useRef(false);
+
+	useEffect(() => {
+		if (items.length === 0 && !submittedRef.current) {
+			router.replace("/cart");
+		}
+	}, [items.length, router]);
+
+	const { orderItems, subtotal, shipping, total } = useMemo(() => {
+		const sub = items.reduce(
+			(sum, item) => sum + item.product.price * item.quantity,
+			0
+		);
+		const ship = sub >= 29_900 || sub === 0 ? 0 : 2990;
+		return {
+			orderItems: items,
+			subtotal: sub,
+			shipping: ship,
+			total: sub + ship,
+		};
+	}, [items]);
+
 	const form = useForm({
 		defaultValues: {
 			firstName: "",
@@ -52,13 +67,17 @@ export function CheckoutContent() {
 			onSubmit: checkoutSchema,
 		},
 		onSubmit: () => {
-			toast.success("Dados salvos! Prosseguindo para entrega...");
+			const orderId = `EMC-${Date.now().toString(36).toUpperCase()}`;
+			submittedRef.current = true;
+			clear();
+			toast.success("Pedido confirmado!");
+			router.push(`/checkout/success?order=${orderId}` as Route);
 		},
 	});
 
 	return (
 		<div className="mx-auto max-w-6xl px-20 py-10">
-			<div className="flex flex-col gap-15 lg:flex-row">
+			<div className="flex flex-row gap-15">
 				{/* Form */}
 				<div className="flex-1">
 					<h1 className="font-medium text-2xl">Dados Pessoais</h1>
@@ -371,7 +390,7 @@ export function CheckoutContent() {
 				</div>
 
 				{/* Order Summary */}
-				<div className="w-full lg:w-[380px]">
+				<div className="w-[380px]">
 					<div className="sticky top-10 space-y-4 border border-border p-6">
 						<h2 className="font-display font-semibold text-xs uppercase tracking-wider">
 							Resumo do Pedido
@@ -381,16 +400,17 @@ export function CheckoutContent() {
 						{orderItems.map((item) => (
 							<div className="flex gap-4" key={item.product.id}>
 								<div className="relative size-16 shrink-0 overflow-hidden bg-muted">
-									<Image
-										alt={item.product.name}
-										className="object-cover"
-										fill
-										sizes="64px"
-										src={
-											item.product.images[0] ??
-											"/images/products/placeholder.png"
-										}
-									/>
+									{item.product.images[0] ? (
+										<NextImage
+											alt={item.product.name}
+											className="object-cover"
+											fill
+											sizes="64px"
+											src={item.product.images[0]}
+										/>
+									) : (
+										<div className="absolute inset-0 bg-[color:var(--gray-10)]" />
+									)}
 								</div>
 								<div className="flex-1 text-sm">
 									<p className="font-medium">{item.product.name}</p>

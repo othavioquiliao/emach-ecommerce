@@ -1,5 +1,3 @@
-import { Button } from "@emach/ui/components/button";
-import { Input } from "@emach/ui/components/input";
 import Link from "next/link";
 
 const footerColumns = [
@@ -35,19 +33,26 @@ const footerColumns = [
 
 export function SiteFooter() {
 	return (
-		<footer className="dark bg-dark-surface px-10 py-10">
-			<div className="grid grid-cols-1 gap-10 md:grid-cols-4">
+		<footer
+			className="px-10 pt-16 pb-7 text-white"
+			style={{ background: "var(--gray-90)" }}
+		>
+			<div
+				className="mx-auto grid grid-cols-4 gap-10"
+				style={{ maxWidth: 1440 }}
+			>
 				{footerColumns.map((col) => (
 					<div key={col.title}>
-						<h4 className="mb-4 font-display font-semibold text-white text-xs uppercase tracking-wider">
+						<h4 className="mb-4 font-bold font-display text-xs uppercase tracking-[0.14em]">
 							{col.title}
 						</h4>
-						<ul className="space-y-2">
+						<ul className="flex flex-col gap-[10px]">
 							{col.links.map((link) => (
 								<li key={link.label}>
 									<Link
-										className="text-muted-foreground text-sm transition-colors hover:text-white"
+										className="text-[13px] transition-colors hover:text-white"
 										href={link.href}
+										style={{ color: "rgba(255,255,255,0.65)" }}
 									>
 										{link.label}
 									</Link>
@@ -56,25 +61,47 @@ export function SiteFooter() {
 						</ul>
 					</div>
 				))}
+
 				<div>
-					<h4 className="mb-4 font-display font-semibold text-white text-xs uppercase tracking-wider">
+					<h4 className="mb-4 font-bold font-display text-xs uppercase tracking-[0.14em]">
 						NEWSLETTER
 					</h4>
-					<p className="mb-4 text-muted-foreground text-sm">
+					<p
+						className="mb-[14px] text-[13px] leading-relaxed"
+						style={{ color: "rgba(255,255,255,0.65)" }}
+					>
 						Receba novidades e ofertas exclusivas.
 					</p>
-					<div className="flex gap-2">
-						<Input
-							className="h-11 flex-1 bg-white/5 text-sm text-white placeholder:text-muted-foreground"
+					<div className="flex gap-0">
+						<input
+							aria-label="Seu e-mail"
+							className="emach-input emach-input--dark flex-1"
 							placeholder="seu@email.com"
+							style={{ borderRadius: 0 }}
 							type="email"
 						/>
-						<Button className="h-11 px-5">Cadastrar</Button>
+						<button
+							className="h-11 px-5 font-semibold text-sm text-white"
+							style={{ background: "var(--emach-red)" }}
+							type="button"
+						>
+							Cadastrar
+						</button>
 					</div>
 				</div>
 			</div>
-			<div className="mt-10 border-white/10 border-t pt-6 text-center text-muted-foreground text-xs">
-				© 2026 EMACH. Todos os direitos reservados.
+
+			<hr className="emach-hr--dark mx-auto mt-12" style={{ maxWidth: 1440 }} />
+
+			<div
+				className="mx-auto mt-5 flex flex-row justify-between gap-3 text-[12px]"
+				style={{ maxWidth: 1440, color: "rgba(255,255,255,0.45)" }}
+			>
+				<div>© 2026 EMACH Ferramentas Profissionais.</div>
+				<div className="flex gap-5">
+					<span>Termos</span>
+					<span>Privacidade</span>
+				</div>
 			</div>
 		</footer>
 	);

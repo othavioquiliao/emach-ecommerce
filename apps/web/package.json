@@ -12,6 +12,8 @@
     "@emach/env": "workspace:*",
     "@emach/ui": "workspace:*",
     "@tanstack/react-form": "^1.28.0",
+    "@vercel/analytics": "^2.0.1",
+    "@vercel/speed-insights": "^2.0.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "catalog:",
     "dotenv": "catalog:",

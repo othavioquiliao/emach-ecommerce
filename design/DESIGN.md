@@ -312,3 +312,39 @@ When refining existing screens generated with this design system:
 4. Describe the desired "feel" alongside specific measurements — "editorial magazine page-turn between sections" communicates the layout philosophy better than "margin-bottom: 80px"
 5. Always maintain the chiaroscuro contrast — if a section feels flat, check whether it needs to be on black or white to maintain the alternating rhythm
 6. Reserve Ferrari Red for ONE element per screen — if red appears in more than one place, it loses its authority
+
+## 9. EMACH Custom Components (ported from design bundle)
+
+### Token additions (packages/ui/src/styles/globals.css)
+Brand tokens added alongside shadcn: `--emach-red` (#DA291C), `--emach-red-hover` (#B01E0A), `--emach-red-deep` (#9D2211), `--near-black` (#181818), `--gray-10/20/50/55/60/90`, `--warning`, `--success`, `--info`, `--link-hover`. Radii: `--radius-xs` (4px) through `--radius-full`. Spacing: `--space-1` (4px) through `--space-20` (80px).
+
+### Radius philosophy (final)
+Default: **2px** on all interactive elements (buttons, inputs, cards, chips, badges). Nearly imperceptible — reinforces the "precision engineering" aesthetic. Only exception: radio/circle indicators use 50%.
+
+### Form controls
+All form controls use `.emach-*` CSS classes defined in globals.css. Do NOT use shadcn Input/Select for EMACH-branded pages.
+- `.emach-input` — hairline border, red `inset 0 -2px` focus underline, 2px radius
+- `.emach-input--dark` — dark surface variant for footer/modals
+- `.emach-select` — custom chevron SVG, same focus treatment
+- `.emach-check` — black filled checked state
+- `.emach-radio` — red dot inner checked state
+- `.emach-chip` / `.emach-chip--active` — voltage/filter pills
+- `.emach-qty` / `.emach-qty__btn--plus` — quantity stepper; **plus button is always red** (`var(--accent)`)
+- `.emach-field`, `.emach-field__label`, `.emach-field__error` — label wrapper
+
+### Ticker marquee
+Red banner at top of page (above header) in layout.tsx. Classes `.emach-ticker` / `.emach-marquee` with `@keyframes marquee` 48s loop. Component: `src/components/ticker.tsx`.
+
+### ProductCard quick-add
+Red button (`var(--emach-red)`) appears top-right corner on hover. Slides in from top (`translateY(-8px)` → `0`). Icon: lucide `Plus`. Text "+" buttons system-wide follow same rule.
+
+### CategoryTile hover
+- Red accent bar animates from `width: 0` to `width: 100%` at bottom of tile
+- Arrow icon (`ArrowRight`) turns red on hover; text "Explorar" stays white (not red)
+- Tile background subtly scales up `1.05` on hover
+
+### ProductImage
+Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrench`, `medicao→Ruler`, `seguranca→Shield`, `acessorios→Disc3`. Radial gradient background. Component: `src/components/product-image.tsx`.
+
+### Cart state
+Client-side cart via React Context + localStorage (`emach:cart`). Provider in `src/lib/cart-context.tsx`. Store helpers in `src/lib/cart-store.ts`. Cart count badge in SiteHeader updates reactively.

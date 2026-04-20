@@ -1,10 +1,10 @@
 "use client";
 import type { authClient } from "@/lib/auth-client";
 
-export default function Dashboard({
-	session,
-}: {
+interface DashboardProps {
 	session: typeof authClient.$Infer.Session;
-}) {
-	return <></>;
+}
+
+export default function Dashboard(_props: DashboardProps) {
+	return null;
 }

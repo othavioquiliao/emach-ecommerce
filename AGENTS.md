@@ -9,25 +9,25 @@
 
 **EMACH** é um e-commerce de **ferramentas elétricas e manuais** (furadeiras, serras, chaves, alicates, etc.) para o mercado brasileiro. Scaffoldado com [Better-T-Stack](https://better-t-stack.dev/).
 
-| | |
-|---|---|
-| **Produto** | Ferramentas elétricas + manuais |
-| **Marca** | EMACH |
-| **Moeda** | R$ (Real brasileiro) — formato `R$ 899,00` |
-| **Mercado** | Brasil (pt-BR) |
-| **Personalidade** | Precisa, Robusta, Profissional |
-| **Package manager** | Bun 1.3.11 |
-| **Orquestração** | Turborepo 2 |
-| **Frontend** | Next.js 16 + React 19 (App Router) |
-| **Banco de dados** | PostgreSQL via Supabase |
-| **ORM** | Drizzle |
-| **Auth** | Better Auth |
-| **UI** | shadcn (style `base-lyra`, baseado em Base UI — não Radix) |
-| **CSS** | Tailwind CSS v4 |
-| **Linting/Format** | Biome via Ultracite |
-| **Forms** | TanStack Form + Zod |
-| **Design** | Ferrari-inspired (chiaroscuro, Barlow, `#DA291C`) |
-| **Design Tool** | Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`) |
+|                     |                                                            |
+| ------------------- | ---------------------------------------------------------- |
+| **Produto**         | Ferramentas elétricas + manuais                            |
+| **Marca**           | EMACH                                                      |
+| **Moeda**           | R$ (Real brasileiro) — formato `R$ 899,00`                 |
+| **Mercado**         | Brasil (pt-BR)                                             |
+| **Personalidade**   | Precisa, Robusta, Profissional                             |
+| **Package manager** | Bun 1.3.11                                                 |
+| **Orquestração**    | Turborepo 2                                                |
+| **Frontend**        | Next.js 16 + React 19 (App Router)                         |
+| **Banco de dados**  | PostgreSQL via Supabase                                    |
+| **ORM**             | Drizzle                                                    |
+| **Auth**            | Better Auth                                                |
+| **UI**              | shadcn (style `base-lyra`, baseado em Base UI — não Radix) |
+| **CSS**             | Tailwind CSS v4                                            |
+| **Linting/Format**  | Biome via Ultracite                                        |
+| **Forms**           | TanStack Form + Zod                                        |
+| **Design**          | Ferrari-inspired (chiaroscuro, Barlow, `#DA291C`)          |
+| **Design Tool**     | Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`)           |
 
 ---
 
@@ -50,6 +50,7 @@ emach-ecommerce/
 ## 3. Packages — O que cada um faz
 
 ### `@emach/config` — TypeScript Base
+
 - **Propósito:** Contém apenas `tsconfig.base.json` com strict mode, `noUncheckedIndexedAccess`, `verbatimModuleSyntax`.
 - **Exports:** Nenhum em runtime. Só `@emach/config/tsconfig.base.json` via `extends`.
 - **Quando modificar:** Quase nunca. Somente para mudar regras TS globais.
@@ -57,6 +58,7 @@ emach-ecommerce/
 ---
 
 ### `@emach/env` — Variáveis de Ambiente Tipadas
+
 - **Propósito:** Valida env vars em build time com Zod. Se uma var estiver faltando, o build falha com mensagem clara.
 - **Exports:**
   - `@emach/env/server` → `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CORS_ORIGIN`, `NODE_ENV`
@@ -66,6 +68,7 @@ emach-ecommerce/
 ---
 
 ### `@emach/db` — Banco de Dados
+
 - **Propósito:** Client Drizzle + schema PostgreSQL. Toda interação com o banco passa por aqui.
 - **Exports:**
   - `@emach/db` → `db` (singleton) + `createDb()`
@@ -76,6 +79,7 @@ emach-ecommerce/
 ---
 
 ### `@emach/auth` — Autenticação
+
 - **Propósito:** Instância Better Auth pré-configurada com Drizzle adapter, email/password e `nextCookies()` para SSR.
 - **Exports:**
   - `@emach/auth` → `auth` (singleton) + `createAuth()`
@@ -88,6 +92,7 @@ emach-ecommerce/
 ---
 
 ### `@emach/ui` — Biblioteca de Componentes (shadcn)
+
 - **Propósito:** Componentes shadcn compartilhados entre todas as apps do monorepo.
 - **Style:** `base-lyra` (usa `@base-ui/react` como primitivo, **não Radix UI**). Visual compacto, cantos retos (`rounded-none`).
 - **Exports subpath** (sem barrel/index — importe componentes individualmente):
@@ -194,24 +199,24 @@ app/<rota>/
 
 ### Tabela de decisão: onde colocar cada coisa
 
-| O que você precisa criar | Onde colocar |
-|---|---|
+| O que você precisa criar                                   | Onde colocar                                        |
+| ---------------------------------------------------------- | --------------------------------------------------- |
 | Componente UI genérico/reutilizável (botão, modal, tabela) | `packages/ui/` via `bunx shadcn add -c packages/ui` |
-| Componente de negócio compartilhado entre rotas | `apps/web/src/components/` |
-| Componente específico de UMA rota | `apps/web/src/app/<rota>/_components/` |
-| Hook compartilhado entre rotas | `apps/web/src/hooks/` |
-| Hook específico de UMA rota | `apps/web/src/app/<rota>/_hooks/` |
-| Server action | `apps/web/src/app/<rota>/_actions/` |
-| Utilitário compartilhado | `apps/web/src/lib/` |
-| Utilitário específico de UMA rota | `apps/web/src/app/<rota>/_lib/` |
-| Nova página/rota | `apps/web/src/app/<rota>/page.tsx` |
-| Layout entre rotas (route group) | `apps/web/src/app/(<grupo>)/layout.tsx` |
-| API route | `apps/web/src/app/api/<rota>/route.ts` |
-| Nova tabela no banco | `packages/db/src/schema/<nome>.ts` |
-| Nova variável de ambiente server | `packages/env/src/server.ts` |
-| Nova variável de ambiente client | `packages/env/src/web.ts` |
-| Novo método/plugin de auth | `packages/auth/src/index.ts` |
-| Middleware global (auth guard, etc.) | `apps/web/src/middleware.ts` |
+| Componente de negócio compartilhado entre rotas            | `apps/web/src/components/`                          |
+| Componente específico de UMA rota                          | `apps/web/src/app/<rota>/_components/`              |
+| Hook compartilhado entre rotas                             | `apps/web/src/hooks/`                               |
+| Hook específico de UMA rota                                | `apps/web/src/app/<rota>/_hooks/`                   |
+| Server action                                              | `apps/web/src/app/<rota>/_actions/`                 |
+| Utilitário compartilhado                                   | `apps/web/src/lib/`                                 |
+| Utilitário específico de UMA rota                          | `apps/web/src/app/<rota>/_lib/`                     |
+| Nova página/rota                                           | `apps/web/src/app/<rota>/page.tsx`                  |
+| Layout entre rotas (route group)                           | `apps/web/src/app/(<grupo>)/layout.tsx`             |
+| API route                                                  | `apps/web/src/app/api/<rota>/route.ts`              |
+| Nova tabela no banco                                       | `packages/db/src/schema/<nome>.ts`                  |
+| Nova variável de ambiente server                           | `packages/env/src/server.ts`                        |
+| Nova variável de ambiente client                           | `packages/env/src/web.ts`                           |
+| Novo método/plugin de auth                                 | `packages/auth/src/index.ts`                        |
+| Middleware global (auth guard, etc.)                       | `apps/web/src/middleware.ts`                        |
 
 ### Pergunta rápida para decidir onde colocar
 
@@ -266,15 +271,16 @@ bunx shadcn@latest diff -c packages/ui                 # Ver atualizações disp
 
 Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em build time pelo `@emach/env`.
 
-| Variável | Tipo | Onde é validada |
-|---|---|---|
-| `DATABASE_URL` | string (min 1) | `@emach/env/server` |
-| `BETTER_AUTH_SECRET` | string (min 32) | `@emach/env/server` |
-| `BETTER_AUTH_URL` | URL válida | `@emach/env/server` |
-| `CORS_ORIGIN` | URL válida | `@emach/env/server` |
-| `NODE_ENV` | `development\|production\|test` | `@emach/env/server` |
+| Variável             | Tipo                            | Onde é validada     |
+| -------------------- | ------------------------------- | ------------------- |
+| `DATABASE_URL`       | string (min 1)                  | `@emach/env/server` |
+| `BETTER_AUTH_SECRET` | string (min 32)                 | `@emach/env/server` |
+| `BETTER_AUTH_URL`    | URL válida                      | `@emach/env/server` |
+| `CORS_ORIGIN`        | URL válida                      | `@emach/env/server` |
+| `NODE_ENV`           | `development\|production\|test` | `@emach/env/server` |
 
 **Para adicionar nova env var:**
+
 1. Adicione ao schema Zod em `packages/env/src/server.ts` (server) ou `packages/env/src/web.ts` (client)
 2. Adicione ao `apps/web/.env`
 
@@ -309,6 +315,7 @@ Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em buil
 O projeto segue uma linguagem visual inspirada no site Ferrari. A linguagem visual é Ferrari, mas os produtos são **ferramentas**.
 
 **Referências:**
+
 - `design/DESIGN.md` — Referência visual completa (cores, tipografia, layout, breakpoints)
 - `design/preview.html` / `design/preview-dark.html` — Catálogo visual HTML dos tokens
 - `.impeccable.md` — Contexto de design persistente com princípios e guidelines
@@ -316,13 +323,13 @@ O projeto segue uma linguagem visual inspirada no site Ferrari. A linguagem visu
 
 ### Categorias de Produtos
 
-| Categoria | Exemplos |
-|---|---|
+| Categoria                 | Exemplos                                                 |
+| ------------------------- | -------------------------------------------------------- |
 | **Ferramentas Elétricas** | Furadeira, Serra Circular, Esmerilhadeira, Parafusadeira |
-| **Ferramentas Manuais** | Jogo de Chaves, Alicate, Martelo, Serrote |
-| **Medição** | Nível Laser, Trena Digital, Paquímetro |
-| **Segurança** | Óculos, Luvas, Protetor Auricular |
-| **Acessórios** | Brocas, Discos de Corte, Lâminas, Bits |
+| **Ferramentas Manuais**   | Jogo de Chaves, Alicate, Martelo, Serrote                |
+| **Medição**               | Nível Laser, Trena Digital, Paquímetro                   |
+| **Segurança**             | Óculos, Luvas, Protetor Auricular                        |
+| **Acessórios**            | Brocas, Discos de Corte, Lâminas, Bits                   |
 
 ### Princípios de Design (da `.impeccable.md`)
 
@@ -334,17 +341,17 @@ O projeto segue uma linguagem visual inspirada no site Ferrari. A linguagem visu
 
 ### Paleta de Cores
 
-| Token | Light (padrão) | Dark (`.dark`) | Papel |
-|-------|----------------|----------------|-------|
-| `--primary` | `#DA291C` Ferrari Red | `#DA291C` | CTAs de alta prioridade. Usar com **parcimônia**. |
-| `--secondary` | `#FFFFFF` branco | `#181818` | Botão padrão (Configure, etc.) |
-| `--background` | `#FFFFFF` | `#181818` Near Black | Superfície base |
-| `--foreground` | `#181818` | `#FFFFFF` | Texto principal |
-| `--muted` | `#D2D2D2` | `#303030` | Superfícies sutis, dividers |
-| `--muted-foreground` | `#666666` | `#8F8F8F` | Texto secundário |
-| `--destructive` | `#F13A2C` | `#F13A2C` | Warning (distinto do brand red) |
-| `--border` | `#CCCCCC` | `rgba(255,255,255,0.1)` | Bordas |
-| `--ring` | `#DA291C` | `#DA291C` | Focus ring (Ferrari Red) |
+| Token                | Light (padrão)        | Dark (`.dark`)          | Papel                                             |
+| -------------------- | --------------------- | ----------------------- | ------------------------------------------------- |
+| `--primary`          | `#DA291C` Ferrari Red | `#DA291C`               | CTAs de alta prioridade. Usar com **parcimônia**. |
+| `--secondary`        | `#FFFFFF` branco      | `#181818`               | Botão padrão (Configure, etc.)                    |
+| `--background`       | `#FFFFFF`             | `#181818` Near Black    | Superfície base                                   |
+| `--foreground`       | `#181818`             | `#FFFFFF`               | Texto principal                                   |
+| `--muted`            | `#D2D2D2`             | `#303030`               | Superfícies sutis, dividers                       |
+| `--muted-foreground` | `#666666`             | `#8F8F8F`               | Texto secundário                                  |
+| `--destructive`      | `#F13A2C`             | `#F13A2C`               | Warning (distinto do brand red)                   |
+| `--border`           | `#CCCCCC`             | `rgba(255,255,255,0.1)` | Bordas                                            |
+| `--ring`             | `#DA291C`             | `#DA291C`               | Focus ring (Ferrari Red)                          |
 
 ### Tipografia
 
@@ -372,6 +379,7 @@ Não há toggle de dark mode global. Seções individuais alternam entre light e
 O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg-*`, `dark:text-*` etc. funcionam dentro de qualquer ancestral com `class="dark"`.
 
 ### Do's
+
 - Ferrari Red (`--primary`) apenas em CTAs de alta prioridade — sua força vem da parcimônia
 - `rounded-none` em todos os componentes — "razor precision"
 - Barlow Condensed apenas para labels/tags em uppercase + `letter-spacing: 1px`
@@ -381,6 +389,7 @@ O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg
 - Imagens de produto com color scheme vermelho/preto (identidade EMACH)
 
 ### Don'ts
+
 - Não espalhe Ferrari Red como decoração — é sinal de CTA, não cor de tema
 - Não use border-radius arredondados (exceto modais: até 8px, avatares: 50%)
 - Não adicione box-shadows em cards — profundidade vem do contraste de superfícies

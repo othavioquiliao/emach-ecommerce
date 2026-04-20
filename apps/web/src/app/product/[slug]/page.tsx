@@ -6,6 +6,7 @@ import {
 	BreadcrumbPage,
 	BreadcrumbSeparator,
 } from "@emach/ui/components/breadcrumb";
+import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
@@ -26,7 +27,9 @@ export async function generateStaticParams() {
 	return products.map((p) => ({ slug: p.slug }));
 }
 
-export async function generateMetadata({ params }: ProductPageProps) {
+export async function generateMetadata({
+	params,
+}: ProductPageProps): Promise<Metadata> {
 	const { slug } = await params;
 	const product = getProductBySlug(slug);
 
@@ -34,9 +37,22 @@ export async function generateMetadata({ params }: ProductPageProps) {
 		return { title: "Produto não encontrado — EMACH" };
 	}
 
+	const title = `${product.name} — EMACH`;
 	return {
-		title: `${product.name} — EMACH`,
+		title,
 		description: product.shortDescription,
+		openGraph: {
+			title,
+			description: product.shortDescription,
+			type: "website",
+			url: `/product/${product.slug}`,
+			siteName: "EMACH",
+		},
+		twitter: {
+			card: "summary_large_image",
+			title,
+			description: product.shortDescription,
+		},
 	};
 }
 
@@ -82,8 +98,12 @@ export default async function ProductPage({ params }: ProductPageProps) {
 			</div>
 
 			{/* Main product section */}
-			<div className="flex flex-col gap-10 px-20 py-8 md:flex-row md:gap-15">
-				<ProductGallery images={product.images} name={product.name} />
+			<div className="flex flex-row gap-15 px-20 py-8">
+				<ProductGallery
+					categorySlug={product.categorySlug}
+					images={product.images}
+					name={product.name}
+				/>
 				<ProductInfo product={product} />
 			</div>
 

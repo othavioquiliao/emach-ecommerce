@@ -1,12 +1,11 @@
-// apps/web/src/app/checkout/page.tsx
-
 import { cn } from "@emach/ui/lib/utils";
+import type { Metadata } from "next";
 import { Fragment } from "react";
-import { CheckoutHeader } from "@/components/checkout-header";
 
+import { CheckoutHeader } from "@/components/checkout-header";
 import { CheckoutContent } from "./_components/checkout-content";
 
-export const metadata = {
+export const metadata: Metadata = {
 	title: "Checkout — EMACH",
 	description: "Finalize seu pedido EMACH com segurança.",
 };
