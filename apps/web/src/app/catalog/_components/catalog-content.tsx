@@ -95,7 +95,7 @@ export function CatalogContent({
 			>
 				<div className="mx-auto" style={{ maxWidth: 1440 }}>
 					<div
-						className="mb-3 text-[12px] uppercase tracking-[0.1em]"
+						className="mb-3 text-[12px] uppercase tracking-widest"
 						style={{ color: "rgba(255,255,255,0.55)" }}
 					>
 						HOME / CATÁLOGO
@@ -255,7 +255,6 @@ export function CatalogContent({
 							Bivolt
 						</label>
 					</div>
-
 				</aside>
 
 				{/* Results */}
