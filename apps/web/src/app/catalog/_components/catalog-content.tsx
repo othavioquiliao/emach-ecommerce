@@ -10,7 +10,8 @@ import { SectionLabel } from "@/components/section-label";
 import { fmtBRL } from "@/lib/format";
 import { categories, products } from "@/lib/mock-data";
 
-type SortKey = "relevance" | "price-asc" | "price-desc" | "name";
+type SortKey = "relevance" | "price-asc" | "price-desc" | "name" | "rating";
+type VoltageFilter = "110V" | "220V" | "Bivolt" | null;
 
 interface CatalogContentProps {
 	initialCat: string | null;
@@ -27,6 +28,7 @@ export function CatalogContent({
 	const [sort, setSort] = useState<SortKey>("relevance");
 	const [view, setView] = useState<"grid" | "list">("grid");
 	const [query, setQuery] = useState(initialQuery);
+	const [voltage, setVoltage] = useState<VoltageFilter>(null);
 
 	useEffect(() => {
 		setCategory(initialCat);
@@ -55,15 +57,32 @@ export function CatalogContent({
 		if (onlyPromo) {
 			list = list.filter((p) => p.originalPrice != null);
 		}
+		if (voltage) {
+			list = list.filter((p) => {
+				if (voltage === "Bivolt") {
+					return p.voltage?.includes("110V") && p.voltage?.includes("220V");
+				}
+				return p.voltage?.includes(voltage) ?? false;
+			});
+		}
 		if (sort === "price-asc") {
 			list.sort((a, b) => a.price - b.price);
 		} else if (sort === "price-desc") {
 			list.sort((a, b) => b.price - a.price);
 		} else if (sort === "name") {
 			list.sort((a, b) => a.name.localeCompare(b.name));
+		} else if (sort === "rating") {
+			// TODO: ordenar por avaliação (decrescente)
+			// - product.rating é { average: number; count: number } OPCIONAL
+			// - Produtos sem rating devem ficar no fim (use ?? 0)
+			// - Decisão de algoritmo: empate em average → desempatar por count?
+			//   Ex: Kit Segurança (5.0, 12 reviews) vs Jogo Chaves (4.9, 412 reviews)
+			//   Sem desempate: Kit vence (5.0 > 4.9), mesmo sendo só 12 reviews
+			//   Com desempate por count: ainda Kit vence (average é primária), mas empates próximos
+			//   em average seriam decididos pela confiança (mais reviews = mais confiável)
 		}
 		return list;
-	}, [category, priceMax, onlyPromo, sort, query]);
+	}, [category, priceMax, onlyPromo, sort, query, voltage]);
 
 	const currentCategory = categories.find((c) => c.slug === category);
 
@@ -135,9 +154,9 @@ export function CatalogContent({
 					</div>
 
 					{/* Category */}
-					<div className="mb-6">
+					<div className="mb-6 flex flex-col gap-1">
 						<div className="mb-2.5 font-semibold text-[13px]">Categoria</div>
-						<label className="emach-radio-label">
+						<label className="flex items-center gap-2">
 							<input
 								checked={category === null}
 								className="emach-radio"
@@ -148,7 +167,7 @@ export function CatalogContent({
 							Todas
 						</label>
 						{categories.map((c) => (
-							<label className="emach-radio-label" key={c.slug}>
+							<label className="flex items-center gap-2" key={c.slug}>
 								<input
 									checked={category === c.slug}
 									className="emach-radio"
@@ -183,7 +202,7 @@ export function CatalogContent({
 
 					{/* Only promo */}
 					<div className="mb-6">
-						<label className="emach-check-label">
+						<label className="flex items-center gap-2">
 							<input
 								checked={onlyPromo}
 								className="emach-check"
@@ -193,6 +212,50 @@ export function CatalogContent({
 							Apenas em promoção
 						</label>
 					</div>
+					<div className="mb-6 flex flex-col gap-1">
+						<div className="mb-2.5 font-semibold text-[13px]">Voltagem</div>
+						<label className="flex items-center gap-2">
+							<input
+								checked={voltage === null}
+								className="emach-radio"
+								name="voltage"
+								onChange={() => setVoltage(null)}
+								type="radio"
+							/>
+							Todas
+						</label>
+						<label className="flex items-center gap-2">
+							<input
+								checked={voltage === "110V"}
+								className="emach-radio"
+								name="voltage"
+								onChange={() => setVoltage("110V")}
+								type="radio"
+							/>
+							110V
+						</label>
+						<label className="flex items-center gap-2">
+							<input
+								checked={voltage === "220V"}
+								className="emach-radio"
+								name="voltage"
+								onChange={() => setVoltage("220V")}
+								type="radio"
+							/>
+							220V
+						</label>
+						<label className="flex items-center gap-2">
+							<input
+								checked={voltage === "Bivolt"}
+								className="emach-radio"
+								name="voltage"
+								onChange={() => setVoltage("Bivolt")}
+								type="radio"
+							/>
+							Bivolt
+						</label>
+					</div>
+
 				</aside>
 
 				{/* Results */}
@@ -219,6 +282,7 @@ export function CatalogContent({
 								<option value="price-asc">Menor preço</option>
 								<option value="price-desc">Maior preço</option>
 								<option value="name">A–Z</option>
+								<option value="rating">Melhor avaliados</option>
 							</select>
 
 							<div

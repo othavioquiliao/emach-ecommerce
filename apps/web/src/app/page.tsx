@@ -344,7 +344,7 @@ export default function HomePage() {
 				</section>
 
 				{/* ---- Featured products ---- */}
-					{featured.length > 0 && (
+				{featured.length > 0 && (
 					<section
 						className="px-[56px] py-[72px]"
 						style={{ background: "var(--gray-10)" }}

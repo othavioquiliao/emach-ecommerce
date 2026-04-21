@@ -9,6 +9,7 @@ export interface Product {
 	name: string;
 	originalPrice?: number;
 	price: number;
+	rating?: { average: number; count: number };
 	shortDescription: string;
 	sku: string;
 	slug: string;
@@ -89,6 +90,7 @@ export const products: Product[] = [
 		sku: "EMC-FI-2001",
 		inStock: true,
 		voltage: ["20V"],
+		rating: { average: 4.8, count: 342 },
 	},
 	{
 		id: "2",
@@ -113,6 +115,7 @@ export const products: Product[] = [
 		sku: "EMC-SC-1851",
 		inStock: true,
 		voltage: ["110V", "220V"],
+		rating: { average: 4.6, count: 87 },
 	},
 	{
 		id: "3",
@@ -134,6 +137,7 @@ export const products: Product[] = [
 		sku: "EMC-EA-1251",
 		inStock: true,
 		voltage: ["110V", "220V"],
+		rating: { average: 4.7, count: 256 },
 	},
 	{
 		id: "4",
@@ -156,6 +160,7 @@ export const products: Product[] = [
 		sku: "EMC-PF-1201",
 		inStock: true,
 		voltage: ["12V"],
+		rating: { average: 4.5, count: 198 },
 	},
 	{
 		id: "5",
@@ -176,6 +181,7 @@ export const products: Product[] = [
 		images: ["/images/products/chaves-combinadas-12pcs.png"],
 		sku: "EMC-CC-1201",
 		inStock: true,
+		rating: { average: 4.9, count: 412 },
 	},
 	{
 		id: "6",
@@ -196,6 +202,7 @@ export const products: Product[] = [
 		images: ["/images/products/alicate-universal-8pol.png"],
 		sku: "EMC-AU-0801",
 		inStock: true,
+		rating: { average: 4.4, count: 76 },
 	},
 	{
 		id: "7",
@@ -219,6 +226,7 @@ export const products: Product[] = [
 		badge: "Promoção",
 		sku: "EMC-NL-3601",
 		inStock: true,
+		rating: { average: 4.7, count: 134 },
 	},
 	{
 		id: "8",
@@ -239,6 +247,7 @@ export const products: Product[] = [
 		images: ["/images/products/trena-digital-50m.png"],
 		sku: "EMC-TD-5001",
 		inStock: true,
+		rating: { average: 4.3, count: 58 },
 	},
 	{
 		id: "9",
@@ -259,6 +268,7 @@ export const products: Product[] = [
 		images: ["/images/products/kit-seguranca.png"],
 		sku: "EMC-KS-0101",
 		inStock: true,
+		rating: { average: 5.0, count: 12 },
 	},
 	{
 		id: "10",
@@ -279,6 +289,7 @@ export const products: Product[] = [
 		images: ["/images/products/brocas-hss-25pcs.png"],
 		sku: "EMC-BH-2501",
 		inStock: true,
+		rating: { average: 4.6, count: 289 },
 	},
 	{
 		id: "11",
@@ -299,6 +310,7 @@ export const products: Product[] = [
 		images: ["/images/products/disco-corte-115mm.png"],
 		sku: "EMC-DC-1151",
 		inStock: true,
+		rating: { average: 4.8, count: 501 },
 	},
 ];
 

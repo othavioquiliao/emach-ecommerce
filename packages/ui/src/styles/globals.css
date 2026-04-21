@@ -349,19 +349,6 @@
 	transform: translate(-50%, -50%);
 }
 
-.emach-check-label,
-.emach-radio-label {
-	display: inline-flex;
-	gap: 10px;
-	align-items: center;
-	padding: 6px 0;
-	font-family: var(--font-sans);
-	font-size: 14px;
-	line-height: 1;
-	color: var(--near-black);
-	cursor: pointer;
-}
-
 /* ---------- Slider (range) ---------- */
 .emach-range {
 	width: 100%;
