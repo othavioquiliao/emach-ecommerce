@@ -245,7 +245,7 @@ export default function HomePage() {
 									href="/catalog"
 									style={{ borderBottom: "2px solid var(--emach-red)" }}
 								>
-									Ver todos
+									Ver todas
 								</Link>
 							</div>
 							<div className="grid grid-cols-4 gap-6">
@@ -344,28 +344,38 @@ export default function HomePage() {
 				</section>
 
 				{/* ---- Featured products ---- */}
-				<section
-					className="mx-auto px-[56px] py-[72px]"
-					style={{ maxWidth: 1440 }}
-				>
-					<div className="mb-8">
-						<SectionLabel tone="accent">03 · Em destaque</SectionLabel>
-						<h2
-							className="m-0 mt-2.5 font-medium"
-							style={{ fontFamily: "var(--font-display)", fontSize: 44 }}
-						>
-							Selecionados pela equipe
-						</h2>
-					</div>
-					<div
-						className="grid gap-6"
-						style={{ gridTemplateColumns: "repeat(4, 1fr)" }}
+					{featured.length > 0 && (
+					<section
+						className="px-[56px] py-[72px]"
+						style={{ background: "var(--gray-10)" }}
 					>
-						{featured.map((p) => (
-							<ProductCard key={p.id} product={p} />
-						))}
-					</div>
-				</section>
+						<div className="mx-auto" style={{ maxWidth: 1440 }}>
+							<div className="mb-8 flex items-end justify-between">
+								<div>
+									<SectionLabel tone="accent">02 · Ofertas</SectionLabel>
+									<h2
+										className="m-0 mt-2.5 font-medium"
+										style={{ fontFamily: "var(--font-display)", fontSize: 44 }}
+									>
+										Promoções da semana
+									</h2>
+								</div>
+								<Link
+									className="pb-0.5 font-semibold text-[13px]"
+									href="/catalog"
+									style={{ borderBottom: "2px solid var(--emach-red)" }}
+								>
+									Ver todas
+								</Link>
+							</div>
+							<div className="grid grid-cols-4 gap-6">
+								{featured.map((p) => (
+									<ProductCard key={p.id} product={p} />
+								))}
+							</div>
+						</div>
+					</section>
+				)}
 			</main>
 
 			<SiteFooter />

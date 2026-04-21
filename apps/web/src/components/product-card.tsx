@@ -87,7 +87,7 @@ export function ProductCard({ product }: ProductCardProps) {
 					{/* SKU reveal on hover */}
 					<div
 						aria-hidden="true"
-						className="absolute right-[14px] bottom-[14px] left-[14px] font-display font-semibold text-[11px] text-white uppercase tracking-[0.1em] transition-all duration-240"
+						className="absolute right-[14px] bottom-[14px] left-[14px] font-display font-semibold text-[11px] text-white uppercase tracking transition-all duration-240"
 						style={{
 							opacity: hovered ? 1 : 0,
 							transform: hovered ? "translateY(0)" : "translateY(8px)",
@@ -108,7 +108,6 @@ export function ProductCard({ product }: ProductCardProps) {
 							color: "#fff",
 							opacity: hovered ? 1 : 0,
 							transform: hovered ? "translateY(0)" : "translateY(-8px)",
-							boxShadow: "0 6px 16px rgba(218,41,28,0.35)",
 						}}
 						type="button"
 					>
@@ -117,7 +116,7 @@ export function ProductCard({ product }: ProductCardProps) {
 				</div>
 
 				{/* Card body */}
-				<div className="flex flex-col gap-1 px-0 py-3">
+				<div className="flex flex-col gap-1 px-2 py-3 bg-gray-100">
 					<SectionLabel>{product.category}</SectionLabel>
 					<p
 						className="mt-1 font-medium text-[14px] leading-tight"
