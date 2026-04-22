@@ -51,7 +51,7 @@ export function CatalogContent({
 					p.name.toLowerCase().includes(q) ||
 					p.category.toLowerCase().includes(q) ||
 					p.sku.toLowerCase().includes(q) ||
-					p.shortDescription.toLowerCase().includes(q)
+					p.shortDescription.some((s) => s.toLowerCase().includes(q))
 			);
 		}
 		list = list.filter((p) => p.price <= priceMax);
@@ -301,7 +301,7 @@ export function CatalogContent({
 										<SectionLabel>{p.category}</SectionLabel>
 										<div className="mt-1 font-medium text-[18px]">{p.name}</div>
 										<div className="mt-1.5 text-[13px] text-gray-60">
-											{p.shortDescription}
+											{p.shortDescription.join(" · ")}
 										</div>
 									</div>
 									<div className="text-right">

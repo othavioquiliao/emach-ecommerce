@@ -10,7 +10,7 @@ export interface Product {
 	originalPrice?: number;
 	price: number;
 	rating?: { average: number; count: number };
-	shortDescription: string;
+	shortDescription: string[];
 	sku: string;
 	slug: string;
 	specs: Record<string, string>;
@@ -73,7 +73,12 @@ export const products: Product[] = [
 		price: 89_900,
 		description:
 			"Furadeira de impacto profissional com motor brushless de alta eficiência. Mandril de 13mm com aperto rápido, 2 velocidades mecânicas e torque máximo de 60Nm. Ideal para concreto, metal e madeira.",
-		shortDescription: "Motor brushless, 60Nm de torque, mandril 13mm.",
+		shortDescription: [
+			"Motor brushless de alta eficiência",
+			"Torque máximo de 60 Nm em 2 velocidades mecânicas",
+			"Mandril de 13 mm com aperto rápido",
+			"Ideal para concreto, metal e madeira",
+		],
 		specs: {
 			Voltagem: "20V",
 			Torque: "60 Nm",
@@ -102,7 +107,12 @@ export const products: Product[] = [
 		originalPrice: 149_900,
 		description:
 			"Serra circular profissional com disco de 185mm e motor de 1.800W. Base em alumínio fundido com ajuste de profundidade e ângulo até 45°. Guia laser integrada para cortes precisos.",
-		shortDescription: "1.800W, disco 185mm, guia laser integrada.",
+		shortDescription: [
+			"Motor de 1.800 W a 5.500 RPM",
+			"Disco de 185 mm, profundidade de corte até 65 mm",
+			"Base em alumínio fundido com ajuste de ângulo até 45°",
+			"Guia laser integrada para cortes precisos",
+		],
 		specs: {
 			Potência: "1.800W",
 			Disco: "185mm",
@@ -126,7 +136,12 @@ export const products: Product[] = [
 		price: 59_900,
 		description:
 			"Esmerilhadeira compacta e potente com disco de 125mm. Motor de 1.100W com proteção contra sobrecarga. Empunhadura lateral ajustável em 3 posições.",
-		shortDescription: "1.100W, disco 125mm, compacta e ergonômica.",
+		shortDescription: [
+			"Motor de 1.100 W a 11.000 RPM",
+			"Disco de 125 mm para corte e desbaste",
+			"Proteção eletrônica contra sobrecarga",
+			"Empunhadura lateral ajustável em 3 posições",
+		],
 		specs: {
 			Potência: "1.100W",
 			Disco: "125mm",
@@ -148,7 +163,12 @@ export const products: Product[] = [
 		price: 49_900,
 		description:
 			"Parafusadeira compacta 12V com 20 posições de torque e embreagem eletrônica. Mandril de 10mm, design leve para trabalhos prolongados. Inclui 2 baterias e carregador rápido.",
-		shortDescription: "12V, 20 posições de torque, 2 baterias inclusas.",
+		shortDescription: [
+			"Bateria 12 V Li-Ion e torque de 30 Nm",
+			"20 posições de torque com embreagem eletrônica",
+			"Mandril de 10 mm, apenas 0,95 kg",
+			"Inclui 2 baterias e carregador rápido",
+		],
 		specs: {
 			Voltagem: "12V",
 			Torque: "30 Nm",
@@ -171,7 +191,12 @@ export const products: Product[] = [
 		price: 18_900,
 		description:
 			"Jogo de 12 chaves combinadas em aço cromo-vanádio com acabamento espelhado. Medidas de 6mm a 22mm. Estojo organizador em EVA para transporte.",
-		shortDescription: "Cromo-vanádio, 6–22mm, estojo EVA.",
+		shortDescription: [
+			"12 chaves em aço cromo-vanádio",
+			"Medidas de 6 mm a 22 mm",
+			"Acabamento espelhado e resistente à corrosão",
+			"Estojo organizador em EVA para transporte",
+		],
 		specs: {
 			Material: "Cromo-Vanádio",
 			Peças: "12",
@@ -192,7 +217,12 @@ export const products: Product[] = [
 		price: 7900,
 		description:
 			'Alicate universal profissional de 8" em aço especial temperado. Empunhadura bi-material antideslizante com proteção até 1.000V.',
-		shortDescription: "Aço temperado, isolamento 1.000V.",
+		shortDescription: [
+			'Aço especial temperado, 8" (200 mm)',
+			"Isolamento elétrico até 1.000 V",
+			"Empunhadura bi-material antideslizante",
+			"Apenas 0,28 kg para uso prolongado",
+		],
 		specs: {
 			Tamanho: '8" (200mm)',
 			Material: "Aço Especial",
@@ -214,7 +244,13 @@ export const products: Product[] = [
 		originalPrice: 99_900,
 		description:
 			"Nível laser autonivelante com projeção 360° horizontal e vertical. Laser verde de alta visibilidade, alcance de 30m (60m com detector). Tripé e maleta inclusos.",
-		shortDescription: "360° verde, alcance 30m, autonivelante.",
+		shortDescription: [
+			"Laser verde 520 nm de alta visibilidade",
+			"Projeção 360° horizontal e vertical",
+			"Alcance de 30 m (60 m com detector)",
+			"Precisão ±1 mm/5 m, autonivelante",
+			"Tripé e maleta inclusos",
+		],
 		specs: {
 			"Tipo laser": "Verde 520nm",
 			Alcance: "30m (60m c/ detector)",
@@ -237,7 +273,12 @@ export const products: Product[] = [
 		price: 29_900,
 		description:
 			"Trena digital a laser com alcance de 50m e precisão de ±1.5mm. Mede distância, área e volume. Display retroiluminado e memória para 20 medições.",
-		shortDescription: "Alcance 50m, precisão ±1.5mm, display LED.",
+		shortDescription: [
+			"Alcance de 50 m com precisão ±1,5 mm",
+			"Mede distância, área e volume",
+			"Display LCD retroiluminado",
+			"Memória para 20 medições",
+		],
 		specs: {
 			Alcance: "50m",
 			Precisão: "±1.5mm",
@@ -258,7 +299,12 @@ export const products: Product[] = [
 		price: 14_900,
 		description:
 			"Kit completo com óculos de proteção anti-risco, protetor auricular tipo concha (NRR 25dB) e luvas de alta resistência. Certificação CA.",
-		shortDescription: "Óculos + protetor auricular + luvas, certificação CA.",
+		shortDescription: [
+			"Óculos anti-risco com proteção UV400",
+			"Protetor auricular tipo concha NRR 25 dB",
+			"Luvas resistência mecânica nível 4",
+			"Certificação CA conforme NR-6",
+		],
 		specs: {
 			Óculos: "Anti-risco, UV400",
 			Protetor: "NRR 25dB",
@@ -279,7 +325,12 @@ export const products: Product[] = [
 		price: 12_900,
 		description:
 			"Jogo de 25 brocas HSS com revestimento em titânio para metal, madeira e plástico. Medidas de 1mm a 13mm em estojo metálico organizador.",
-		shortDescription: "HSS titânio, 1–13mm, estojo metálico.",
+		shortDescription: [
+			"25 brocas HSS com revestimento em titânio",
+			"Medidas de 1 mm a 13 mm",
+			"Aplicação em metal, madeira e plástico",
+			"Estojo metálico organizador",
+		],
 		specs: {
 			Material: "HSS Titânio",
 			Peças: "25",
@@ -300,7 +351,12 @@ export const products: Product[] = [
 		price: 4900,
 		description:
 			"Pack com 10 discos de corte para metal 115mm x 1.0mm. Alta velocidade de corte com mínima geração de rebarbas.",
-		shortDescription: "10 unidades, 115mm, corte rápido.",
+		shortDescription: [
+			"Pack com 10 discos de 115 mm × 1,0 mm",
+			"Rotação máxima de 13.300 RPM",
+			"Alta velocidade de corte com mínima rebarba",
+			'Compatível com esmerilhadeiras de 4½"',
+		],
 		specs: {
 			Diâmetro: "115mm",
 			Espessura: "1.0mm",

@@ -1,11 +1,14 @@
 "use client";
 
-import { Check, Share2, ShoppingBag } from "lucide-react";
+import { Check, Share2, ShoppingBag, Zap } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmachBadge } from "@/components/emach-badge";
 import { EmachButton } from "@/components/emach-button";
+import { FreightCalculator } from "@/components/freight-calculator";
+import { ProductRating } from "@/components/product-rating";
 import { QuantityStepper } from "@/components/quantity-stepper";
 import { SectionLabel } from "@/components/section-label";
 import { useCart } from "@/lib/cart-context";
@@ -29,11 +32,18 @@ export function ProductInfo({ product }: ProductInfoProps) {
 	);
 	const [qty, setQty] = useState(1);
 	const [shared, setShared] = useState(false);
-	const { add } = useCart();
+	const { add, clear } = useCart();
+	const router = useRouter();
 
 	function handleAddToCart() {
 		add(product, qty);
 		toast.success(`${product.name} adicionado ao carrinho`);
+	}
+
+	function handleBuyNow() {
+		clear();
+		add(product, qty);
+		router.push("/checkout");
 	}
 
 	async function handleShare() {
@@ -43,7 +53,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 				: window.location.href;
 		const data = {
 			title: `${product.name} — EMACH`,
-			text: product.shortDescription,
+			text: product.shortDescription.join(" · "),
 			url,
 		};
 		try {
@@ -74,6 +84,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
 					</EmachBadge>
 				)}
 				<div className="mt-2 text-[13px] text-gray-60">SKU {product.sku}</div>
+				{product.rating && (
+					<ProductRating average={product.rating.average} className="mt-3" />
+				)}
 			</div>
 
 			<div className="border-border border-y py-5">
@@ -94,9 +107,16 @@ export function ProductInfo({ product }: ProductInfoProps) {
 				</div>
 			</div>
 
-			<p className="text-[15px] text-gray-60 leading-relaxed">
-				{product.shortDescription}
-			</p>
+			<ul className="space-y-1.5 text-[15px] text-gray-60 leading-relaxed">
+				{product.shortDescription.map((item) => (
+					<li className="flex gap-2" key={item}>
+						<span aria-hidden className="text-foreground">
+							•
+						</span>
+						<span>{item}</span>
+					</li>
+				))}
+			</ul>
 
 			{product.voltage && product.voltage.length > 1 && (
 				<div>
@@ -116,16 +136,27 @@ export function ProductInfo({ product }: ProductInfoProps) {
 				</div>
 			)}
 
-			<div className="flex items-stretch gap-3">
-				<QuantityStepper onChange={setQty} value={qty} />
+			<div className="space-y-3">
+				<div className="flex items-stretch gap-3">
+					<QuantityStepper onChange={setQty} value={qty} />
+					<EmachButton
+						full
+						icon={<ShoppingBag size={16} />}
+						onClick={handleAddToCart}
+						size="lg"
+						variant="dark"
+					>
+						Adicionar ao carrinho
+					</EmachButton>
+				</div>
 				<EmachButton
 					full
-					icon={<ShoppingBag size={16} />}
-					onClick={handleAddToCart}
+					icon={<Zap size={16} />}
+					onClick={handleBuyNow}
 					size="lg"
 					variant="primary"
 				>
-					Adicionar ao carrinho
+					Comprar agora
 				</EmachButton>
 			</div>
 
@@ -147,6 +178,8 @@ export function ProductInfo({ product }: ProductInfoProps) {
 					</>
 				)}
 			</button>
+
+			<FreightCalculator subtotal={product.price * qty} />
 
 			<div className="grid grid-cols-2 gap-3 bg-gray-10 p-5">
 				<div>
