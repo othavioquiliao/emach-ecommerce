@@ -1,6 +1,13 @@
 "use client";
 
-import { Check, Share2, ShoppingBag, Zap } from "lucide-react";
+import {
+	Check,
+	CheckCircle,
+	Share2,
+	ShoppingBag,
+	Truck,
+	Zap,
+} from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -181,14 +188,20 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
 			<FreightCalculator subtotal={product.price * qty} />
 
-			<div className="grid grid-cols-2 gap-3 bg-gray-10 p-5">
-				<div>
-					<div className="font-semibold text-[13px]">Frete grátis</div>
-					<div className="text-[12px] text-gray-60">acima de R$ 299</div>
+			<div className="flex h-16 justify-between rounded-sm bg-gray-10 px-5">
+				<div className="flex items-center gap-2">
+					<Truck size={16} />
+					<div>
+						<div className="font-semibold text-sm">Frete grátis</div>
+						<div className="text-gray-60 text-xs">acima de R$ 299</div>
+					</div>
 				</div>
-				<div>
-					<div className="font-semibold text-[13px]">Garantia 2 anos</div>
-					<div className="text-[12px] text-gray-60">direto com a marca</div>
+				<div className="flex items-center gap-2">
+					<CheckCircle size={16} />
+					<div>
+						<div className="font-semibold text-sm">Garantia 2 anos</div>
+						<div className="text-gray-60 text-xs">direto com a marca</div>
+					</div>
 				</div>
 			</div>
 		</div>
