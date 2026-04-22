@@ -39,7 +39,7 @@ export function ProductCard({ product }: ProductCardProps) {
 			className="group block cursor-pointer"
 			href={`/product/${product.slug}`}
 		>
-			<div className="overflow-hidden rounded-[2px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-[240ms] ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
+			<div className="overflow-hidden rounded-[2px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-240 ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
 				{/* Image area */}
 				<div className="relative aspect-square overflow-hidden rounded-[2px] bg-image-bg">
 					<ProductImage
@@ -60,13 +60,13 @@ export function ProductCard({ product }: ProductCardProps) {
 					{/* Hover gradient overlay */}
 					<div
 						aria-hidden="true"
-						className="emach-bg-card-hover pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[240ms] group-hover:opacity-100"
+						className="emach-bg-card-hover pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-240 group-hover:opacity-100"
 					/>
 
 					{/* SKU reveal on hover */}
 					<div
 						aria-hidden="true"
-						className="absolute right-[14px] bottom-[14px] left-[14px] translate-y-2 font-display font-semibold text-[11px] text-white uppercase tracking-wide opacity-0 transition-all duration-[240ms] group-hover:translate-y-0 group-hover:opacity-100"
+						className="absolute right-[14px] bottom-[14px] left-[14px] translate-y-2 font-display font-semibold text-[11px] text-white uppercase tracking-wide opacity-0 transition-all duration-240 group-hover:translate-y-0 group-hover:opacity-100"
 					>
 						SKU {product.sku}
 					</div>
@@ -74,7 +74,7 @@ export function ProductCard({ product }: ProductCardProps) {
 					{/* Quick-add button */}
 					<button
 						aria-label={`Adicionar ${product.name} ao carrinho`}
-						className="absolute top-3 right-3 z-10 flex size-9 -translate-y-2 items-center justify-center rounded-[2px] bg-emach-red text-white opacity-0 transition-all duration-[240ms] group-hover:translate-y-0 group-hover:opacity-100"
+						className="absolute top-3 right-3 z-10 flex size-9 -translate-y-2 items-center justify-center rounded-[2px] bg-emach-red text-white opacity-0 transition-all duration-240 group-hover:translate-y-0 group-hover:opacity-100"
 						onClick={handleQuickAdd}
 						type="button"
 					>

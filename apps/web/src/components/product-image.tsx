@@ -61,7 +61,7 @@ export function ProductImage({
 			</div>
 			<div
 				aria-hidden="true"
-				className="emach-bg-placeholder-shadow absolute right-[20%] bottom-[8%] left-[20%] h-4 blur-[8px]"
+				className="emach-bg-placeholder-shadow absolute right-[20%] bottom-[8%] left-[20%] h-4 blur-sm"
 			/>
 		</div>
 	);
