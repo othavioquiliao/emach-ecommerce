@@ -1,5 +1,13 @@
 "use client";
 
+import { Separator } from "@emach/ui/components/separator";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@emach/ui/components/tabs";
+import { cn } from "@emach/ui/lib/utils";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -7,6 +15,9 @@ import { toast } from "sonner";
 import z from "zod";
 import Loader from "@/components/loader";
 import { authClient } from "@/lib/auth-client";
+
+const TRIGGER_CLASS =
+	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
 
 export default function LoginPage() {
 	const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -64,318 +75,272 @@ export default function LoginPage() {
 
 	if (isPending) {
 		return (
-			<main
-				className="flex h-svh items-center justify-center"
-				style={{ background: "var(--near-black)" }}
-			>
+			<main className="flex h-svh items-center justify-center bg-near-black">
 				<Loader />
 			</main>
 		);
 	}
 
-	const isSignIn = mode === "sign-in";
-
 	return (
-		<main
-			className="grid"
-			style={{
-				gridTemplateColumns: "1fr 1fr",
-				minHeight: "100svh",
-			}}
-		>
+		<main className="grid min-h-svh grid-cols-2">
 			{/* Left — dark panel */}
-			<div
-				className="relative flex flex-col justify-between overflow-hidden px-[60px] py-20"
-				style={{ background: "#000", color: "#fff" }}
-			>
+			<div className="relative flex flex-col justify-between overflow-hidden bg-black px-[60px] py-20 text-white">
 				<div
 					aria-hidden="true"
-					className="absolute inset-0"
-					style={{
-						background:
-							"repeating-linear-gradient(35deg, transparent 0 40px, rgba(255,255,255,0.02) 40px 80px)",
-					}}
+					className="emach-bg-diagonal absolute inset-0"
 				/>
-				<span
-					className="relative font-display font-semibold text-[12px] uppercase tracking-[0.14em]"
-					style={{ color: "rgba(255,255,255,0.72)" }}
-				>
+				<span className="relative font-display font-semibold text-[12px] text-white/70 uppercase tracking-[0.14em]">
 					EMACH Profissional
 				</span>
 				<div className="relative">
-					<h2
-						className="m-0 font-medium leading-[1.05]"
-						style={{
-							fontFamily: "var(--font-display)",
-							fontSize: 44,
-							letterSpacing: "-0.01em",
-						}}
-					>
+					<h2 className="font-display font-medium text-[44px] leading-[1.05] tracking-[-0.01em]">
 						Bem-vindo de
 						<br />
-						volta à <span style={{ color: "var(--emach-red)" }}>bancada</span>.
+						volta à <span className="text-emach-red">bancada</span>.
 					</h2>
-					<p
-						className="mt-5 max-w-[380px] text-[15px] leading-relaxed"
-						style={{ color: "rgba(255,255,255,0.7)" }}
-					>
+					<p className="mt-5 max-w-[380px] text-[15px] text-white/70 leading-relaxed">
 						Acesse sua conta para acompanhar pedidos, gerenciar endereços e
 						aproveitar descontos exclusivos para profissionais.
 					</p>
 				</div>
-				<div
-					className="relative text-[12px] uppercase tracking-[0.12em]"
-					style={{ color: "rgba(255,255,255,0.45)" }}
-				>
+				<div className="relative text-[12px] text-white/45 uppercase tracking-[0.12em]">
 					© 2026 EMACH FERRAMENTAS
 				</div>
 			</div>
 
 			{/* Right — white form panel */}
 			<div className="flex items-center justify-center bg-white px-[60px] py-20">
-				<div style={{ width: "100%", maxWidth: 400 }}>
-					{/* Tabs */}
-					<div
-						className="mb-8 flex"
-						style={{ borderBottom: "1px solid var(--border)" }}
+				<div className="w-full max-w-[400px]">
+					<Tabs
+						className="mb-8 gap-0"
+						onValueChange={(v) => setMode(v as "sign-in" | "sign-up")}
+						value={mode}
 					>
-						{(["sign-in", "sign-up"] as const).map((m) => (
-							<button
-								className="flex-1 cursor-pointer border-0 bg-transparent py-3.5 font-semibold text-[14px]"
-								key={m}
-								onClick={() => setMode(m)}
-								style={{
-									color: mode === m ? "var(--near-black)" : "var(--gray-50)",
-									borderBottom:
-										mode === m
-											? "2px solid var(--emach-red)"
-											: "2px solid transparent",
-									marginBottom: -1,
+						<TabsList className="w-full" variant="line">
+							<TabsTrigger className={TRIGGER_CLASS} value="sign-in">
+								Entrar
+							</TabsTrigger>
+							<TabsTrigger className={TRIGGER_CLASS} value="sign-up">
+								Cadastrar
+							</TabsTrigger>
+						</TabsList>
+
+						<TabsContent value="sign-in">
+							<form
+								className="flex flex-col gap-3.5 pt-8"
+								onSubmit={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									signInForm.handleSubmit();
 								}}
-								type="button"
 							>
-								{m === "sign-in" ? "Entrar" : "Cadastrar"}
-							</button>
-						))}
-					</div>
+								<signInForm.Field name="email">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">E-mail</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="seu@email.com"
+												type="email"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signInForm.Field>
 
-					{isSignIn ? (
-						<form
-							className="flex flex-col gap-3.5"
-							onSubmit={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								signInForm.handleSubmit();
-							}}
-						>
-							<signInForm.Field name="email">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">E-mail</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="seu@email.com"
-											type="email"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
+								<signInForm.Field name="password">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">Senha</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="••••••••"
+												type="password"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signInForm.Field>
+
+								<div className="flex items-center justify-between">
+									<label className="emach-check-label text-[13px]">
+										<input className="emach-check" type="checkbox" />
+										Lembrar de mim
 									</label>
-								)}
-							</signInForm.Field>
+									<button
+										className="emach-ghost-btn font-semibold text-[13px] text-emach-red"
+										type="button"
+									>
+										Esqueci a senha
+									</button>
+								</div>
 
-							<signInForm.Field name="password">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">Senha</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="••••••••"
-											type="password"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signInForm.Field>
-
-							<div className="flex items-center justify-between">
-								<label className="emach-check-label text-[13px]">
-									<input className="emach-check" type="checkbox" />
-									Lembrar de mim
-								</label>
-								<button
-									className="emach-ghost-btn font-semibold text-[13px]"
-									style={{ color: "var(--emach-red)" }}
-									type="button"
+								<signInForm.Subscribe
+									selector={(state) => ({
+										canSubmit: state.canSubmit,
+										isSubmitting: state.isSubmitting,
+									})}
 								>
-									Esqueci a senha
-								</button>
-							</div>
+									{({ canSubmit, isSubmitting }) => (
+										<button
+											className={cn(
+												"mt-2 w-full cursor-pointer rounded-[2px] border-0 bg-emach-red py-3 font-semibold text-[14px] text-white transition-all duration-180",
+												canSubmit ? "opacity-100" : "opacity-65"
+											)}
+											disabled={!canSubmit || isSubmitting}
+											type="submit"
+										>
+											{isSubmitting ? "Entrando…" : "Entrar"}
+										</button>
+									)}
+								</signInForm.Subscribe>
+							</form>
+						</TabsContent>
 
-							<signInForm.Subscribe
-								selector={(state) => ({
-									canSubmit: state.canSubmit,
-									isSubmitting: state.isSubmitting,
-								})}
+						<TabsContent value="sign-up">
+							<form
+								className="flex flex-col gap-3.5 pt-8"
+								onSubmit={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									signUpForm.handleSubmit();
+								}}
 							>
-								{({ canSubmit, isSubmitting }) => (
-									<button
-										className="mt-2 w-full cursor-pointer border-0 py-3 font-semibold text-[14px] text-white transition-all duration-180"
-										disabled={!canSubmit || isSubmitting}
-										style={{
-											background: "var(--emach-red)",
-											borderRadius: 2,
-											opacity: canSubmit ? 1 : 0.65,
-										}}
-										type="submit"
-									>
-										{isSubmitting ? "Entrando…" : "Entrar"}
-									</button>
-								)}
-							</signInForm.Subscribe>
-						</form>
-					) : (
-						<form
-							className="flex flex-col gap-3.5"
-							onSubmit={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								signUpForm.handleSubmit();
-							}}
-						>
-							<signUpForm.Field name="name">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">Nome completo</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="João da Silva"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signUpForm.Field>
+								<signUpForm.Field name="name">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">Nome completo</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="João da Silva"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
 
-							<signUpForm.Field name="email">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">E-mail</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="seu@email.com"
-											type="email"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signUpForm.Field>
+								<signUpForm.Field name="email">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">E-mail</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="seu@email.com"
+												type="email"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
 
-							<signUpForm.Field name="password">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">Senha</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="••••••••"
-											type="password"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signUpForm.Field>
+								<signUpForm.Field name="password">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">Senha</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="••••••••"
+												type="password"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
 
-							<signUpForm.Subscribe
-								selector={(state) => ({
-									canSubmit: state.canSubmit,
-									isSubmitting: state.isSubmitting,
-								})}
-							>
-								{({ canSubmit, isSubmitting }) => (
-									<button
-										className="mt-2 w-full cursor-pointer border-0 py-3 font-semibold text-[14px] text-white transition-all duration-180"
-										disabled={!canSubmit || isSubmitting}
-										style={{
-											background: "var(--emach-red)",
-											borderRadius: 2,
-											opacity: canSubmit ? 1 : 0.65,
-										}}
-										type="submit"
-									>
-										{isSubmitting ? "Criando conta…" : "Criar conta"}
-									</button>
-								)}
-							</signUpForm.Subscribe>
-						</form>
-					)}
+								<signUpForm.Subscribe
+									selector={(state) => ({
+										canSubmit: state.canSubmit,
+										isSubmitting: state.isSubmitting,
+									})}
+								>
+									{({ canSubmit, isSubmitting }) => (
+										<button
+											className={cn(
+												"mt-2 w-full cursor-pointer rounded-[2px] border-0 bg-emach-red py-3 font-semibold text-[14px] text-white transition-all duration-180",
+												canSubmit ? "opacity-100" : "opacity-65"
+											)}
+											disabled={!canSubmit || isSubmitting}
+											type="submit"
+										>
+											{isSubmitting ? "Criando conta…" : "Criar conta"}
+										</button>
+									)}
+								</signUpForm.Subscribe>
+							</form>
+						</TabsContent>
+					</Tabs>
 
 					{/* Divider */}
-					<div
-						className="my-7 flex items-center gap-3"
-						style={{ color: "var(--gray-50)", fontSize: 12 }}
-					>
-						<div
-							className="flex-1"
-							style={{ height: 1, background: "var(--border)" }}
-						/>
+					<div className="my-7 flex items-center gap-3 text-[12px] text-gray-50">
+						<Separator className="flex-1" />
 						ou
-						<div
-							className="flex-1"
-							style={{ height: 1, background: "var(--border)" }}
-						/>
+						<Separator className="flex-1" />
 					</div>
 
 					{/* Social login */}
 					<div className="flex flex-col gap-2">
 						<button
-							className="flex w-full cursor-pointer items-center justify-center gap-2 border py-2.5 font-medium text-[14px] transition-colors"
-							style={{
-								borderColor: "var(--near-black)",
-								background: "transparent",
-								borderRadius: 2,
-							}}
+							className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-colors"
 							type="button"
 						>
 							<svg
@@ -405,12 +370,7 @@ export default function LoginPage() {
 							Continuar com Google
 						</button>
 						<button
-							className="flex w-full cursor-pointer items-center justify-center gap-2 border py-2.5 font-medium text-[14px] transition-colors"
-							style={{
-								borderColor: "var(--near-black)",
-								background: "transparent",
-								borderRadius: 2,
-							}}
+							className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-colors"
 							type="button"
 						>
 							<svg

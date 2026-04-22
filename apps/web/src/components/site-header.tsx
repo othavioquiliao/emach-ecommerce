@@ -65,7 +65,7 @@ export function SiteHeader() {
 								<Link
 									className={cn(
 										"relative inline-block pb-1 font-semibold text-[12px] tracking-[0.04em] transition-colors",
-										"after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-(--emach-red) after:transition-transform after:duration-300 after:ease-out after:content-['']",
+										"after:absolute after:bottom-0 after:left-0 after:h-[2px] after:w-full after:origin-left after:scale-x-0 after:bg-emach-red after:transition-transform after:duration-300 after:ease-out after:content-['']",
 										"hover:after:scale-x-100",
 										active
 											? "text-white after:scale-x-100"
@@ -107,9 +107,8 @@ export function SiteHeader() {
 						{totalCount > 0 && (
 							<span
 								aria-hidden="true"
-								className="emach-cart-badge absolute -top-1.5 -right-2 flex min-w-4 items-center justify-center rounded-none px-1 font-bold text-[10px] text-white"
+								className="emach-cart-badge absolute -top-1.5 -right-2 flex h-4 min-w-4 items-center justify-center rounded-none bg-emach-red px-1 font-bold text-[10px] text-white"
 								data-pulse={pulse ? "true" : undefined}
-								style={{ background: "var(--emach-red)", height: 16 }}
 							>
 								{totalCount}
 							</span>

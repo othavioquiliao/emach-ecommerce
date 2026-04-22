@@ -1,9 +1,10 @@
 "use client";
 
+import { cn } from "@emach/ui/lib/utils";
 import { Grid3x3, List } from "lucide-react";
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
-
+import { PageContainer } from "@/components/page-container";
 import { ProductCard } from "@/components/product-card";
 import { ProductImage } from "@/components/product-image";
 import { SectionLabel } from "@/components/section-label";
@@ -75,11 +76,6 @@ export function CatalogContent({
 			// TODO: ordenar por avaliação (decrescente)
 			// - product.rating é { average: number; count: number } OPCIONAL
 			// - Produtos sem rating devem ficar no fim (use ?? 0)
-			// - Decisão de algoritmo: empate em average → desempatar por count?
-			//   Ex: Kit Segurança (5.0, 12 reviews) vs Jogo Chaves (4.9, 412 reviews)
-			//   Sem desempate: Kit vence (5.0 > 4.9), mesmo sendo só 12 reviews
-			//   Com desempate por count: ainda Kit vence (average é primária), mas empates próximos
-			//   em average seriam decididos pela confiança (mais reviews = mais confiável)
 		}
 		return list;
 	}, [category, priceMax, onlyPromo, sort, query, voltage]);
@@ -89,46 +85,22 @@ export function CatalogContent({
 	return (
 		<div>
 			{/* Hero */}
-			<section
-				className="px-10 py-12 text-white"
-				style={{ background: "var(--near-black)" }}
-			>
-				<div className="mx-auto" style={{ maxWidth: 1440 }}>
-					<div
-						className="mb-3 text-[12px] uppercase tracking-widest"
-						style={{ color: "rgba(255,255,255,0.55)" }}
-					>
+			<section className="bg-near-black py-12 text-white">
+				<PageContainer>
+					<div className="mb-3 text-[12px] text-white/55 uppercase tracking-widest">
 						HOME / CATÁLOGO
 						{currentCategory ? ` / ${currentCategory.name.toUpperCase()}` : ""}
 					</div>
-					<h1
-						className="m-0 font-medium"
-						style={{
-							fontFamily: "var(--font-display)",
-							fontSize: "clamp(36px, 5vw, 60px)",
-							letterSpacing: "-0.01em",
-							textWrap: "balance",
-						}}
-					>
+					<h1 className="text-balance font-display font-medium text-[clamp(36px,5vw,60px)] tracking-[-0.01em]">
 						{currentCategory ? currentCategory.name : "Catálogo completo"}
 					</h1>
 					{currentCategory && (
-						<p
-							className="mt-3 max-w-[600px] text-[16px]"
-							style={{ color: "rgba(255,255,255,0.7)" }}
-						>
+						<p className="mt-3 max-w-[600px] text-[16px] text-white/70">
 							{currentCategory.description}
 						</p>
 					)}
 					{query.trim() && (
-						<div
-							className="mt-4 inline-flex items-center gap-2 rounded-[2px] px-3 py-1.5 text-[12px]"
-							style={{
-								background: "rgba(255,255,255,0.08)",
-								border: "1px solid rgba(255,255,255,0.18)",
-								color: "#fff",
-							}}
-						>
+						<div className="mt-4 inline-flex items-center gap-2 rounded-[2px] border border-white/20 bg-white/10 px-3 py-1.5 text-[12px] text-white">
 							Busca: <strong>“{query}”</strong>
 							<button
 								aria-label="Limpar busca"
@@ -140,13 +112,10 @@ export function CatalogContent({
 							</button>
 						</div>
 					)}
-				</div>
+				</PageContainer>
 			</section>
 
-			<div
-				className="mx-auto grid grid-cols-[260px_1fr] gap-10 px-10 py-8"
-				style={{ maxWidth: 1440 }}
-			>
+			<PageContainer className="grid grid-cols-[260px_1fr] gap-10 py-8">
 				{/* Sidebar filters */}
 				<aside>
 					<div className="pb-4 font-bold font-display text-[12px] uppercase tracking-[0.14em]">
@@ -192,10 +161,7 @@ export function CatalogContent({
 							type="range"
 							value={priceMax}
 						/>
-						<div
-							className="mt-1.5 text-[13px]"
-							style={{ fontVariantNumeric: "tabular-nums" }}
-						>
+						<div className="mt-1.5 text-[13px] tabular-nums">
 							Até <strong>{fmtBRL(priceMax)}</strong>
 						</div>
 					</div>
@@ -259,22 +225,16 @@ export function CatalogContent({
 
 				{/* Results */}
 				<div>
-					<div
-						className="mb-6 flex items-center justify-between py-3"
-						style={{ borderBottom: "1px solid var(--border)" }}
-					>
-						<div className="text-[13px]" style={{ color: "var(--gray-60)" }}>
-							<strong style={{ color: "var(--near-black)" }}>
-								{filtered.length}
-							</strong>{" "}
+					<div className="mb-6 flex items-center justify-between border-border border-b py-3">
+						<div className="text-[13px] text-gray-60">
+							<strong className="text-near-black">{filtered.length}</strong>{" "}
 							produtos
 						</div>
 
 						<div className="flex items-center gap-4">
 							<select
-								className="emach-select emach-select--sm"
+								className="emach-select emach-select--sm w-[180px]"
 								onChange={(e) => setSort(e.target.value as SortKey)}
-								style={{ width: 180 }}
 								value={sort}
 							>
 								<option value="relevance">Relevância</option>
@@ -284,42 +244,29 @@ export function CatalogContent({
 								<option value="rating">Melhor avaliados</option>
 							</select>
 
-							<div
-								className="flex"
-								style={{ border: "1px solid var(--border)" }}
-							>
+							<div className="flex border border-border">
 								<button
 									aria-label="Grade"
+									className={cn(
+										"flex size-9 cursor-pointer items-center justify-center border-none",
+										view === "grid"
+											? "bg-near-black text-white"
+											: "bg-white text-near-black"
+									)}
 									onClick={() => setView("grid")}
-									style={{
-										width: 36,
-										height: 36,
-										background: view === "grid" ? "var(--near-black)" : "#fff",
-										color: view === "grid" ? "#fff" : "var(--near-black)",
-										border: "none",
-										cursor: "pointer",
-										display: "flex",
-										alignItems: "center",
-										justifyContent: "center",
-									}}
 									type="button"
 								>
 									<Grid3x3 size={14} />
 								</button>
 								<button
 									aria-label="Lista"
+									className={cn(
+										"flex size-9 cursor-pointer items-center justify-center border-none",
+										view === "list"
+											? "bg-near-black text-white"
+											: "bg-white text-near-black"
+									)}
 									onClick={() => setView("list")}
-									style={{
-										width: 36,
-										height: 36,
-										background: view === "list" ? "var(--near-black)" : "#fff",
-										color: view === "list" ? "#fff" : "var(--near-black)",
-										border: "none",
-										cursor: "pointer",
-										display: "flex",
-										alignItems: "center",
-										justifyContent: "center",
-									}}
 									type="button"
 								>
 									<List size={14} />
@@ -338,22 +285,11 @@ export function CatalogContent({
 						<div className="flex flex-col">
 							{filtered.map((p) => (
 								<Link
-									className="grid cursor-pointer items-center gap-6 py-5"
+									className="grid cursor-pointer grid-cols-[140px_1fr_auto] items-center gap-6 border-gray-10 border-b py-5"
 									href={`/product/${p.slug}`}
 									key={p.id}
-									style={{
-										gridTemplateColumns: "140px 1fr auto",
-										borderBottom: "1px solid var(--gray-10)",
-									}}
 								>
-									<div
-										className="relative overflow-hidden"
-										style={{
-											width: 140,
-											aspectRatio: "1/1",
-											background: "#ECECEC",
-										}}
-									>
+									<div className="relative aspect-square w-[140px] overflow-hidden bg-image-bg">
 										<ProductImage
 											alt={p.name}
 											categorySlug={p.categorySlug}
@@ -364,18 +300,12 @@ export function CatalogContent({
 									<div>
 										<SectionLabel>{p.category}</SectionLabel>
 										<div className="mt-1 font-medium text-[18px]">{p.name}</div>
-										<div
-											className="mt-1.5 text-[13px]"
-											style={{ color: "var(--gray-60)" }}
-										>
+										<div className="mt-1.5 text-[13px] text-gray-60">
 											{p.shortDescription}
 										</div>
 									</div>
 									<div className="text-right">
-										<div
-											className="font-bold text-[20px]"
-											style={{ fontVariantNumeric: "tabular-nums" }}
-										>
+										<div className="font-bold text-[20px] tabular-nums">
 											{fmtBRL(p.price)}
 										</div>
 									</div>
@@ -385,10 +315,7 @@ export function CatalogContent({
 					)}
 
 					{filtered.length === 0 && (
-						<div
-							className="py-20 text-center"
-							style={{ color: "var(--gray-60)" }}
-						>
+						<div className="py-20 text-center text-gray-60">
 							<div className="font-medium text-[15px]">
 								Nenhum produto encontrado
 							</div>
@@ -398,7 +325,7 @@ export function CatalogContent({
 						</div>
 					)}
 				</div>
-			</div>
+			</PageContainer>
 		</div>
 	);
 }

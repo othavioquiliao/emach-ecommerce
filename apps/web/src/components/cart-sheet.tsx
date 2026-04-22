@@ -1,22 +1,20 @@
 "use client";
 
-import { Button } from "@emach/ui/components/button";
 import {
 	Sheet,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
 } from "@emach/ui/components/sheet";
-import { CircleCheckBig, ShoppingBag } from "lucide-react";
+import { ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+
+import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
-import { ProductImage } from "@/components/product-image";
-import { SectionLabel } from "@/components/section-label";
+import { FreeShippingProgress } from "@/components/free-shipping-progress";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL } from "@/lib/format";
-
-const FREE_SHIPPING_THRESHOLD = 29_900;
 
 interface CartSheetProps {
 	onOpenChange: (open: boolean) => void;
@@ -37,11 +35,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 
 	const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 	const subtotal = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
-	const freeShippingProgress = Math.min(
-		100,
-		(subtotal / FREE_SHIPPING_THRESHOLD) * 100
-	);
-	const earnedFreeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+	const close = () => onOpenChange(false);
 
 	return (
 		<Sheet onOpenChange={onOpenChange} open={open}>
@@ -53,10 +47,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 					<SheetTitle className="flex items-center gap-2 font-bold font-display text-[15px] uppercase tracking-[0.14em]">
 						Carrinho
 						{totalItems > 0 && (
-							<span
-								className="font-medium text-[13px] tracking-[0.08em]"
-								style={{ color: "var(--gray-60)" }}
-							>
+							<span className="font-medium text-[13px] text-gray-60 tracking-[0.08em]">
 								· {totalItems} {totalItems === 1 ? "item" : "itens"}
 							</span>
 						)}
@@ -65,33 +56,20 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 
 				{items.length === 0 ? (
 					<div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
-						<div
-							className="mb-4 flex items-center justify-center rounded-full"
-							style={{
-								background: "var(--gray-10)",
-								height: 64,
-								width: 64,
-							}}
-						>
-							<ShoppingBag size={28} style={{ color: "var(--gray-50)" }} />
+						<div className="mb-4 flex size-16 items-center justify-center rounded-full bg-gray-10">
+							<ShoppingBag className="text-gray-50" size={28} />
 						</div>
-						<h2
-							className="m-0 font-semibold"
-							style={{ fontFamily: "var(--font-display)", fontSize: 24 }}
-						>
+						<h2 className="font-display font-semibold text-[24px]">
 							Carrinho vazio
 						</h2>
-						<p
-							className="mt-2 max-w-[260px] text-[13px]"
-							style={{ color: "var(--gray-60)" }}
-						>
+						<p className="mt-2 max-w-[260px] text-[13px] text-gray-60">
 							Explore nosso catálogo e encontre as ferramentas certas para o seu
 							trabalho.
 						</p>
 						<Link
 							className="mt-6 w-full max-w-[220px]"
 							href="/catalog"
-							onClick={() => onOpenChange(false)}
+							onClick={close}
 						>
 							<EmachButton full size="md" variant="primary">
 								Ver catálogo
@@ -100,169 +78,42 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 					</div>
 				) : (
 					<>
-						<div
-							className="px-5 py-3.5"
-							style={{ background: "var(--gray-10)" }}
-						>
-							{earnedFreeShipping ? (
-								<div className="flex min-h-9 items-center gap-2.5 font-semibold text-[13px]">
-									<CircleCheckBig
-										size={18}
-										style={{ color: "var(--success)" }}
-									/>
-									Você ganhou frete grátis!
-								</div>
-							) : (
-								<>
-									<div className="mb-2 min-h-5 text-[13px]">
-										Faltam{" "}
-										<strong>
-											{fmtBRL(FREE_SHIPPING_THRESHOLD - subtotal)}
-										</strong>{" "}
-										para frete grátis.
-									</div>
-									<div className="h-1.5 overflow-hidden bg-white">
-										<div
-											style={{
-												background: "var(--emach-red)",
-												height: "100%",
-												transition: "width 300ms ease",
-												width: `${freeShippingProgress}%`,
-											}}
-										/>
-									</div>
-								</>
-							)}
-						</div>
+						<FreeShippingProgress className="px-5 py-3.5" subtotal={subtotal} />
 
 						<div className="flex-1 overflow-y-auto px-5">
 							{items.map(({ product, quantity }) => (
-								<div
-									className="emach-cart-item grid grid-cols-[80px_1fr_auto] items-start gap-3.5 py-4"
-									data-leaving={removing === product.id ? "true" : undefined}
+								<CartItemRow
 									key={product.id}
-									style={{ borderBottom: "1px solid var(--gray-10)" }}
-								>
-									<div
-										className="relative overflow-hidden"
-										style={{
-											background: "#ECECEC",
-											height: 80,
-											width: 80,
-										}}
-									>
-										<ProductImage
-											alt={product.name}
-											categorySlug={product.categorySlug}
-											sizes="80px"
-											src={product.images[0]}
-										/>
-									</div>
-
-									<div className="min-w-0">
-										<SectionLabel>{product.category}</SectionLabel>
-										<Link
-											className="mt-0.5 block overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[14px] hover:underline"
-											href={`/product/${product.slug}`}
-											onClick={() => onOpenChange(false)}
-											title={product.name}
-										>
-											{product.name}
-										</Link>
-										<div
-											className="mt-0.5 text-[11px]"
-											style={{ color: "var(--gray-60)" }}
-										>
-											SKU {product.sku}
-										</div>
-										<div className="mt-2 flex flex-col items-start gap-1">
-											<div
-												className="emach-qty"
-												style={{
-													transform: "scale(0.85)",
-													transformOrigin: "left",
-												}}
-											>
-												<button
-													aria-label="Diminuir"
-													className="emach-qty__btn"
-													onClick={() => setQty(product.id, quantity - 1)}
-													type="button"
-												>
-													−
-												</button>
-												<div className="emach-qty__val">{quantity}</div>
-												<button
-													aria-label="Aumentar"
-													className="emach-qty__btn emach-qty__btn--plus"
-													onClick={() => setQty(product.id, quantity + 1)}
-													type="button"
-												>
-													+
-												</button>
-											</div>
-											<Button
-												className="cursor-pointer text-gray-500 text-xs underline hover:bg-white"
-												onClick={() => handleRemove(product.id)}
-												size="sm"
-												type="button"
-												variant="ghost"
-											>
-												Remover
-											</Button>
-										</div>
-									</div>
-
-									<div
-										className="pt-0.5 font-bold text-[14px]"
-										style={{ fontVariantNumeric: "tabular-nums" }}
-									>
-										{fmtBRL(product.price * quantity)}
-									</div>
-								</div>
+									leaving={removing === product.id}
+									onLinkClick={close}
+									onQuantityChange={(next) => setQty(product.id, next)}
+									onRemove={() => handleRemove(product.id)}
+									product={product}
+									quantity={quantity}
+									variant="compact"
+								/>
 							))}
 						</div>
 
-						<div
-							className="px-5 pt-4 pb-5"
-							style={{ borderTop: "1px solid var(--gray-10)" }}
-						>
+						<div className="border-gray-10 border-t px-5 pt-4 pb-5">
 							<div className="flex items-baseline justify-between">
 								<span className="font-bold font-display text-[13px] uppercase tracking-[0.12em]">
 									Subtotal
 								</span>
-								<span
-									className="font-bold"
-									style={{
-										fontFamily: "var(--font-display)",
-										fontSize: 24,
-										fontVariantNumeric: "tabular-nums",
-									}}
-								>
+								<span className="font-bold font-display text-[24px] tabular-nums">
 									{fmtBRL(subtotal)}
 								</span>
 							</div>
-							<div
-								className="mb-3.5 text-right text-[11px]"
-								style={{ color: "var(--gray-60)" }}
-							>
+							<div className="mb-3.5 text-right text-[11px] text-gray-60">
 								ou 12× de {fmtBRL(subtotal / 12)} sem juros
 							</div>
 
-							<Link
-								className="mb-2 block"
-								href="/checkout"
-								onClick={() => onOpenChange(false)}
-							>
+							<Link className="mb-2 block" href="/checkout" onClick={close}>
 								<EmachButton full size="lg" variant="primary">
 									Finalizar compra
 								</EmachButton>
 							</Link>
-							<Link
-								className="block"
-								href="/cart"
-								onClick={() => onOpenChange(false)}
-							>
+							<Link className="block" href="/cart" onClick={close}>
 								<EmachButton full size="md" variant="ghost">
 									Ver carrinho
 								</EmachButton>

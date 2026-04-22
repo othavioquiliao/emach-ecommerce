@@ -1,4 +1,7 @@
+import { Separator } from "@emach/ui/components/separator";
 import Link from "next/link";
+
+import { PageContainer } from "@/components/page-container";
 
 const footerColumns = [
 	{
@@ -33,14 +36,8 @@ const footerColumns = [
 
 export function SiteFooter() {
 	return (
-		<footer
-			className="px-10 pt-16 pb-7 text-white"
-			style={{ background: "var(--gray-90)" }}
-		>
-			<div
-				className="mx-auto grid grid-cols-4 gap-10"
-				style={{ maxWidth: 1440 }}
-			>
+		<footer className="bg-gray-90 pt-16 pb-7 text-white">
+			<PageContainer className="grid grid-cols-4 gap-10">
 				{footerColumns.map((col) => (
 					<div key={col.title}>
 						<h4 className="mb-4 font-bold font-display text-xs uppercase tracking-[0.14em]">
@@ -50,9 +47,8 @@ export function SiteFooter() {
 							{col.links.map((link) => (
 								<li key={link.label}>
 									<Link
-										className="text-[13px] transition-colors hover:text-white"
+										className="text-[13px] text-white/65 transition-colors hover:text-white"
 										href={link.href}
-										style={{ color: "rgba(255,255,255,0.65)" }}
 									>
 										{link.label}
 									</Link>
@@ -66,43 +62,37 @@ export function SiteFooter() {
 					<h4 className="mb-4 font-bold font-display text-xs uppercase tracking-[0.14em]">
 						NEWSLETTER
 					</h4>
-					<p
-						className="mb-[14px] text-[13px] leading-relaxed"
-						style={{ color: "rgba(255,255,255,0.65)" }}
-					>
+					<p className="mb-[14px] text-[13px] text-white/65 leading-relaxed">
 						Receba novidades e ofertas exclusivas.
 					</p>
 					<div className="flex gap-0">
 						<input
 							aria-label="Seu e-mail"
-							className="emach-input emach-input--dark flex-1"
+							className="emach-input emach-input--dark flex-1 rounded-none"
 							placeholder="seu@email.com"
-							style={{ borderRadius: 0 }}
 							type="email"
 						/>
 						<button
-							className="h-11 px-5 font-semibold text-sm text-white"
-							style={{ background: "var(--emach-red)" }}
+							className="h-11 bg-emach-red px-5 font-semibold text-sm text-white"
 							type="button"
 						>
 							Cadastrar
 						</button>
 					</div>
 				</div>
-			</div>
+			</PageContainer>
 
-			<hr className="emach-hr--dark mx-auto mt-12" style={{ maxWidth: 1440 }} />
+			<PageContainer className="mt-12">
+				<Separator className="bg-white/10" />
+			</PageContainer>
 
-			<div
-				className="mx-auto mt-5 flex flex-row justify-between gap-3 text-[12px]"
-				style={{ maxWidth: 1440, color: "rgba(255,255,255,0.45)" }}
-			>
+			<PageContainer className="mt-5 flex flex-row justify-between gap-3 text-[12px] text-white/45">
 				<div>© 2026 EMACH Ferramentas Profissionais.</div>
 				<div className="flex gap-5">
 					<span>Termos</span>
 					<span>Privacidade</span>
 				</div>
-			</div>
+			</PageContainer>
 		</footer>
 	);
 }

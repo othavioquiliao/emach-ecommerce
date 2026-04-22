@@ -1,28 +1,38 @@
-type BadgeVariant = "primary" | "dark" | "promo" | "light";
+import { cn } from "@emach/ui/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 
-const VARIANT_CLASSES: Record<BadgeVariant, string> = {
-	primary: "bg-[var(--emach-red)] text-white",
-	dark: "bg-[var(--near-black)] text-white",
-	promo: "bg-[#F13A2C] text-white",
-	light: "bg-white text-[var(--near-black)]",
-};
+const emachBadgeVariants = cva(
+	"inline-flex h-[22px] items-center rounded-[2px] px-[10px] font-display font-semibold text-[11px] uppercase tracking-[0.12em]",
+	{
+		variants: {
+			variant: {
+				primary: "bg-emach-red text-white",
+				dark: "bg-near-black text-white",
+				promo: "bg-warning text-white",
+				light: "bg-white text-near-black",
+			},
+		},
+		defaultVariants: {
+			variant: "primary",
+		},
+	}
+);
 
-interface EmachBadgeProps {
-	children: React.ReactNode;
-	className?: string;
-	variant?: BadgeVariant;
-}
+interface EmachBadgeProps
+	extends React.HTMLAttributes<HTMLSpanElement>,
+		VariantProps<typeof emachBadgeVariants> {}
 
 export function EmachBadge({
 	children,
-	variant = "primary",
+	variant,
 	className,
+	...props
 }: EmachBadgeProps) {
 	return (
-		<span
-			className={`inline-flex h-[22px] items-center rounded-[2px] px-[10px] font-display font-semibold text-[11px] uppercase tracking-[0.12em] ${VARIANT_CLASSES[variant]} ${className ?? ""}`}
-		>
+		<span className={cn(emachBadgeVariants({ variant }), className)} {...props}>
 			{children}
 		</span>
 	);
 }
+
+export { emachBadgeVariants };

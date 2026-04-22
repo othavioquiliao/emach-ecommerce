@@ -1,77 +1,54 @@
-"use client";
+import { cn } from "@emach/ui/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { useState } from "react";
-
-type ButtonVariant = "primary" | "outline" | "outline-light" | "ghost" | "dark";
-type ButtonSize = "sm" | "md" | "lg";
+const emachButtonVariants = cva(
+	"inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[2px] border border-transparent font-sans font-semibold tracking-[0.04em] transition-all duration-180 disabled:pointer-events-none disabled:opacity-60",
+	{
+		variants: {
+			variant: {
+				primary: "bg-emach-red text-white hover:bg-emach-red-hover",
+				outline:
+					"border-near-black bg-transparent text-near-black hover:bg-near-black hover:text-white",
+				"outline-light":
+					"border-white/70 bg-transparent text-white hover:border-white hover:bg-white hover:text-near-black",
+				ghost: "bg-transparent text-near-black hover:bg-gray-10",
+				dark: "bg-near-black text-white hover:bg-black",
+			},
+			size: {
+				sm: "h-9 px-4 text-xs",
+				md: "h-11 px-[22px] text-[13px]",
+				lg: "h-13 px-[30px] text-sm",
+			},
+			full: {
+				true: "w-full",
+			},
+		},
+		defaultVariants: {
+			variant: "primary",
+			size: "md",
+		},
+	}
+);
 
 interface EmachButtonProps
-	extends React.ButtonHTMLAttributes<HTMLButtonElement> {
-	full?: boolean;
+	extends React.ButtonHTMLAttributes<HTMLButtonElement>,
+		VariantProps<typeof emachButtonVariants> {
 	icon?: React.ReactNode;
-	size?: ButtonSize;
-	variant?: ButtonVariant;
 }
-
-const BASE =
-	"inline-flex items-center justify-center gap-2 font-sans font-semibold tracking-[0.04em] rounded-[2px] border border-transparent cursor-pointer transition-all duration-180 whitespace-nowrap";
-
-const SIZE_CLASSES: Record<ButtonSize, string> = {
-	sm: "h-9 px-4 text-xs",
-	md: "h-11 px-[22px] text-[13px]",
-	lg: "h-13 px-[30px] text-sm",
-};
-
-const VARIANT_STYLES: Record<ButtonVariant, React.CSSProperties> = {
-	primary: { background: "var(--emach-red)", color: "#fff" },
-	outline: {
-		background: "transparent",
-		color: "var(--near-black)",
-		borderColor: "var(--near-black)",
-	},
-	"outline-light": {
-		background: "transparent",
-		color: "#fff",
-		borderColor: "rgba(255,255,255,0.7)",
-	},
-	ghost: { background: "transparent", color: "var(--near-black)" },
-	dark: { background: "var(--near-black)", color: "#fff" },
-};
-
-const HOVER_STYLES: Record<ButtonVariant, React.CSSProperties> = {
-	primary: { background: "var(--emach-red-hover)" },
-	outline: { background: "var(--near-black)", color: "#fff" },
-	"outline-light": {
-		background: "#fff",
-		color: "var(--near-black)",
-		borderColor: "#fff",
-	},
-	ghost: { background: "var(--gray-10)" },
-	dark: { background: "#000" },
-};
 
 export function EmachButton({
 	children,
-	variant = "primary",
-	size = "md",
-	full = false,
+	variant,
+	size,
+	full,
 	icon,
-	style,
+	className,
 	...props
 }: EmachButtonProps) {
-	const [hovered, setHovered] = useState(false);
-
 	return (
 		<button
 			{...props}
-			className={`${BASE} ${SIZE_CLASSES[size]} ${full ? "w-full" : ""} ${props.className ?? ""}`}
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
-			style={{
-				...VARIANT_STYLES[variant],
-				...(hovered ? HOVER_STYLES[variant] : {}),
-				...style,
-			}}
+			className={cn(emachButtonVariants({ variant, size, full }), className)}
 			type={props.type ?? "button"}
 		>
 			{icon}
@@ -79,3 +56,5 @@ export function EmachButton({
 		</button>
 	);
 }
+
+export { emachButtonVariants };

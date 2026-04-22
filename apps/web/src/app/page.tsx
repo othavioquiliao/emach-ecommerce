@@ -1,10 +1,12 @@
+import { cn } from "@emach/ui/lib/utils";
 import { CreditCard, RotateCcw, ShieldCheck, Truck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-
 import { CategoryTile } from "@/components/category-tile";
 import { EmachButton } from "@/components/emach-button";
+import { PageContainer } from "@/components/page-container";
 import { ProductCard } from "@/components/product-card";
+import { SectionHeader } from "@/components/section-header";
 import { SectionLabel } from "@/components/section-label";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -40,35 +42,19 @@ export default function HomePage() {
 
 			<main>
 				{/* ---- HERO: Cinema variant ---- */}
-				<section
-					className="relative h-[640px] overflow-hidden text-white"
-					style={{ background: "#000" }}
-				>
+				<section className="relative h-[640px] overflow-hidden bg-black text-white">
 					<div
 						aria-hidden="true"
-						className="absolute inset-0"
-						style={{
-							background:
-								"radial-gradient(ellipse at 70% 40%, #2a2a2a 0%, #0a0a0a 60%, #000 100%)",
-						}}
+						className="emach-bg-cinema absolute inset-0"
 					/>
 					<div
 						aria-hidden="true"
-						className="absolute inset-0"
-						style={{
-							background:
-								"repeating-linear-gradient(35deg, transparent 0 40px, rgba(255,255,255,0.02) 40px 80px)",
-						}}
+						className="emach-bg-diagonal absolute inset-0"
 					/>
 					{/* Hero product photo */}
 					<div
 						aria-hidden="true"
-						className="absolute top-1/2 right-[-4%] aspect-square w-[56%] max-w-[720px] -translate-y-1/2"
-						style={{
-							opacity: 0.72,
-							maskImage:
-								"radial-gradient(ellipse at center, rgba(0,0,0,1) 55%, rgba(0,0,0,0) 100%)",
-						}}
+						className="emach-mask-vignette absolute top-1/2 right-[-4%] aspect-square w-[56%] max-w-[720px] -translate-y-1/2 opacity-[0.72]"
 					>
 						<Image
 							alt=""
@@ -80,39 +66,21 @@ export default function HomePage() {
 						/>
 					</div>
 
-					<div
-						className="relative flex h-full flex-col justify-center gap-6 px-20"
-						style={{ maxWidth: 1440, margin: "0 auto" }}
-					>
+					<PageContainer className="relative flex h-full flex-col justify-center gap-6 px-20">
 						<div className="flex items-center gap-3.5">
-							<div
-								className="h-0.5 w-12"
-								style={{ background: "var(--emach-red)" }}
-							/>
+							<div className="h-0.5 w-12 bg-emach-red" />
 							<SectionLabel tone="light">
 								Coleção 2026 · Linha Profissional
 							</SectionLabel>
 						</div>
 
-						<h1
-							className="m-0 max-w-[780px] font-medium leading-[0.95]"
-							style={{
-								fontFamily: "var(--font-display)",
-								fontSize: "clamp(44px, 6vw, 84px)",
-								letterSpacing: "-0.01em",
-								textWrap: "balance",
-							}}
-						>
+						<h1 className="max-w-[780px] text-balance font-display font-medium text-[clamp(44px,6vw,84px)] leading-[0.95] tracking-[-0.01em]">
 							Ferramentas
 							<br />
-							feitas para{" "}
-							<span style={{ color: "var(--emach-red)" }}>trabalhar</span>.
+							feitas para <span className="text-emach-red">trabalhar</span>.
 						</h1>
 
-						<p
-							className="max-w-[520px] text-[17px] leading-relaxed"
-							style={{ color: "rgba(255,255,255,0.75)" }}
-						>
+						<p className="max-w-[520px] text-[17px] text-white/75 leading-relaxed">
 							Desempenho industrial para obras, oficinas e profissionais que não
 							negociam com qualidade.
 						</p>
@@ -129,19 +97,10 @@ export default function HomePage() {
 								</EmachButton>
 							</Link>
 						</div>
-					</div>
+					</PageContainer>
 
 					{/* Bottom trust strip inside hero */}
-					<div
-						className="absolute right-0 bottom-0 left-0 flex justify-between px-10 py-4"
-						style={{
-							borderTop: "1px solid rgba(255,255,255,0.1)",
-							fontFamily: "var(--font-display)",
-							fontSize: 11,
-							letterSpacing: "0.2em",
-							color: "rgba(255,255,255,0.55)",
-						}}
-					>
+					<div className="absolute right-0 bottom-0 left-0 flex justify-between border-white/10 border-t px-10 py-4 font-display text-[11px] text-white/55 tracking-[0.2em]">
 						<div>ENTREGA EM TODO BRASIL</div>
 						<div>12× SEM JUROS</div>
 						<div>GARANTIA 2 ANOS</div>
@@ -150,67 +109,29 @@ export default function HomePage() {
 				</section>
 
 				{/* ---- Trust strip ---- */}
-				<div
-					className="bg-white"
-					style={{ borderBottom: "1px solid var(--border)" }}
-				>
-					<div
-						className="mx-auto grid grid-cols-4 gap-6 px-10 py-[22px]"
-						style={{ maxWidth: 1440 }}
-					>
+				<div className="border-border border-b bg-white">
+					<PageContainer className="grid grid-cols-4 gap-6 py-[22px]">
 						{TRUST_ITEMS.map((f) => (
 							<div className="flex items-center gap-3" key={f.title}>
-								<div
-									className="flex items-center justify-center"
-									style={{
-										width: 36,
-										height: 36,
-										background: "var(--gray-10)",
-									}}
-								>
+								<div className="flex size-9 items-center justify-center bg-gray-10">
 									<f.icon size={18} />
 								</div>
 								<div>
 									<div className="font-semibold text-[13px]">{f.title}</div>
-									<div
-										className="text-[12px]"
-										style={{ color: "var(--gray-60)" }}
-									>
-										{f.sub}
-									</div>
+									<div className="text-[12px] text-gray-60">{f.sub}</div>
 								</div>
 							</div>
 						))}
-					</div>
+					</PageContainer>
 				</div>
 
 				{/* ---- Categories ---- */}
-				<section
-					className="mx-auto px-[56px] py-[72px]"
-					style={{ maxWidth: 1440 }}
-				>
-					<div className="mb-8 flex items-end justify-between">
-						<div>
-							<SectionLabel tone="accent">01 · Categorias</SectionLabel>
-							<h2
-								className="m-0 mt-2.5 font-medium"
-								style={{
-									fontFamily: "var(--font-display)",
-									fontSize: 44,
-									letterSpacing: "-0.01em",
-								}}
-							>
-								Explorar por categoria
-							</h2>
-						</div>
-						<Link
-							className="pb-0.5 font-semibold text-[13px]"
-							href="/catalog"
-							style={{ borderBottom: "2px solid var(--emach-red)" }}
-						>
-							Ver todas
-						</Link>
-					</div>
+				<PageContainer as="section" className="px-[56px] py-[72px]">
+					<SectionHeader
+						label="01 · Categorias"
+						link={{ href: "/catalog", label: "Ver todas" }}
+						title="Explorar por categoria"
+					/>
 
 					<div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-2 gap-6">
 						<div className="row-span-2">
@@ -221,71 +142,39 @@ export default function HomePage() {
 						<CategoryTile category={categories[3]} />
 						<CategoryTile category={categories[4]} />
 					</div>
-				</section>
+				</PageContainer>
 
 				{/* ---- Promos ---- */}
 				{promos.length > 0 && (
-					<section
-						className="px-[56px] py-[72px]"
-						style={{ background: "var(--gray-10)" }}
-					>
-						<div className="mx-auto" style={{ maxWidth: 1440 }}>
-							<div className="mb-8 flex items-end justify-between">
-								<div>
-									<SectionLabel tone="accent">02 · Ofertas</SectionLabel>
-									<h2
-										className="m-0 mt-2.5 font-medium"
-										style={{ fontFamily: "var(--font-display)", fontSize: 44 }}
-									>
-										Promoções da semana
-									</h2>
-								</div>
-								<Link
-									className="pb-0.5 font-semibold text-[13px]"
-									href="/catalog"
-									style={{ borderBottom: "2px solid var(--emach-red)" }}
-								>
-									Ver todas
-								</Link>
-							</div>
+					<section className="bg-gray-10 px-[56px] py-[72px]">
+						<PageContainer>
+							<SectionHeader
+								label="02 · Ofertas"
+								link={{ href: "/catalog", label: "Ver todas" }}
+								title="Promoções da semana"
+							/>
 							<div className="grid grid-cols-4 gap-6">
 								{promos.map((p) => (
 									<ProductCard key={p.id} product={p} />
 								))}
 							</div>
-						</div>
+						</PageContainer>
 					</section>
 				)}
 
 				{/* ---- Editorial banner ---- */}
-				<section
-					className="text-white"
-					style={{ background: "#000", padding: 0 }}
-				>
-					<div
-						className="mx-auto grid grid-cols-2"
-						style={{ maxWidth: 1440, minHeight: 440 }}
-					>
-						<div className="flex flex-col justify-center gap-5 px-20 py-[80px]">
+				<section className="bg-black text-white">
+					<PageContainer className="grid min-h-[440px] grid-cols-2 px-0">
+						<div className="flex flex-col justify-center gap-5 px-20 py-20">
 							<SectionLabel tone="accent">Feito para durar</SectionLabel>
-							<h2
-								className="m-0 font-medium leading-[1.02]"
-								style={{
-									fontFamily: "var(--font-display)",
-									fontSize: 48,
-									letterSpacing: "-0.01em",
-								}}
-							>
+							<h2 className="font-display font-medium text-[48px] leading-[1.02] tracking-[-0.01em]">
 								Engenharia que
 								<br />
 								não abandona você
 								<br />
 								no meio da obra.
 							</h2>
-							<p
-								className="max-w-[440px] text-[16px] leading-relaxed"
-								style={{ color: "rgba(255,255,255,0.7)" }}
-							>
+							<p className="max-w-[440px] text-[16px] text-white/70 leading-relaxed">
 								Cada ferramenta EMACH passa por 200+ horas de testes em campo
 								antes de chegar ao catálogo.
 							</p>
@@ -296,84 +185,45 @@ export default function HomePage() {
 							</div>
 						</div>
 
-						<div
-							className="relative"
-							style={{
-								background: "linear-gradient(135deg, #1a1a1a, #000)",
-								borderLeft: "3px solid var(--emach-red)",
-							}}
-						>
-							<div
-								className="absolute inset-0 grid items-center p-10"
-								style={{
-									gridTemplateColumns: "repeat(3, 1fr)",
-									alignContent: "center",
-								}}
-							>
+						<div className="emach-bg-stats relative border-emach-red border-l-[3px]">
+							<div className="absolute inset-0 grid grid-cols-3 content-center p-10">
 								{STATS.map((s, i) => (
 									<div
+										className={cn(
+											"p-5",
+											i > 2 && "border-white/10 border-t",
+											i % 3 < 2 && "border-white/10 border-r"
+										)}
 										key={s.n}
-										style={{
-											padding: 20,
-											borderTop:
-												i > 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-											borderRight:
-												i % 3 < 2 ? "1px solid rgba(255,255,255,0.1)" : "none",
-										}}
 									>
-										<div
-											className="font-medium text-white"
-											style={{
-												fontFamily: "var(--font-display)",
-												fontSize: 32,
-											}}
-										>
+										<div className="font-display font-medium text-[32px] text-white">
 											{s.n}
 										</div>
-										<div
-											className="mt-1 text-[11px] uppercase tracking-[0.14em]"
-											style={{ color: "rgba(255,255,255,0.55)" }}
-										>
+										<div className="mt-1 text-[11px] text-white/55 uppercase tracking-[0.14em]">
 											{s.l}
 										</div>
 									</div>
 								))}
 							</div>
 						</div>
-					</div>
+					</PageContainer>
 				</section>
 
 				{/* ---- Featured products ---- */}
 				{featured.length > 0 && (
-					<section
-						className="px-[56px] py-[72px]"
-						style={{ background: "var(--gray-10)" }}
-					>
-						<div className="mx-auto" style={{ maxWidth: 1440 }}>
-							<div className="mb-8 flex items-end justify-between">
-								<div>
-									<SectionLabel tone="accent">02 · Ofertas</SectionLabel>
-									<h2
-										className="m-0 mt-2.5 font-medium"
-										style={{ fontFamily: "var(--font-display)", fontSize: 44 }}
-									>
-										Promoções da semana
-									</h2>
-								</div>
-								<Link
-									className="pb-0.5 font-semibold text-[13px]"
-									href="/catalog"
-									style={{ borderBottom: "2px solid var(--emach-red)" }}
-								>
-									Ver todas
-								</Link>
-							</div>
+					<section className="bg-gray-10 px-[56px] py-[72px]">
+						<PageContainer>
+							<SectionHeader
+								label="02 · Ofertas"
+								link={{ href: "/catalog", label: "Ver todas" }}
+								title="Promoções da semana"
+							/>
 							<div className="grid grid-cols-4 gap-6">
 								{featured.map((p) => (
 									<ProductCard key={p.id} product={p} />
 								))}
 							</div>
-						</div>
+						</PageContainer>
 					</section>
 				)}
 			</main>

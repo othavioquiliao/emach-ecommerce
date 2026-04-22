@@ -2,7 +2,6 @@
 
 import { Plus } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 import { toast } from "sonner";
 
 import { EmachBadge } from "@/components/emach-badge";
@@ -27,7 +26,6 @@ function getBadgeVariant(badge: string) {
 }
 
 export function ProductCard({ product }: ProductCardProps) {
-	const [hovered, setHovered] = useState(false);
 	const { add } = useCart();
 
 	function handleQuickAdd(e: React.MouseEvent) {
@@ -38,31 +36,17 @@ export function ProductCard({ product }: ProductCardProps) {
 
 	return (
 		<Link
-			className="block cursor-pointer"
+			className="group block cursor-pointer"
 			href={`/product/${product.slug}`}
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
 		>
-			<div
-				className="overflow-hidden rounded-[2px] bg-white"
-				style={{
-					boxShadow: hovered
-						? "0 14px 40px rgba(0,0,0,0.1)"
-						: "0 1px 2px rgba(0,0,0,0.04)",
-					transform: hovered ? "translateY(-4px)" : "translateY(0)",
-					transition: "all 240ms cubic-bezier(.2,.6,.2,1)",
-				}}
-			>
+			<div className="overflow-hidden rounded-[2px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-[240ms] ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
 				{/* Image area */}
-				<div
-					className="relative overflow-hidden rounded-[2px]"
-					style={{ aspectRatio: "1 / 1", background: "#ECECEC" }}
-				>
+				<div className="relative aspect-square overflow-hidden rounded-[2px] bg-image-bg">
 					<ProductImage
 						alt={product.name}
 						categorySlug={product.categorySlug}
 						src={product.images[0]}
-						zoom={hovered}
+						zoom
 					/>
 
 					{product.badge && (
@@ -76,22 +60,13 @@ export function ProductCard({ product }: ProductCardProps) {
 					{/* Hover gradient overlay */}
 					<div
 						aria-hidden="true"
-						className="pointer-events-none absolute inset-0 transition-opacity duration-240"
-						style={{
-							background:
-								"linear-gradient(to top, rgba(0,0,0,0.7), transparent 50%)",
-							opacity: hovered ? 1 : 0,
-						}}
+						className="emach-bg-card-hover pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[240ms] group-hover:opacity-100"
 					/>
 
 					{/* SKU reveal on hover */}
 					<div
 						aria-hidden="true"
-						className="tracking absolute right-[14px] bottom-[14px] left-[14px] font-display font-semibold text-[11px] text-white uppercase transition-all duration-240"
-						style={{
-							opacity: hovered ? 1 : 0,
-							transform: hovered ? "translateY(0)" : "translateY(8px)",
-						}}
+						className="absolute right-[14px] bottom-[14px] left-[14px] translate-y-2 font-display font-semibold text-[11px] text-white uppercase tracking-wide opacity-0 transition-all duration-[240ms] group-hover:translate-y-0 group-hover:opacity-100"
 					>
 						SKU {product.sku}
 					</div>
@@ -99,16 +74,8 @@ export function ProductCard({ product }: ProductCardProps) {
 					{/* Quick-add button */}
 					<button
 						aria-label={`Adicionar ${product.name} ao carrinho`}
-						className="absolute top-3 right-3 z-10 flex items-center justify-center rounded-[2px] transition-all duration-240"
+						className="absolute top-3 right-3 z-10 flex size-9 -translate-y-2 items-center justify-center rounded-[2px] bg-emach-red text-white opacity-0 transition-all duration-[240ms] group-hover:translate-y-0 group-hover:opacity-100"
 						onClick={handleQuickAdd}
-						style={{
-							width: 36,
-							height: 36,
-							background: "var(--emach-red)",
-							color: "#fff",
-							opacity: hovered ? 1 : 0,
-							transform: hovered ? "translateY(0)" : "translateY(-8px)",
-						}}
 						type="button"
 					>
 						<Plus size={16} strokeWidth={2.5} />
@@ -116,32 +83,17 @@ export function ProductCard({ product }: ProductCardProps) {
 				</div>
 
 				{/* Card body */}
-				<div className="flex flex-col gap-1 bg-gray-100 px-2 py-3">
+				<div className="flex flex-col gap-1 bg-gray-10 px-2 py-3">
 					<SectionLabel>{product.category}</SectionLabel>
-					<p
-						className="mt-1 font-medium text-[14px] leading-tight"
-						style={{ color: "var(--near-black)" }}
-					>
+					<p className="mt-1 font-medium text-[14px] text-near-black leading-tight">
 						{product.name}
 					</p>
 					<div className="mt-1 flex items-baseline gap-2">
-						<span
-							className="font-bold text-[15px]"
-							style={{
-								color: "var(--near-black)",
-								fontVariantNumeric: "tabular-nums",
-							}}
-						>
+						<span className="font-bold text-[15px] text-near-black tabular-nums">
 							{fmtBRL(product.price)}
 						</span>
 						{product.originalPrice && (
-							<span
-								className="text-[11px] line-through"
-								style={{
-									color: "var(--gray-50)",
-									fontVariantNumeric: "tabular-nums",
-								}}
-							>
+							<span className="text-[11px] text-gray-50 tabular-nums line-through">
 								{fmtBRL(product.originalPrice)}
 							</span>
 						)}

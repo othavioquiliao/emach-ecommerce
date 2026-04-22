@@ -1,27 +1,37 @@
-type SectionLabelTone = "default" | "light" | "accent";
+import { cn } from "@emach/ui/lib/utils";
+import { cva, type VariantProps } from "class-variance-authority";
 
-interface SectionLabelProps {
-	children: React.ReactNode;
-	className?: string;
-	tone?: SectionLabelTone;
-}
+const sectionLabelVariants = cva(
+	"font-display font-semibold text-[12px] uppercase tracking-[0.14em]",
+	{
+		variants: {
+			tone: {
+				default: "text-gray-50",
+				light: "text-white/70",
+				accent: "text-emach-red",
+			},
+		},
+		defaultVariants: {
+			tone: "default",
+		},
+	}
+);
 
-const TONE_COLORS: Record<SectionLabelTone, string> = {
-	default: "text-[var(--gray-50)]",
-	light: "text-white/72",
-	accent: "text-[var(--emach-red)]",
-};
+interface SectionLabelProps
+	extends React.HTMLAttributes<HTMLSpanElement>,
+		VariantProps<typeof sectionLabelVariants> {}
 
 export function SectionLabel({
 	children,
-	tone = "default",
+	tone,
 	className,
+	...props
 }: SectionLabelProps) {
 	return (
-		<span
-			className={`font-display font-semibold text-[12px] uppercase tracking-[0.14em] ${TONE_COLORS[tone]} ${className ?? ""}`}
-		>
+		<span className={cn(sectionLabelVariants({ tone }), className)} {...props}>
 			{children}
 		</span>
 	);
 }
+
+export { sectionLabelVariants };

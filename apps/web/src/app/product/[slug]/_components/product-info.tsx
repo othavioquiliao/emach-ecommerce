@@ -6,6 +6,7 @@ import { toast } from "sonner";
 
 import { EmachBadge } from "@/components/emach-badge";
 import { EmachButton } from "@/components/emach-button";
+import { QuantityStepper } from "@/components/quantity-stepper";
 import { SectionLabel } from "@/components/section-label";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL } from "@/lib/format";
@@ -64,14 +65,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 			<SectionLabel tone="accent">{product.category}</SectionLabel>
 
 			<div>
-				<h1
-					className="m-0 mt-3 font-medium leading-[1.1]"
-					style={{
-						fontFamily: "var(--font-display)",
-						fontSize: 36,
-						letterSpacing: "-0.01em",
-					}}
-				>
+				<h1 className="mt-3 font-display font-medium text-[36px] leading-[1.1] tracking-[-0.01em]">
 					{product.name}
 				</h1>
 				{product.badge && (
@@ -79,52 +73,28 @@ export function ProductInfo({ product }: ProductInfoProps) {
 						{product.badge}
 					</EmachBadge>
 				)}
-				<div className="mt-2 text-[13px]" style={{ color: "var(--gray-60)" }}>
-					SKU {product.sku}
-				</div>
+				<div className="mt-2 text-[13px] text-gray-60">SKU {product.sku}</div>
 			</div>
 
-			<div
-				className="py-5"
-				style={{
-					borderTop: "1px solid var(--border)",
-					borderBottom: "1px solid var(--border)",
-				}}
-			>
+			<div className="border-border border-y py-5">
 				<div className="flex items-baseline gap-3">
-					<span
-						className="font-bold"
-						style={{
-							fontFamily: "var(--font-display)",
-							fontSize: 40,
-							fontVariantNumeric: "tabular-nums",
-						}}
-					>
+					<span className="font-bold font-display text-[40px] tabular-nums">
 						{fmtBRL(product.price)}
 					</span>
 					{product.originalPrice && (
-						<span
-							className="text-[16px] line-through"
-							style={{
-								color: "var(--gray-50)",
-								fontVariantNumeric: "tabular-nums",
-							}}
-						>
+						<span className="text-[16px] text-gray-50 tabular-nums line-through">
 							{fmtBRL(product.originalPrice)}
 						</span>
 					)}
 				</div>
-				<div className="mt-1.5 text-[13px]" style={{ color: "var(--gray-60)" }}>
+				<div className="mt-1.5 text-[13px] text-gray-60">
 					Em até{" "}
 					<strong>12× de {fmtBRL(Math.round(product.price / 12))}</strong> sem
 					juros
 				</div>
 			</div>
 
-			<p
-				className="text-[15px] leading-relaxed"
-				style={{ color: "var(--gray-60)" }}
-			>
+			<p className="text-[15px] text-gray-60 leading-relaxed">
 				{product.shortDescription}
 			</p>
 
@@ -134,10 +104,9 @@ export function ProductInfo({ product }: ProductInfoProps) {
 					<div className="flex gap-2">
 						{product.voltage.map((v) => (
 							<button
-								className={`emach-chip ${selectedVoltage === v ? "emach-chip--active" : ""}`}
+								className={`emach-chip min-w-16 ${selectedVoltage === v ? "emach-chip--active" : ""}`}
 								key={v}
 								onClick={() => setSelectedVoltage(v)}
-								style={{ minWidth: 64 }}
 								type="button"
 							>
 								{v}
@@ -148,25 +117,7 @@ export function ProductInfo({ product }: ProductInfoProps) {
 			)}
 
 			<div className="flex items-stretch gap-3">
-				<div className="emach-qty">
-					<button
-						aria-label="Diminuir"
-						className="emach-qty__btn"
-						onClick={() => setQty(Math.max(1, qty - 1))}
-						type="button"
-					>
-						−
-					</button>
-					<div className="emach-qty__val">{qty}</div>
-					<button
-						aria-label="Aumentar"
-						className="emach-qty__btn emach-qty__btn--plus"
-						onClick={() => setQty(qty + 1)}
-						type="button"
-					>
-						+
-					</button>
-				</div>
+				<QuantityStepper onChange={setQty} value={qty} />
 				<EmachButton
 					full
 					icon={<ShoppingBag size={16} />}
@@ -180,14 +131,13 @@ export function ProductInfo({ product }: ProductInfoProps) {
 
 			<button
 				aria-label="Compartilhar produto"
-				className="emach-ghost-btn inline-flex items-center gap-2 font-semibold text-[13px]"
+				className="emach-ghost-btn inline-flex items-center gap-2 font-semibold text-[13px] text-gray-60"
 				onClick={handleShare}
-				style={{ color: "var(--gray-60)" }}
 				type="button"
 			>
 				{shared ? (
 					<>
-						<Check size={14} style={{ color: "var(--success)" }} />
+						<Check className="text-success" size={14} />
 						Link copiado
 					</>
 				) : (
@@ -198,24 +148,14 @@ export function ProductInfo({ product }: ProductInfoProps) {
 				)}
 			</button>
 
-			<div
-				className="grid gap-3 p-5"
-				style={{
-					background: "var(--gray-10)",
-					gridTemplateColumns: "1fr 1fr",
-				}}
-			>
+			<div className="grid grid-cols-2 gap-3 bg-gray-10 p-5">
 				<div>
 					<div className="font-semibold text-[13px]">Frete grátis</div>
-					<div className="text-[12px]" style={{ color: "var(--gray-60)" }}>
-						acima de R$ 299
-					</div>
+					<div className="text-[12px] text-gray-60">acima de R$ 299</div>
 				</div>
 				<div>
 					<div className="font-semibold text-[13px]">Garantia 2 anos</div>
-					<div className="text-[12px]" style={{ color: "var(--gray-60)" }}>
-						direto com a marca
-					</div>
+					<div className="text-[12px] text-gray-60">direto com a marca</div>
 				</div>
 			</div>
 		</div>
