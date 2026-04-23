@@ -16,6 +16,7 @@ import { getProductBySlug, products } from "@/lib/mock-data";
 
 import { ProductGallery } from "./_components/product-gallery";
 import { ProductInfo } from "./_components/product-info";
+import { ProductReviews } from "./_components/product-reviews";
 import { ProductTabs } from "./_components/product-tabs";
 import { RelatedProducts } from "./_components/related-products";
 
@@ -108,6 +109,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 			</div>
 
 			<ProductTabs product={product} />
+			<ProductReviews product={product} />
 			<RelatedProducts products={relatedProducts} />
 			<SiteFooter />
 		</>

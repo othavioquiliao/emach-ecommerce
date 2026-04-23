@@ -30,6 +30,14 @@ export interface CartItem {
 	selectedVoltage?: string;
 }
 
+export interface Review {
+	author: string;
+	body: string;
+	date: string;
+	id: string;
+	rating: 1 | 2 | 3 | 4 | 5;
+}
+
 export const categories: Category[] = [
 	{
 		name: "Ferramentas Elétricas",
@@ -388,4 +396,121 @@ export function getProductsByCategory(categorySlug: string): Product[] {
 
 export function getFeaturedProducts(count = 4): Product[] {
 	return products.filter((p) => p.badge).slice(0, count);
+}
+
+const reviewPool: Review[] = [
+	{
+		id: "r01",
+		author: "Carlos M.",
+		date: "2026-03-12",
+		rating: 5,
+		body: "Uso diário no canteiro há 4 meses. O motor aguenta perfurações contínuas em concreto sem aquecer. Bateria dura um turno inteiro com carga média. Mandril firme, sem folga.",
+	},
+	{
+		id: "r02",
+		author: "Renata S.",
+		date: "2026-02-28",
+		rating: 5,
+		body: "Troquei a antiga por esta e a diferença de torque é absurda. Maleta bem organizada, veio com 2 baterias. Leve pro torque que entrega.",
+	},
+	{
+		id: "r03",
+		author: "Paulo F.",
+		date: "2026-02-15",
+		rating: 4,
+		body: "Ferramenta profissional de verdade. Só tiro uma estrela porque a alça podia ter um apoio melhor pra uso acima da cabeça. No resto, impecável.",
+	},
+	{
+		id: "r04",
+		author: "João B.",
+		date: "2026-02-02",
+		rating: 5,
+		body: "Comprei pra reforma da casa. Furou tudo: madeira, concreto, aço. Sem esforço extra, sem trepidação. Vale cada centavo investido.",
+	},
+	{
+		id: "r05",
+		author: "Marcos A.",
+		date: "2026-01-20",
+		rating: 5,
+		body: "Fiz uma obra inteira com ela. Pega pesado no concreto armado sem patinar. A qualidade do mandril é notável. Recomendo para profissionais.",
+	},
+	{
+		id: "r06",
+		author: "Juliana R.",
+		date: "2026-01-08",
+		rating: 4,
+		body: "Muito boa, só senti falta de uma luz LED mais forte para trabalhos em ambiente escuro. No mais, potente e precisa.",
+	},
+	{
+		id: "r07",
+		author: "Fernando L.",
+		date: "2025-12-22",
+		rating: 5,
+		body: "Trabalho com marcenaria há 15 anos e essa é a melhor que já usei. Equilíbrio perfeito, vibração mínima, acabamento impecável nas peças.",
+	},
+	{
+		id: "r08",
+		author: "Bruno T.",
+		date: "2025-12-10",
+		rating: 3,
+		body: "Produto bom mas esperava mais pelo preço. O desempenho é ok, mas já usei concorrentes por valor parecido com mais acessórios inclusos.",
+	},
+	{
+		id: "r09",
+		author: "Sérgio P.",
+		date: "2025-11-28",
+		rating: 5,
+		body: "Chegou antes do prazo, embalagem excelente. Ferramenta robusta, pesada no lugar certo, leve no lugar certo. Entrega a potência que promete.",
+	},
+	{
+		id: "r10",
+		author: "Aline C.",
+		date: "2025-11-14",
+		rating: 5,
+		body: "Primeira compra na EMACH e fiquei impressionada. Produto de ponta, atendimento rápido. Já virei cliente fiel da marca.",
+	},
+	{
+		id: "r11",
+		author: "Diego V.",
+		date: "2025-10-30",
+		rating: 4,
+		body: "Cumpre o que promete. Só achei o manual um pouco resumido para quem é iniciante, mas pra quem já tem experiência é tranquilo de usar.",
+	},
+	{
+		id: "r12",
+		author: "Roberto G.",
+		date: "2025-10-15",
+		rating: 5,
+		body: "Uso em instalações elétricas comerciais. Ferramenta que não falha, não aquece, não dá fadiga no braço. É investimento de longo prazo.",
+	},
+	{
+		id: "r13",
+		author: "Camila H.",
+		date: "2025-09-28",
+		rating: 2,
+		body: "Tive problema com a bateria após 3 meses de uso moderado. Suporte técnico foi atencioso mas a troca demorou mais do que eu gostaria.",
+	},
+	{
+		id: "r14",
+		author: "Eduardo N.",
+		date: "2025-09-10",
+		rating: 5,
+		body: "Comparando com o modelo anterior da minha marca antiga, esta é muito superior em torque e autonomia. Não volto mais pra concorrência.",
+	},
+	{
+		id: "r15",
+		author: "Patrícia O.",
+		date: "2025-08-22",
+		rating: 5,
+		body: "Presente para meu marido, que é eletricista. Ele usa todos os dias há 6 meses e só tem elogios. Resistente, silenciosa e potente.",
+	},
+];
+
+export function getReviewsByProductId(productId: string): Review[] {
+	let hash = 0;
+	for (let i = 0; i < productId.length; i++) {
+		hash = (hash * 31 + productId.charCodeAt(i)) % 2_147_483_647;
+	}
+	const offset = hash % reviewPool.length;
+	return [...reviewPool.slice(offset), ...reviewPool.slice(0, offset)];
 }

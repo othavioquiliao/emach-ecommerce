@@ -1,0 +1,42 @@
+import type { Review } from "@/lib/mock-data";
+import { StarRating } from "./star-rating";
+
+interface ReviewCardProps {
+	review: Review;
+}
+
+const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
+	day: "2-digit",
+	month: "short",
+	year: "numeric",
+});
+const TRAILING_DOT = /\.$/u;
+
+function formatReviewDate(iso: string): string {
+	const date = new Date(`${iso}T00:00:00`);
+	return DATE_FORMATTER.format(date).replace(TRAILING_DOT, "").toUpperCase();
+}
+
+export function ReviewCard({ review }: ReviewCardProps) {
+	return (
+		<article className="border-gray-20 border-b py-7 md:even:pl-8 md:odd:pr-8">
+			<header className="mb-2.5 flex items-center justify-between gap-3">
+				<div className="flex items-center gap-2.5">
+					<StarRating rating={review.rating} />
+					<span className="font-semibold text-[13px] text-foreground">
+						{review.author}
+					</span>
+				</div>
+				<time
+					className="font-display text-[11px] text-gray-50 uppercase tracking-[0.08em]"
+					dateTime={review.date}
+				>
+					{formatReviewDate(review.date)}
+				</time>
+			</header>
+			<p className="text-[13.5px] text-gray-70 leading-relaxed">
+				{review.body}
+			</p>
+		</article>
+	);
+}
