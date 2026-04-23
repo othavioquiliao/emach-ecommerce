@@ -16,12 +16,7 @@ import { toast } from "sonner";
 import z from "zod";
 import Loader from "@/components/loader";
 import { authClient } from "@/lib/auth-client";
-import {
-	isValidCpfCnpj,
-	maskCpfCnpj,
-	maskPhone,
-	onlyDigits,
-} from "@/lib/validators/cpf-cnpj";
+import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
 
 const TRIGGER_CLASS =
 	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
@@ -61,7 +56,6 @@ export default function LoginPage() {
 			email: "",
 			password: "",
 			phone: "",
-			document: "",
 		},
 		onSubmit: async ({ value }) => {
 			const payload: {
@@ -69,19 +63,14 @@ export default function LoginPage() {
 				password: string;
 				name: string;
 				phone?: string;
-				document?: string;
 			} = {
 				email: value.email,
 				password: value.password,
 				name: value.name,
 			};
 			const phoneDigits = onlyDigits(value.phone);
-			const docDigits = onlyDigits(value.document);
 			if (phoneDigits) {
 				payload.phone = phoneDigits;
-			}
-			if (docDigits) {
-				payload.document = docDigits;
 			}
 			await authClient.signUp.email(payload, {
 				onSuccess: () => {
@@ -103,9 +92,6 @@ export default function LoginPage() {
 				phone: z
 					.string()
 					.refine((v) => !v || onlyDigits(v).length >= 10, "Telefone inválido"),
-				document: z
-					.string()
-					.refine((v) => !v || isValidCpfCnpj(v), "CPF/CNPJ inválido"),
 			}),
 		},
 	});
@@ -348,36 +334,6 @@ export default function LoginPage() {
 									)}
 								</signUpForm.Field>
 
-								<signUpForm.Field name="document">
-									{(field) => (
-										<label className="emach-field" htmlFor={field.name}>
-											<span className="emach-field__label">
-												CPF / CNPJ (opcional)
-											</span>
-											<input
-												className="emach-input"
-												id={field.name}
-												inputMode="numeric"
-												name={field.name}
-												onBlur={field.handleBlur}
-												onChange={(e) =>
-													field.handleChange(maskCpfCnpj(e.target.value))
-												}
-												placeholder="000.000.000-00"
-												value={field.state.value}
-											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
-										</label>
-									)}
-								</signUpForm.Field>
-
 								<signUpForm.Field name="password">
 									{(field) => (
 										<label className="emach-field" htmlFor={field.name}>
@@ -437,10 +393,20 @@ export default function LoginPage() {
 					{/* Social login */}
 					<div className="flex flex-col gap-2">
 						<button
-							className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-colors"
+							className="group relative flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-all duration-200 hover:border-emach-red hover:bg-near-black hover:text-white"
+							onClick={() =>
+								toast.info("Login com Google em breve.", {
+									description: "Estamos finalizando a integração.",
+								})
+							}
 							type="button"
 						>
+							<span
+								aria-hidden="true"
+								className="absolute inset-0 origin-left scale-x-0 bg-emach-red/10 transition-transform duration-300 ease-out group-hover:scale-x-100"
+							/>
 							<svg
+								className="relative"
 								height="16"
 								viewBox="0 0 18 18"
 								width="16"
@@ -464,23 +430,10 @@ export default function LoginPage() {
 									fill="#EA4335"
 								/>
 							</svg>
-							Continuar com Google
-						</button>
-						<button
-							className="flex w-full cursor-pointer items-center justify-center gap-2 rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-colors"
-							type="button"
-						>
-							<svg
-								fill="currentColor"
-								height="16"
-								viewBox="0 0 24 24"
-								width="16"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<title>Apple</title>
-								<path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-							</svg>
-							Continuar com Apple
+							<span className="relative">Continuar com Google</span>
+							<span className="relative ml-auto font-display text-[10px] uppercase tracking-[0.12em] opacity-60">
+								Em breve
+							</span>
 						</button>
 					</div>
 				</div>
