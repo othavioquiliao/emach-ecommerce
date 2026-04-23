@@ -1,12 +1,15 @@
 import { relations } from "drizzle-orm";
 import { boolean, index, pgTable, text, timestamp } from "drizzle-orm/pg-core";
 
+export type UserRole = "admin" | "manager" | "user";
+
 export const user = pgTable("user", {
 	id: text("id").primaryKey(),
 	name: text("name").notNull(),
 	email: text("email").notNull().unique(),
 	emailVerified: boolean("email_verified").default(false).notNull(),
 	image: text("image"),
+	role: text("role").$type<UserRole>().notNull().default("user"),
 	createdAt: timestamp("created_at").defaultNow().notNull(),
 	updatedAt: timestamp("updated_at")
 		.defaultNow()
