@@ -1,23 +1,18 @@
 "use client";
 
-import {
-	Carousel,
-	CarouselContent,
-	CarouselItem,
-	CarouselNext,
-	CarouselPrevious,
-} from "@emach/ui/components/carousel";
-import {
-	Dialog,
-	DialogContent,
-	DialogTitle,
-	DialogTrigger,
-} from "@emach/ui/components/dialog";
-import { cn } from "@emach/ui/lib/utils";
-import { ZoomIn } from "lucide-react";
-import Image from "next/image";
-import { useState } from "react";
 import { ProductImage } from "@/components/product-image";
+import {
+  Carousel,
+  CarouselContent,
+  CarouselItem,
+  CarouselNext,
+  CarouselPrevious,
+} from "@emach/ui/components/carousel";
+import { cn } from "@emach/ui/lib/utils";
+import { useState } from "react";
+import InnerImageZoom from "react-inner-image-zoom";
+import "react-inner-image-zoom/es/styles.min.css";
+import "./product-gallery.css";
 
 interface ProductGalleryProps {
 	categorySlug: string;
@@ -123,41 +118,18 @@ export function ProductGallery({
 			)}
 
 			<div className="order-1 lg:order-2 lg:flex-1">
-				<Dialog>
-					<DialogTrigger
-						aria-label={`Ampliar imagem de ${name}`}
-						className="group relative block aspect-square w-5/6 cursor-zoom-in overflow-hidden bg-image-bg"
-						disabled={!activeSrc}
-					>
-						<ProductImage
-							alt={name}
-							categorySlug={categorySlug}
-							priority
+				<div className="relative aspect-square w-5/6 overflow-hidden bg-image-bg">
+					{activeSrc ? (
+						<InnerImageZoom
+							imgAttributes={{ alt: name }}
 							src={activeSrc}
+							zoomScale={2}
+							zoomSrc={activeSrc}
 						/>
-						<span
-							aria-hidden="true"
-							className="absolute right-3 bottom-3 flex size-9 items-center justify-center bg-black/70 text-white opacity-0 transition-opacity group-hover:opacity-100"
-						>
-							<ZoomIn size={16} />
-						</span>
-					</DialogTrigger>
-
-					{activeSrc && (
-						<DialogContent className="max-w-[min(90vw,900px)] border-none bg-black/95 p-0 ring-0">
-							<DialogTitle className="sr-only">{name}</DialogTitle>
-							<div className="relative h-[min(90vh,800px)] w-full">
-								<Image
-									alt={name}
-									className="object-contain"
-									fill
-									sizes="90vw"
-									src={activeSrc}
-								/>
-							</div>
-						</DialogContent>
+					) : (
+						<ProductImage alt={name} categorySlug={categorySlug} priority />
 					)}
-				</Dialog>
+				</div>
 			</div>
 		</div>
 	);
