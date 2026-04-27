@@ -36,11 +36,14 @@ export function ProductReviews({ product }: ProductReviewsProps) {
 	const stats = computeStats(reviews);
 
 	return (
-		<section className="px-20 pt-16 pb-20">
-			<SectionLabel tone="accent">O que dizem os clientes</SectionLabel>
-
+		<section className="w-full py-10">
+      <div className="max-w-7xl mx-auto mb-5">
+          <SectionLabel tone="accent">O que dizem os clientes</SectionLabel>
+      </div>
 			<div className="mt-5 flex flex-col items-start gap-5 border-gray-20 border-b pb-6 md:flex-row md:items-center md:gap-8">
-				<div className="flex items-baseline gap-1.5">
+
+				<div className="flex items-center justify-center gap-5 max-w-7xl mx-auto">
+          <div className="flex max-w-7xl justify-center items-baseline gap-1.5">
 					<span className="font-display font-medium text-[40px] text-foreground tabular-nums leading-none tracking-[-0.02em]">
 						{stats.average.toFixed(1)}
 					</span>
@@ -75,9 +78,12 @@ export function ProductReviews({ product }: ProductReviewsProps) {
 						últimos 30 dias
 					</span>
 				</div>
+        </div>
 			</div>
 
-			<ReviewList reviews={reviews} />
+			<div className="max-w-7xl mx-auto">
+        <ReviewList reviews={reviews} />
+      </div>
 		</section>
 	);
 }

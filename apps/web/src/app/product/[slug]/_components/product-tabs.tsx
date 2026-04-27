@@ -1,13 +1,13 @@
 "use client";
 
-import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
-} from "@emach/ui/components/tabs";
 import { SectionLabel } from "@/components/section-label";
 import type { Product } from "@/lib/mock-data";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@emach/ui/components/tabs";
 
 interface ProductTabsProps {
 	product: Product;
@@ -35,7 +35,7 @@ const RAIL_ITEMS = [
 ] as const;
 
 const TRIGGER_CLASS =
-	"group/rail flex h-auto flex-1 items-start justify-start gap-3.5 whitespace-normal border-l-[3px] border-transparent px-8 py-5 text-left transition-colors hover:bg-background/60 focus-visible:ring-0 data-active:border-l-emach-red data-active:bg-background";
+	"group/rail w-full flex h-auto flex-1 items-start justify-start gap-3.5 whitespace-normal border-l-[3px] border-transparent px-8 py-5 text-left transition-colors hover:bg-background/60 focus-visible:ring-0 data-active:border-l-emach-red data-active:bg-background";
 
 const PANEL_HEADING_CLASS =
 	"mt-3 mb-7 font-display font-medium text-[28px] leading-[1.1] tracking-[-0.01em]";
@@ -44,7 +44,7 @@ const PANEL_PROSE_CLASS = "space-y-4 text-[15px] text-gray-60 leading-relaxed";
 
 export function ProductTabs({ product }: ProductTabsProps) {
 	return (
-		<section className="">
+		<section>
 			<div className="flex items-end justify-between gap-6 px-20 pt-12">
 				<div>
 					<SectionLabel tone="accent">Ficha da ferramenta</SectionLabel>
@@ -55,16 +55,16 @@ export function ProductTabs({ product }: ProductTabsProps) {
 			</div>
 
 			<Tabs
-				className="mt-9 grid min-h-[520px] grid-cols-[280px_1fr] gap-0"
+				className="mt-9 grid min-h-[520px] grid-cols-[280px_1fr] gap-0 border-gray-20 border-y"
 				defaultValue="specs"
 				orientation="vertical"
 			>
-				<div className="flex flex-col border-gray-20 border-t border-r bg-gray-10">
+				<div className="flex flex-col border-gray-20 border-r bg-gray-10">
 					<span className="border-gray-20 border-b px-8 pt-8 pb-4 font-display font-semibold text-[12px] text-gray-50 uppercase tracking-[0.14em]">
 						Informações
 					</span>
 					<TabsList
-						className="h-auto flex-col items-stretch gap-0 border-0 bg-transparent p-0"
+						className="h-auto w-full flex-col items-stretch gap-0 border-0 bg-transparent p-0"
 						variant="line"
 					>
 						{RAIL_ITEMS.map((item) => (
@@ -95,7 +95,7 @@ export function ProductTabs({ product }: ProductTabsProps) {
 					</div>
 				</div>
 
-				<div className="border-gray-20 border-t px-16 py-12">
+				<div className="px-16 py-12">
 					<TabsContent className="block" value="specs">
 						<SectionLabel tone="accent">01 · Especificações</SectionLabel>
 						<h3 className={`${PANEL_HEADING_CLASS} max-w-[620px]`}>
