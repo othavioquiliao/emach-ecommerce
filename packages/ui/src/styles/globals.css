@@ -23,6 +23,20 @@
 	--info: #4c98b9;
 	--link-hover: #3860be;
 
+	/* Surfaces */
+	--black: #000;
+	--image-bg: #ececec;
+
+	/* Cinema/editorial dark gradient stops */
+	--cinema-1: #2a2a2a;
+	--cinema-2: #1a1a1a;
+	--cinema-3: #0a0a0a;
+
+	/* Product placeholder radial stops */
+	--placeholder-light: #f6f6f6;
+	--placeholder-mid: #d8d8d8;
+	--placeholder-dark: #c8c8c8;
+
 	/* Accent alias used by .emach-qty__btn--plus */
 	--accent: var(--emach-red);
 
@@ -349,19 +363,6 @@
 	transform: translate(-50%, -50%);
 }
 
-.emach-check-label,
-.emach-radio-label {
-	display: inline-flex;
-	gap: 10px;
-	align-items: center;
-	padding: 6px 0;
-	font-family: var(--font-sans);
-	font-size: 14px;
-	line-height: 1;
-	color: var(--near-black);
-	cursor: pointer;
-}
-
 /* ---------- Slider (range) ---------- */
 .emach-range {
 	width: 100%;
@@ -433,8 +434,12 @@
 	border-radius: 2px;
 }
 .emach-qty__btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
 	width: 40px;
-	height: 44px;
+	height: 100%;
+	min-height: 38px;
 	font-size: 18px;
 	font-weight: 400;
 	color: var(--near-black);
@@ -448,10 +453,10 @@
 }
 .emach-qty__btn--plus {
 	color: #fff;
-	background: var(--accent);
+	background: var(--emach-red);
 }
 .emach-qty__btn--plus:hover {
-	background: var(--accent);
+	background: var(--emach-red);
 	filter: brightness(1.08);
 }
 .emach-qty__val {
@@ -459,7 +464,8 @@
 	align-items: center;
 	justify-content: center;
 	width: 44px;
-	height: 44px;
+	height: 100%;
+	min-height: 38px;
 	font-family: var(--font-sans);
 	font-size: 14px;
 	font-weight: 600;
@@ -594,6 +600,73 @@
 	animation: emach-cart-leave 220ms ease forwards;
 }
 
+/* ---------- Design system backgrounds ---------- */
+.emach-bg-diagonal {
+	background: repeating-linear-gradient(
+		35deg,
+		transparent 0 40px,
+		rgba(255, 255, 255, 0.02) 40px 80px
+	);
+}
+.emach-bg-diagonal-2 {
+	background: repeating-linear-gradient(
+		40deg,
+		transparent 0 30px,
+		rgba(255, 255, 255, 0.015) 30px 60px
+	);
+}
+.emach-bg-cinema {
+	background: radial-gradient(
+		ellipse at 70% 40%,
+		var(--cinema-1) 0%,
+		var(--cinema-3) 60%,
+		var(--black) 100%
+	);
+}
+.emach-mask-vignette {
+	-webkit-mask-image: radial-gradient(
+		ellipse at center,
+		rgba(0, 0, 0, 1) 55%,
+		rgba(0, 0, 0, 0) 100%
+	);
+	mask-image: radial-gradient(
+		ellipse at center,
+		rgba(0, 0, 0, 1) 55%,
+		rgba(0, 0, 0, 0) 100%
+	);
+}
+.emach-bg-category-overlay {
+	background: linear-gradient(135deg, rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.45));
+}
+.emach-bg-category-fallback {
+	background: linear-gradient(135deg, var(--cinema-1), var(--cinema-3));
+}
+.emach-bg-vignette-bottom {
+	background: linear-gradient(
+		to top,
+		rgba(0, 0, 0, 0.85),
+		rgba(0, 0, 0, 0.2) 55%,
+		transparent
+	);
+}
+.emach-bg-card-hover {
+	background: linear-gradient(to top, rgba(0, 0, 0, 0.7), transparent 50%);
+}
+.emach-bg-stats {
+	background: linear-gradient(135deg, var(--cinema-2), var(--black));
+}
+.emach-bg-placeholder {
+	background: radial-gradient(
+		ellipse at 50% 55%,
+		var(--placeholder-light) 0%,
+		var(--placeholder-mid) 55%,
+		var(--placeholder-dark) 100%
+	);
+}
+.emach-bg-placeholder-shadow {
+	background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent 70%);
+}
+
 /* ---------- Cart badge bounce ---------- */
 @keyframes emach-cart-bounce {
 	0% {
@@ -693,7 +766,28 @@
 	--color-link-blue: #3860be;
 	--color-teal-hover: #1eaedb;
 	--color-dark-red: #b01e0a;
-	--color-success: #16a34a;
+	--color-success: var(--success);
+	--color-warning: var(--warning);
+	--color-info: var(--info);
+	--color-link-hover: var(--link-hover);
+	--color-emach-red: var(--emach-red);
+	--color-emach-red-hover: var(--emach-red-hover);
+	--color-emach-red-deep: var(--emach-red-deep);
+	--color-near-black: var(--near-black);
+	--color-black: var(--black);
+	--color-image-bg: var(--image-bg);
+	--color-gray-10: var(--gray-10);
+	--color-gray-20: var(--gray-20);
+	--color-gray-50: var(--gray-50);
+	--color-gray-55: var(--gray-55);
+	--color-gray-60: var(--gray-60);
+	--color-gray-90: var(--gray-90);
+	--color-cinema-1: var(--cinema-1);
+	--color-cinema-2: var(--cinema-2);
+	--color-cinema-3: var(--cinema-3);
+	--color-placeholder-light: var(--placeholder-light);
+	--color-placeholder-mid: var(--placeholder-mid);
+	--color-placeholder-dark: var(--placeholder-dark);
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
 	--color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

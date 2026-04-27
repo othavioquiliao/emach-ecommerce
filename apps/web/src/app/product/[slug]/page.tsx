@@ -16,6 +16,7 @@ import { getProductBySlug, products } from "@/lib/mock-data";
 
 import { ProductGallery } from "./_components/product-gallery";
 import { ProductInfo } from "./_components/product-info";
+import { ProductReviews } from "./_components/product-reviews";
 import { ProductTabs } from "./_components/product-tabs";
 import { RelatedProducts } from "./_components/related-products";
 
@@ -40,10 +41,10 @@ export async function generateMetadata({
 	const title = `${product.name} — EMACH`;
 	return {
 		title,
-		description: product.shortDescription,
+		description: product.shortDescription.join(" · "),
 		openGraph: {
 			title,
-			description: product.shortDescription,
+			description: product.shortDescription.join(" · "),
 			type: "website",
 			url: `/product/${product.slug}`,
 			siteName: "EMACH",
@@ -51,7 +52,7 @@ export async function generateMetadata({
 		twitter: {
 			card: "summary_large_image",
 			title,
-			description: product.shortDescription,
+			description: product.shortDescription.join(" · "),
 		},
 	};
 }
@@ -98,7 +99,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 			</div>
 
 			{/* Main product section */}
-			<div className="flex flex-row gap-15 px-20 py-8">
+			<div className="flex flex-row justify-center py-8">
 				<ProductGallery
 					categorySlug={product.categorySlug}
 					images={product.images}
@@ -108,6 +109,7 @@ export default async function ProductPage({ params }: ProductPageProps) {
 			</div>
 
 			<ProductTabs product={product} />
+			<ProductReviews product={product} />
 			<RelatedProducts products={relatedProducts} />
 			<SiteFooter />
 		</>

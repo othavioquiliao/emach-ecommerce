@@ -1,15 +1,62 @@
 "use client";
 
-import { X, ZoomIn } from "lucide-react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
-
+import {
+	Carousel,
+	CarouselContent,
+	CarouselItem,
+	CarouselNext,
+	CarouselPrevious,
+} from "@emach/ui/components/carousel";
+import { cn } from "@emach/ui/lib/utils";
+import { useState } from "react";
+import InnerImageZoom from "react-inner-image-zoom";
 import { ProductImage } from "@/components/product-image";
+import "react-inner-image-zoom/es/styles.min.css";
+import "./product-gallery.css";
 
 interface ProductGalleryProps {
 	categorySlug: string;
 	images: string[];
 	name: string;
+}
+
+const MAX_STATIC_THUMBS = 5;
+
+interface ThumbButtonProps {
+	categorySlug: string;
+	index: number;
+	isActive: boolean;
+	name: string;
+	onClick: () => void;
+	src: string | undefined;
+}
+
+function ThumbButton({
+	categorySlug,
+	index,
+	isActive,
+	name,
+	onClick,
+	src,
+}: ThumbButtonProps) {
+	return (
+		<button
+			aria-label={`${name} — imagem ${index + 1}`}
+			className={cn(
+				"relative aspect-square w-full cursor-pointer overflow-hidden border-2 bg-image-bg",
+				isActive ? "border-emach-red" : "border-transparent"
+			)}
+			onClick={onClick}
+			type="button"
+		>
+			<ProductImage
+				alt={`${name} — miniatura ${index + 1}`}
+				categorySlug={categorySlug}
+				sizes="80px"
+				src={src}
+			/>
+		</button>
+	);
 }
 
 export function ProductGallery({
@@ -19,119 +66,71 @@ export function ProductGallery({
 }: ProductGalleryProps) {
 	const slots = images.length > 0 ? images : [undefined];
 	const [activeThumb, setActiveThumb] = useState(0);
-	const [zoomOpen, setZoomOpen] = useState(false);
 	const activeSrc = slots[activeThumb] ?? slots[0];
+	const needsCarousel = slots.length > MAX_STATIC_THUMBS;
 
-	useEffect(() => {
-		if (!zoomOpen) {
-			return;
-		}
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
-				setZoomOpen(false);
-			}
-		};
-		document.addEventListener("keydown", onKey);
-		const prev = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-		return () => {
-			document.removeEventListener("keydown", onKey);
-			document.body.style.overflow = prev;
-		};
-	}, [zoomOpen]);
+	const renderThumb = (src: string | undefined, i: number) => (
+		<ThumbButton
+			categorySlug={categorySlug}
+			index={i}
+			isActive={activeThumb === i}
+			key={src ?? i}
+			name={name}
+			onClick={() => setActiveThumb(i)}
+			src={src}
+		/>
+	);
 
 	return (
-		<div className="flex-1">
-			{/* Main image */}
-			<button
-				aria-label={`Ampliar imagem de ${name}`}
-				className="group relative mb-3 block w-full overflow-hidden"
-				onClick={() => activeSrc && setZoomOpen(true)}
-				style={{ aspectRatio: "1/1", background: "#ECECEC", cursor: "zoom-in" }}
-				type="button"
-			>
-				<ProductImage
-					alt={name}
-					categorySlug={categorySlug}
-					priority
-					sizes="600px"
-					src={activeSrc}
-				/>
-				<span
-					aria-hidden="true"
-					className="absolute right-3 bottom-3 flex size-9 items-center justify-center opacity-0 transition-opacity group-hover:opacity-100"
-					style={{ background: "rgba(0,0,0,0.7)", color: "#fff" }}
-				>
-					<ZoomIn size={16} />
-				</span>
-			</button>
-
-			{/* Thumbnails */}
+		<div className="flex w-1/2 flex-col justify-center lg:flex-row lg:gap-3">
 			{slots.length > 1 && (
-				<div className="grid grid-cols-4 gap-2">
-					{slots.map((src, i) => (
-						<button
-							aria-label={`${name} — imagem ${i + 1}`}
-							className="relative overflow-hidden"
-							key={src ?? i}
-							onClick={() => setActiveThumb(i)}
-							style={{
-								aspectRatio: "1/1",
-								background: "#ECECEC",
-								cursor: "pointer",
-								border:
-									activeThumb === i
-										? "2px solid var(--emach-red)"
-										: "2px solid transparent",
-							}}
-							type="button"
-						>
-							<ProductImage
-								alt={`${name} — miniatura ${i + 1}`}
-								categorySlug={categorySlug}
-								sizes="140px"
-								src={src}
-							/>
-						</button>
-					))}
-				</div>
+				<aside className="order-2 mt-3 md:order-1 md:mt-0 md:w-24">
+					{/* Mobile: grid horizontal */}
+					<div className="grid grid-cols-4 gap-2 lg:hidden">
+						{slots.map((src, i) => renderThumb(src, i))}
+					</div>
+
+					{/* Desktop: coluna vertical — estática ou carrossel */}
+					<div className="hidden lg:block">
+						{needsCarousel ? (
+							<Carousel
+								className="relative w-full py-10"
+								opts={{ align: "start", slidesToScroll: 1 }}
+								orientation="vertical"
+							>
+								<CarouselContent className="-mt-2 h-[412px]">
+									{slots.map((src, i) => (
+										<CarouselItem className="basis-1/5 pt-2" key={src ?? i}>
+											{renderThumb(src, i)}
+										</CarouselItem>
+									))}
+								</CarouselContent>
+								<CarouselPrevious className="top-0 size-8" />
+								<CarouselNext className="bottom-0 size-8" />
+							</Carousel>
+						) : (
+							<div className="flex flex-col gap-2">
+								{slots.map((src, i) => renderThumb(src, i))}
+							</div>
+						)}
+					</div>
+				</aside>
 			)}
 
-			{/* Zoom modal */}
-			{zoomOpen && activeSrc && (
-				<div
-					aria-label="Visualização ampliada"
-					aria-modal="true"
-					className="fixed inset-0 z-[200] flex items-center justify-center p-4"
-					role="dialog"
-					style={{ background: "rgba(0,0,0,0.92)" }}
-				>
-					<button
-						aria-label="Fechar visualização"
-						className="absolute top-4 right-4 flex size-10 items-center justify-center text-white/80 hover:text-white"
-						onClick={() => setZoomOpen(false)}
-						type="button"
-					>
-						<X size={24} />
-					</button>
-					<button
-						aria-label="Fechar visualização"
-						className="absolute inset-0"
-						onClick={() => setZoomOpen(false)}
-						style={{ background: "transparent" }}
-						type="button"
-					/>
-					<div className="relative h-[min(90vh,800px)] w-[min(90vw,800px)]">
-						<Image
-							alt={name}
-							className="object-contain"
-							fill
-							sizes="90vw"
+			<div className="order-1 lg:order-2 lg:flex-1">
+				<div className="relative aspect-square w-5/6 overflow-hidden bg-image-bg">
+					{activeSrc ? (
+						<InnerImageZoom
+							imgAttributes={{ alt: name }}
 							src={activeSrc}
+							zoomScale={2}
+							zoomSrc={activeSrc}
 						/>
-					</div>
+					) : (
+						<ProductImage alt={name} categorySlug={categorySlug} priority />
+					)}
 				</div>
-			)}
+			</div>
 		</div>
 	);
 }

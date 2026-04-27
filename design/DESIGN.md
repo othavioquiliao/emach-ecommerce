@@ -45,7 +45,7 @@ Typography relies on FerrariSans — a proprietary sans-serif family with medium
 
 ### Semantic & Accent
 - **Warning Red** (`#F13A2C`): Accessible warning state — brighter and more orange-shifted than Ferrari Red to differentiate semantic alerts from brand expression (--f-color-accessible-warning)
-- **Success Green** (`#03904A`): Confirmation and positive status indicators (--f-color-accessible-success)
+- **Success Green** (`#16A34A`): Confirmation and positive status indicators. EMACH uses a brighter, more modern green than the original Ferrari token (`#03904A`) for better legibility on both light and dark surfaces (--emach-success)
 - **Info Blue** (`#4C98B9`): Informational callouts, tooltips, and neutral status messaging (--f-color-accessible-info)
 - **Link Hover Blue** (`#3860BE`): Interactive hover state for text links — a dignified navy-blue that signals interactivity without competing with Ferrari Red
 
@@ -58,27 +58,38 @@ Typography relies on FerrariSans — a proprietary sans-serif family with medium
 ## 3. Typography Rules
 
 ### Font Family
-- **FerrariSans**: Primary typeface for headings, navigation, buttons, and editorial content. A proprietary sans-serif with medium weight as the default (500), compact x-height, and precise letter-spacing control. Fallbacks: Arial, Helvetica, sans-serif
-- **Body-Font**: Secondary typeface for captions, labels, and utility text. Frequently rendered in uppercase with expanded letter-spacing (1px) for an editorial label aesthetic. Used for category tags and small annotation text
-- **Arial / Helvetica**: System fallback fonts used in cookie consent modals, form elements, and third-party component frameworks
+- **Barlow** (`--font-sans`, wired via `next/font` in `apps/web/src/app/layout.tsx`): Primary typeface for headings, navigation, buttons, and editorial content. Loaded with weights 400–700; default heading voice runs at 500. Barlow was chosen as the open-source counterpart to FerrariSans — compact x-height, slight condensation, precise counters. Fallbacks: Arial, Helvetica, sans-serif
+- **Barlow Condensed** (`--font-display`, wired via `next/font`): Secondary typeface for captions, labels, category tags and all `SectionLabel` usage. Always rendered in uppercase with wide letter-spacing (0.12–0.14em). Also powers oversized display headings on the hero (`clamp(44px, 6vw, 84px)`), where its narrower proportions keep long product copy in-bounds
+- **System fallback**: Arial / Helvetica — used only as the ultimate fallback when the custom fonts fail to load
 
-### Hierarchy
+> **Note**: The original Ferrari design references `FerrariSans` + `Body-Font`. EMACH substitutes Barlow / Barlow Condensed one-to-one because FerrariSans is proprietary and unlicensable. All weight/tracking rules below still apply.
 
-| Role | Size | Weight | Line Height | Letter Spacing | Notes |
-|------|------|--------|-------------|----------------|-------|
-| Section Title | 26px (1.63rem) | 500 | 1.20 | normal | FerrariSans, primary editorial headings on white backgrounds |
-| Card Heading | 24px (1.50rem) | 400 | normal | normal | FerrariSans, content card titles |
-| Subheading | 18px (1.13rem) | 700 | 1.20 (tight) | normal | FerrariSans, bold subsection labels |
-| UI Heading | 16px (1.00rem) | 500 | 1.40 | 0.08px | FerrariSans, component headings and nav items |
-| Body Bold | 16px (1.00rem) | 700 | 1.30 (tight) | normal | FerrariSans, emphasized inline text |
-| Button Label | 16px (1.00rem) | 400 | normal | 1.28px | FerrariSans, primary button text with wide tracking |
-| Small Button | 14.4px (0.90rem) | 700 | 1.00 (tight) | normal | FerrariSans, compact action buttons |
-| Nav Link | 13px (0.81rem) | 600 | 1.20 (tight) | 0.13px | FerrariSans, navigation and footer links |
-| Caption | 13px (0.81rem) | 400 | 1.50 | 0.195px | FerrariSans/Body-Font, metadata and descriptions |
-| Micro Button | 12px (0.75rem) | 700 | 1.00 (tight) | 0.96px | FerrariSans, small CTA with wide tracking |
-| Label Upper | 12px (0.75rem) | 400 | 1.27 (tight) | 1px | Body-Font, uppercase labels and category tags |
-| Micro Label | 11px (0.69rem) | 400 | 1.27 (tight) | 1px | Body-Font, uppercase smallest annotation text |
-| Cookie Text | 45px (2.81rem) | 400 | 1.50 | 0.195px | Arial, consent dialog oversized button text |
+### Hierarchy (EMACH — actual implementation)
+
+The EMACH catalog needs a much wider display range than the original Ferrari spec because it markets oversized editorial hero copy. The table below reflects what is implemented in `apps/web`; any new screen **must** pick a size from this scale.
+
+| Role | Size | Weight | Font | Notes / Where |
+|------|------|--------|------|---------------|
+| Hero Display | `clamp(44px, 6vw, 84px)` | 500 | Barlow Condensed | Home hero `<h1>` |
+| Hero Headline (secondary) | `clamp(48px, 7vw, 96px)` | 500 | Barlow Condensed | 404 page and large error screens |
+| Section Title — XL | 48px | 500 | Barlow Condensed | Editorial banners (home), cart empty state |
+| Section Title — L | 44px | 500 | Barlow Condensed | Home sections ("Explorar por categoria", "Promoções"), catalog hero `clamp(36px, 5vw, 60px)` |
+| Page Title | 40px | 500 | Barlow Condensed | Cart page `<h1>` |
+| Product Title | 36px | 500 | Barlow Condensed | Product detail, empty states |
+| Subsection Title | 32px | 500 | Barlow Condensed | Stat numbers in editorial banner |
+| Related / Block Title | 28px | 500 | Barlow Condensed | "Você também pode gostar" |
+| Modal / Sheet Heading | 24px | 700 | Barlow Condensed | Cart Sheet title, empty states |
+| Card Price | 20px | 700 | Barlow | Product detail primary price |
+| UI Heading | 18px | 500 | Barlow | Product list title in catalog list view |
+| Subheading | 17px | 400 | Barlow | Hero subtitle |
+| Body Large | 16px | 400–600 | Barlow | Product card title, editorial body |
+| Body | 15px | 400 | Barlow | Product short description |
+| Body Small | 14px | 400–600 | Barlow | Cart item name, form labels (`emach-field`) |
+| Nav Link | 12–13px | 600 | Barlow | Primary nav + footer links; letter-spacing `0.04em` |
+| Caption | 12–13px | 400 | Barlow | Metadata, SKU hints |
+| Label Upper | 12px | 600 | Barlow Condensed | `SectionLabel`, category tags — uppercase, tracking `0.14em` |
+| Micro Label | 11px | 600 | Barlow Condensed | Smallest editorial annotation, trust strips — uppercase, tracking `0.12–0.20em` |
+| Mini | 10–11px | 700 | Barlow | Cart badge count, EmachBadge |
 
 ### Principles
 - **Proprietary identity**: FerrariSans is exclusive to Ferrari — it cannot be substituted without losing brand recognition. The font's compact proportions and medium weight default (500) convey engineering precision
@@ -89,31 +100,39 @@ Typography relies on FerrariSans — a proprietary sans-serif family with medium
 
 ## 4. Component Stylings
 
-### Buttons
-Ferrari's buttons are minimal white rectangles with near-zero radius — the CTA philosophy is "architecture, not decoration."
+### Buttons — EMACH `EmachButton`
+Canonical implementation: `apps/web/src/components/emach-button.tsx`. All EMACH pages use `EmachButton` instead of shadcn `<Button>`. The component is built on `cva` with `variant` × `size` × `full`.
 
-**Primary CTA (White)** — The default action button:
-- Default: bg `#FFFFFF`, text `#000000`, fontSize 16px (FerrariSans), letterSpacing 1.28px, padding 12px 10px, borderRadius 2px, border 1px solid `#000000`
-- Hover: bg `#1EAEDB` (Teal), text `#FFFFFF`, opacity 0.9
-- Focus: bg `#1EAEDB`, text `#FFFFFF`, border 1px solid `#FFFFFF`, outline 2px solid `#000000`, opacity 0.9
-- Used for: "Configure" actions, secondary calls to action on light backgrounds
+**Shared base:**
+- Radius: `2px` (razor precision)
+- Font: Barlow Sans, weight 600, tracking `0.04em`
+- Transition: `180ms` ease on all properties
+- Disabled: `pointer-events-none opacity-60`
 
-**Subscribe CTA (Red)** — The high-emphasis action button:
-- Default: bg `#DA291C` (Ferrari Red), text `#FFFFFF`, borderRadius 2px, padding 12px 10px
-- Used for: Newsletter subscribe, primary conversion actions on dark backgrounds
-- The only button that uses Ferrari Red — reserved for maximum visual priority
+**Sizes:**
+| Size | Height | Padding X | Font size |
+|------|--------|-----------|-----------|
+| `sm` | 36px | 16px | 12px |
+| `md` (default) | 44px | 22px | 13px |
+| `lg` | 52px | 30px | 14px |
 
-**Ghost Button (White Border)** — For dark backgrounds:
-- Default: bg transparent, text `#FFFFFF`, border 1px solid `#FFFFFF`, borderRadius 2px, padding 12px 10px
-- Hover: bg `#1EAEDB` (Teal), text `#FFFFFF`, opacity 0.9
-- Focus: same as Primary CTA focus state
-- Used for: Actions overlaid on dark imagery and cinematic sections
+**Variants:**
 
-**Text Link** — Inline navigation:
-- Default: text `#181818` (on light surfaces) or `#FFFFFF` (on dark), no border, no background
-- Hover: color shifts to `#3860BE` (Link Hover Blue), decoration removes underline
-- White variant on dark surfaces uses underline decoration by default
-- FerrariSans or Body-Font depending on context (Body-Font for uppercase label links)
+| Variant | Default | Hover | Primary use |
+|---------|---------|-------|-------------|
+| `primary` | `bg-emach-red`, text white | `bg-emach-red-hover` | High-priority CTAs: "Adicionar ao carrinho", "Finalizar compra", "Ver catálogo" |
+| `outline` | `border-near-black`, text near-black, transparent bg | `bg-near-black`, text white (inverts) | Secondary actions on light surfaces: "Página inicial", "Continuar comprando" |
+| `outline-light` | `border-white/70`, text white, transparent bg | `bg-white`, text near-black (inverts) | Actions overlaid on dark cinematic sections (hero, editorial banners) |
+| `ghost` | Transparent, text near-black | `bg-gray-10` | Tertiary link-like buttons, cart sheet secondary action |
+| `dark` | `bg-near-black`, text white | `bg-black` | Attached buttons (coupon "Aplicar") that need a darker fill |
+
+**Usage rule:** One `primary` (red) button per viewport fold. Outline/ghost variants carry secondary actions so Ferrari Red keeps its authority.
+
+**Text link (inline)**:
+- Text `text-emach-red` for "Esqueci a senha" / destructive-leaning links in forms
+- Text `text-gray-60 underline` for "Remover" inside cart rows
+- Standard link color on light surfaces: `text-near-black`; on dark: `text-white`
+- Hover: Link Hover Blue (`--link-hover`) reserved for body-copy anchors (not in use yet; slot reserved)
 
 ### Cards & Containers
 
@@ -313,10 +332,37 @@ When refining existing screens generated with this design system:
 5. Always maintain the chiaroscuro contrast — if a section feels flat, check whether it needs to be on black or white to maintain the alternating rhythm
 6. Reserve Ferrari Red for ONE element per screen — if red appears in more than one place, it loses its authority
 
-## 9. EMACH Custom Components (ported from design bundle)
+## 10. EMACH Custom Components & Tokens
 
-### Token additions (packages/ui/src/styles/globals.css)
-Brand tokens added alongside shadcn: `--emach-red` (#DA291C), `--emach-red-hover` (#B01E0A), `--emach-red-deep` (#9D2211), `--near-black` (#181818), `--gray-10/20/50/55/60/90`, `--warning`, `--success`, `--info`, `--link-hover`. Radii: `--radius-xs` (4px) through `--radius-full`. Spacing: `--space-1` (4px) through `--space-20` (80px).
+### Token additions (`packages/ui/src/styles/globals.css`)
+
+Brand tokens live in `:root` **and** are registered in `@theme inline` so Tailwind utilities (`bg-emach-red`, `text-gray-60`, `bg-image-bg`, etc.) are generated automatically.
+
+**Brand palette**:
+`--emach-red` (#DA291C), `--emach-red-hover` (#B01E0A), `--emach-red-deep` (#9D2211), `--near-black` (#181818), `--gray-10/20/50/55/60/90`, `--warning` (#F13A2C), `--success` (#16A34A), `--info` (#4C98B9), `--link-hover` (#3860BE).
+
+**Surface / gradient stops** (supplementing brand palette):
+`--black` (#000), `--image-bg` (#ECECEC — product placeholder tile), `--cinema-1/2/3` (#2A2A2A / #1A1A1A / #0A0A0A — cinematic hero gradients), `--placeholder-light/mid/dark` (#F6F6F6 / #D8D8D8 / #C8C8C8 — radial used when product has no image).
+
+**Radii**: `--radius-xs` 4px → `--radius-full` 9999px. Default shadcn `--radius: 2px` applied to all components.
+
+**Spacing scale**: `--space-1` 4px → `--space-20` 80px (8px base).
+
+### Design-system utility classes (backgrounds that would be ugly as arbitrary values)
+
+Only use these for their named intent — do not inline equivalents:
+
+| Class | Purpose |
+|-------|---------|
+| `.emach-bg-cinema` | Hero radial gradient `#2a2a2a → #0a0a0a → #000` |
+| `.emach-bg-diagonal` / `.emach-bg-diagonal-2` | Editorial repeating stripe overlays (hero + category tiles) |
+| `.emach-mask-vignette` | Radial mask on hero product photo |
+| `.emach-bg-stats` | `linear-gradient(135deg, --cinema-2, --black)` — stats panel |
+| `.emach-bg-vignette-bottom` | Bottom-anchored darken for tiles over imagery |
+| `.emach-bg-category-overlay` | Slight darken used on category tile with image |
+| `.emach-bg-category-fallback` | Dark fallback for category tile without image |
+| `.emach-bg-card-hover` | Bottom gradient that fades in on product card hover |
+| `.emach-bg-placeholder` / `.emach-bg-placeholder-shadow` | Radial + shadow for product icon placeholder |
 
 ### Radius philosophy (final)
 Default: **2px** on all interactive elements (buttons, inputs, cards, chips, badges). Nearly imperceptible — reinforces the "precision engineering" aesthetic. Only exception: radio/circle indicators use 50%.
@@ -348,3 +394,29 @@ Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrenc
 
 ### Cart state
 Client-side cart via React Context + localStorage (`emach:cart`). Provider in `src/lib/cart-context.tsx`. Store helpers in `src/lib/cart-store.ts`. Cart count badge in SiteHeader updates reactively.
+
+### Shared layout primitives (`apps/web/src/components/`)
+
+New DRY helpers. Prefer composing these over raw markup when the pattern applies:
+
+- **`<PageContainer>`** — `mx-auto max-w-[1440px] px-10`. Accepts `as="section|main"` and `bleed` (drops `max-w`). Replaces every `mx-auto max-w-[1440px]` in the codebase.
+- **`<SectionHeader>`** — `SectionLabel + <h2> + optional "Ver todas" link`. Drives every home-page section header. `titleSize="md|lg"` swaps 28px ↔ 44px.
+- **`<QuantityStepper>`** — Canonical `emach-qty` stepper (buttons − / val / +). `compact` scales to 85% for cart rows. Plus button always red via `.emach-qty__btn--plus`.
+- **`<FreeShippingProgress>`** — Shared bar used in `CartSheet` and `CartContent`. Pulls `FREE_SHIPPING_THRESHOLD` from `lib/constants.ts`. Dynamic width is passed through `--pct` CSS custom property + Tailwind `w-(--pct)` (no style-object for colors/layout).
+- **`<CartItemRow>`** — Single source of truth for cart rows. `variant="compact"` for the drawer, `variant="full"` for the cart page.
+
+### Brand components refactored to cva
+
+`EmachButton`, `EmachBadge`, `SectionLabel` now follow the same `cva` pattern as shadcn primitives (`buttonVariants`, `badgeVariants`). Variant names and resulting CSS are **identical** to before — the refactor is internal DX only. Consumers pass `variant="..."` and optionally `className` to override.
+
+### shadcn components now adopted
+
+| shadcn | Replaces | Notes |
+|--------|----------|-------|
+| `<Tabs variant="line">` | Manual `border-b active` tab strips | Emits a **red** underline (`after:bg-emach-red`) on the active trigger — this is a **shadcn override** baked into `packages/ui/src/components/tabs.tsx` (EMACH is law). Consumers pass `className="h-auto flex-1 border-none px-0 py-3.5 text-[13px]/[14px] font-semibold ..."` to match the EMACH chrome |
+| `<Dialog>` | Custom zoom modal inside `ProductGallery` | shadcn supplies focus trap, escape handler and scroll lock. Override `className="bg-black/95 p-0 border-none ring-0"` for the image viewer |
+| `<Separator>` | `<hr>` / `<div className="h-px bg-border" />` | Used in cart summary total divider, login "ou" divider, footer bottom rule, related-products band |
+
+### Typography utility classes status
+
+The `.h1 / .h2 / .h3 / .subheading / .ui-heading / .body / .body-bold / .button-label / .nav-link / .caption / .label / .micro-label / .price` classes in `globals.css` are **legacy** — they are not used in current components and were retained for backwards compatibility during the DESIGN.md split. New work must use the size scale from §3 "Hierarchy (EMACH — actual implementation)" via Tailwind arbitrary values or `font-display` / `font-sans` utilities. Planned cleanup: drop the unused typography classes once the site consumes only the new scale.

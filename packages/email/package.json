@@ -1,0 +1,27 @@
+{
+  "name": "@emach/email",
+  "type": "module",
+  "exports": {
+    "./send": {
+      "default": "./src/send.ts"
+    },
+    "./templates/reset-password": {
+      "default": "./src/templates/reset-password.tsx"
+    },
+    "./templates/verify-email": {
+      "default": "./src/templates/verify-email.tsx"
+    }
+  },
+  "dependencies": {
+    "@emach/env": "workspace:*",
+    "@react-email/components": "catalog:",
+    "@react-email/render": "catalog:",
+    "react": "catalog:",
+    "resend": "catalog:"
+  },
+  "devDependencies": {
+    "@emach/config": "workspace:*",
+    "@types/react": "catalog:",
+    "typescript": "^5"
+  }
+}

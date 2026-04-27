@@ -16,6 +16,7 @@
     "@vercel/speed-insights": "^2.0.0",
     "babel-plugin-react-compiler": "^1.0.0",
     "better-auth": "catalog:",
+    "class-variance-authority": "^0.7.1",
     "dotenv": "catalog:",
     "lucide-react": "catalog:",
     "next": "^16.2.0",

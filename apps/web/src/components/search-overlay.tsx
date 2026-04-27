@@ -1,10 +1,10 @@
 "use client";
 
+import { cn } from "@emach/ui/lib/utils";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
-
 import { ProductImage } from "@/components/product-image";
 import { SectionLabel } from "@/components/section-label";
 import { fmtBRL } from "@/lib/format";
@@ -59,13 +59,7 @@ function highlightMatch(text: string, query: string) {
 	return (
 		<>
 			{text.slice(0, idx)}
-			<mark
-				style={{
-					background: "rgba(218,41,28,0.15)",
-					color: "var(--near-black)",
-					padding: 0,
-				}}
-			>
+			<mark className="bg-emach-red/15 p-0 text-near-black">
 				{text.slice(idx, idx + q.length)}
 			</mark>
 			{text.slice(idx + q.length)}
@@ -218,26 +212,21 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 	return (
 		<div
 			aria-modal="true"
-			className="fixed inset-0 z-[100] flex items-start justify-center pt-20"
+			className="fixed inset-0 z-100 flex items-start justify-center bg-black/60 pt-20"
 			role="dialog"
-			style={{ background: "rgba(0,0,0,0.6)" }}
 		>
 			<button
 				aria-label="Fechar busca"
-				className="absolute inset-0"
+				className="absolute inset-0 cursor-default border-none bg-transparent"
 				onClick={onClose}
-				style={{ background: "transparent", border: "none", cursor: "default" }}
 				type="button"
 			/>
 			<div
 				className="relative w-[720px] max-w-[90%] rounded-[2px] bg-white p-7"
 				ref={dialogRef}
 			>
-				<div
-					className="flex items-center gap-3 pb-3"
-					style={{ borderBottom: "1px solid var(--border)" }}
-				>
-					<Search size={20} style={{ color: "var(--near-black)" }} />
+				<div className="flex items-center gap-3 border-border border-b pb-3">
+					<Search className="text-near-black" size={20} />
 					<input
 						aria-label="Busca"
 						autoFocus
@@ -248,9 +237,8 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 						value={query}
 					/>
 					<button
-						className="emach-ghost-btn font-semibold text-[11px] uppercase tracking-[0.14em]"
+						className="emach-ghost-btn font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]"
 						onClick={onClose}
-						style={{ color: "var(--gray-60)" }}
 						type="button"
 					>
 						FECHAR
@@ -265,9 +253,8 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 									<div className="flex items-center justify-between">
 										<SectionLabel>Recentes</SectionLabel>
 										<button
-											className="text-[11px] uppercase tracking-[0.12em]"
+											className="text-[11px] text-gray-60 uppercase tracking-[0.12em]"
 											onClick={clearRecent}
-											style={{ color: "var(--gray-60)" }}
 											type="button"
 										>
 											Limpar
@@ -307,22 +294,13 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 
 					{showEmpty && (
 						<div className="py-10 text-center">
-							<div
-								className="font-display font-semibold text-[11px] uppercase tracking-[0.14em]"
-								style={{ color: "var(--emach-red)" }}
-							>
+							<div className="font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.14em]">
 								Sem resultados
 							</div>
-							<div
-								className="mt-2 text-[15px]"
-								style={{ color: "var(--near-black)" }}
-							>
+							<div className="mt-2 text-[15px] text-near-black">
 								Nada encontrado para <b>“{query}”</b>.
 							</div>
-							<div
-								className="mt-1 text-[13px]"
-								style={{ color: "var(--gray-60)" }}
-							>
+							<div className="mt-1 text-[13px] text-gray-60">
 								Pressione Enter para buscar no catálogo completo.
 							</div>
 						</div>
@@ -332,23 +310,16 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 						const active = i === highlight;
 						return (
 							<Link
-								className="grid cursor-pointer items-center gap-4 rounded-[2px] py-3 transition-colors"
+								className={cn(
+									"grid cursor-pointer grid-cols-[60px_1fr_auto] items-center gap-4 rounded-[2px] border-gray-10 border-b px-2 py-3 transition-colors",
+									active ? "bg-gray-10" : "bg-transparent"
+								)}
 								href={`/product/${p.slug}`}
 								key={p.id}
 								onClick={handleResultClick}
 								onMouseEnter={() => setHighlight(i)}
-								style={{
-									gridTemplateColumns: "60px 1fr auto",
-									borderBottom: "1px solid var(--gray-10)",
-									background: active ? "var(--gray-10)" : "transparent",
-									paddingLeft: 8,
-									paddingRight: 8,
-								}}
 							>
-								<div
-									className="relative overflow-hidden rounded-[2px]"
-									style={{ width: 60, height: 60, background: "#ECECEC" }}
-								>
+								<div className="relative size-[60px] overflow-hidden rounded-[2px] bg-image-bg">
 									<ProductImage
 										alt={p.name}
 										categorySlug={p.categorySlug}
@@ -362,12 +333,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 										{highlightMatch(p.name, query)}
 									</div>
 								</div>
-								<div
-									className="font-bold"
-									style={{ fontVariantNumeric: "tabular-nums" }}
-								>
-									{fmtBRL(p.price)}
-								</div>
+								<div className="font-bold tabular-nums">{fmtBRL(p.price)}</div>
 							</Link>
 						);
 					})}

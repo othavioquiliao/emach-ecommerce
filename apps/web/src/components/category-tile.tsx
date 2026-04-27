@@ -1,10 +1,7 @@
-"use client";
-
+import { cn } from "@emach/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
-
 import { SectionLabel } from "@/components/section-label";
 import type { Category } from "@/lib/mock-data";
 
@@ -13,44 +10,28 @@ interface CategoryTileProps {
 	size?: "sm" | "md" | "lg" | "full";
 }
 
-const SIZE_HEIGHT: Record<string, string | number> = {
-	sm: 240,
-	md: 320,
-	lg: 400,
-	full: "100%",
+const SIZE_CLASS: Record<NonNullable<CategoryTileProps["size"]>, string> = {
+	sm: "h-[240px]",
+	md: "h-[320px]",
+	lg: "h-[400px]",
+	full: "h-full min-h-[664px]",
 };
 
-export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
-	const [hovered, setHovered] = useState(false);
-	const h = SIZE_HEIGHT[size] ?? 320;
+const OVERLAY_BASE =
+	"pointer-events-none absolute inset-0 transition-transform duration-[400ms] ease-out group-hover:scale-[1.05]";
 
+export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 	return (
 		<Link
-			className="block"
+			className={cn(
+				"group relative block overflow-hidden rounded-[2px] bg-near-black",
+				SIZE_CLASS[size]
+			)}
 			href={`/catalog?cat=${category.slug}`}
-			onMouseEnter={() => setHovered(true)}
-			onMouseLeave={() => setHovered(false)}
-			style={{
-				position: "relative",
-				height: h,
-				minHeight: size === "full" ? 664 : undefined,
-				overflow: "hidden",
-				background: "var(--near-black)",
-				borderRadius: 2,
-				display: "block",
-			}}
 		>
 			{/* Background image */}
 			{category.image && (
-				<div
-					aria-hidden="true"
-					style={{
-						position: "absolute",
-						inset: 0,
-						transform: hovered ? "scale(1.05)" : "scale(1)",
-						transition: "transform 400ms ease",
-					}}
-				>
+				<div aria-hidden="true" className={OVERLAY_BASE}>
 					<Image
 						alt=""
 						className="object-cover"
@@ -61,87 +42,48 @@ export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 				</div>
 			)}
 
-			{/* Gradient fallback / darken */}
+			{/* Gradient darken / fallback */}
 			<div
 				aria-hidden="true"
-				style={{
-					position: "absolute",
-					inset: 0,
-					background: category.image
-						? "linear-gradient(135deg, rgba(0,0,0,0.2), rgba(0,0,0,0.45))"
-						: "linear-gradient(135deg, #2a2a2a, #0a0a0a)",
-					transform: hovered ? "scale(1.05)" : "scale(1)",
-					transition: "transform 400ms ease",
-				}}
+				className={cn(
+					OVERLAY_BASE,
+					category.image
+						? "emach-bg-category-overlay"
+						: "emach-bg-category-fallback"
+				)}
 			/>
 
 			{/* Texture overlay */}
 			<div
 				aria-hidden="true"
-				style={{
-					position: "absolute",
-					inset: 0,
-					background:
-						"repeating-linear-gradient(40deg, transparent 0 30px, rgba(255,255,255,0.015) 30px 60px)",
-				}}
+				className="emach-bg-diagonal-2 pointer-events-none absolute inset-0"
 			/>
 
 			{/* Bottom vignette */}
 			<div
 				aria-hidden="true"
-				style={{
-					position: "absolute",
-					inset: 0,
-					background:
-						"linear-gradient(to top, rgba(0,0,0,0.85), rgba(0,0,0,0.2) 55%, transparent)",
-				}}
+				className="emach-bg-vignette-bottom pointer-events-none absolute inset-0"
 			/>
 
 			{/* Red accent bar on hover */}
 			<div
 				aria-hidden="true"
-				style={{
-					position: "absolute",
-					left: 0,
-					bottom: 0,
-					height: 3,
-					width: hovered ? "100%" : "0%",
-					background: "var(--emach-red)",
-					transition: "width 300ms ease",
-				}}
+				className="absolute bottom-0 left-0 h-[3px] w-0 bg-emach-red transition-[width] duration-300 ease-out group-hover:w-full"
 			/>
 
 			{/* Content */}
-			<div
-				style={{
-					position: "absolute",
-					right: 24,
-					bottom: 24,
-					left: 24,
-					color: "#fff",
-					display: "flex",
-					flexDirection: "column",
-					gap: 6,
-				}}
-			>
+			<div className="absolute right-6 bottom-6 left-6 flex flex-col gap-1.5 text-white">
 				<SectionLabel tone="light">{category.slug}</SectionLabel>
 				<div className="font-medium text-[24px]">{category.name}</div>
-				<div
-					className="max-w-[320px] text-[13px] leading-relaxed"
-					style={{ color: "rgba(255,255,255,0.72)" }}
-				>
+				<div className="max-w-[320px] text-[13px] text-white/70 leading-relaxed">
 					{category.description}
 				</div>
-				<div className="mt-2.5 flex items-center gap-2 font-semibold text-[12px] text-white">
+				<div className="mt-2.5 flex items-end gap-2 font-semibold text-white text-xs">
 					<span>Explorar</span>
 					<ArrowRight
+						className="text-white transition-[color,transform] duration-200 ease-out group-hover:translate-x-1 group-hover:text-emach-red"
 						size={14}
 						strokeWidth={2}
-						style={{
-							color: hovered ? "var(--emach-red)" : "#fff",
-							transform: hovered ? "translateX(4px)" : "translateX(0)",
-							transition: "color 200ms ease, transform 200ms ease",
-						}}
 					/>
 				</div>
 			</div>

@@ -1,17 +1,8 @@
-import { auth } from "@emach/auth";
-import { headers } from "next/headers";
-import { redirect } from "next/navigation";
-
+import { requireCurrentClient } from "@/lib/session";
 import Dashboard from "./dashboard";
 
 export default async function DashboardPage() {
-	const session = await auth.api.getSession({
-		headers: await headers(),
-	});
-
-	if (!session?.user) {
-		redirect("/login");
-	}
+	const session = await requireCurrentClient();
 
 	return (
 		<div>

@@ -9,7 +9,8 @@ export interface Product {
 	name: string;
 	originalPrice?: number;
 	price: number;
-	shortDescription: string;
+	rating?: { average: number; count: number };
+	shortDescription: string[];
 	sku: string;
 	slug: string;
 	specs: Record<string, string>;
@@ -27,6 +28,14 @@ export interface CartItem {
 	product: Product;
 	quantity: number;
 	selectedVoltage?: string;
+}
+
+export interface Review {
+	author: string;
+	body: string;
+	date: string;
+	id: string;
+	rating: 1 | 2 | 3 | 4 | 5;
 }
 
 export const categories: Category[] = [
@@ -72,7 +81,12 @@ export const products: Product[] = [
 		price: 89_900,
 		description:
 			"Furadeira de impacto profissional com motor brushless de alta eficiência. Mandril de 13mm com aperto rápido, 2 velocidades mecânicas e torque máximo de 60Nm. Ideal para concreto, metal e madeira.",
-		shortDescription: "Motor brushless, 60Nm de torque, mandril 13mm.",
+		shortDescription: [
+			"Motor brushless de alta eficiência",
+			"Torque máximo de 60 Nm em 2 velocidades mecânicas",
+			"Mandril de 13 mm com aperto rápido",
+			"Ideal para concreto, metal e madeira",
+		],
 		specs: {
 			Voltagem: "20V",
 			Torque: "60 Nm",
@@ -89,6 +103,7 @@ export const products: Product[] = [
 		sku: "EMC-FI-2001",
 		inStock: true,
 		voltage: ["20V"],
+		rating: { average: 4.8, count: 342 },
 	},
 	{
 		id: "2",
@@ -100,7 +115,12 @@ export const products: Product[] = [
 		originalPrice: 149_900,
 		description:
 			"Serra circular profissional com disco de 185mm e motor de 1.800W. Base em alumínio fundido com ajuste de profundidade e ângulo até 45°. Guia laser integrada para cortes precisos.",
-		shortDescription: "1.800W, disco 185mm, guia laser integrada.",
+		shortDescription: [
+			"Motor de 1.800 W a 5.500 RPM",
+			"Disco de 185 mm, profundidade de corte até 65 mm",
+			"Base em alumínio fundido com ajuste de ângulo até 45°",
+			"Guia laser integrada para cortes precisos",
+		],
 		specs: {
 			Potência: "1.800W",
 			Disco: "185mm",
@@ -113,6 +133,7 @@ export const products: Product[] = [
 		sku: "EMC-SC-1851",
 		inStock: true,
 		voltage: ["110V", "220V"],
+		rating: { average: 4.6, count: 87 },
 	},
 	{
 		id: "3",
@@ -123,7 +144,12 @@ export const products: Product[] = [
 		price: 59_900,
 		description:
 			"Esmerilhadeira compacta e potente com disco de 125mm. Motor de 1.100W com proteção contra sobrecarga. Empunhadura lateral ajustável em 3 posições.",
-		shortDescription: "1.100W, disco 125mm, compacta e ergonômica.",
+		shortDescription: [
+			"Motor de 1.100 W a 11.000 RPM",
+			"Disco de 125 mm para corte e desbaste",
+			"Proteção eletrônica contra sobrecarga",
+			"Empunhadura lateral ajustável em 3 posições",
+		],
 		specs: {
 			Potência: "1.100W",
 			Disco: "125mm",
@@ -134,6 +160,7 @@ export const products: Product[] = [
 		sku: "EMC-EA-1251",
 		inStock: true,
 		voltage: ["110V", "220V"],
+		rating: { average: 4.7, count: 256 },
 	},
 	{
 		id: "4",
@@ -144,7 +171,12 @@ export const products: Product[] = [
 		price: 49_900,
 		description:
 			"Parafusadeira compacta 12V com 20 posições de torque e embreagem eletrônica. Mandril de 10mm, design leve para trabalhos prolongados. Inclui 2 baterias e carregador rápido.",
-		shortDescription: "12V, 20 posições de torque, 2 baterias inclusas.",
+		shortDescription: [
+			"Bateria 12 V Li-Ion e torque de 30 Nm",
+			"20 posições de torque com embreagem eletrônica",
+			"Mandril de 10 mm, apenas 0,95 kg",
+			"Inclui 2 baterias e carregador rápido",
+		],
 		specs: {
 			Voltagem: "12V",
 			Torque: "30 Nm",
@@ -156,6 +188,7 @@ export const products: Product[] = [
 		sku: "EMC-PF-1201",
 		inStock: true,
 		voltage: ["12V"],
+		rating: { average: 4.5, count: 198 },
 	},
 	{
 		id: "5",
@@ -166,7 +199,12 @@ export const products: Product[] = [
 		price: 18_900,
 		description:
 			"Jogo de 12 chaves combinadas em aço cromo-vanádio com acabamento espelhado. Medidas de 6mm a 22mm. Estojo organizador em EVA para transporte.",
-		shortDescription: "Cromo-vanádio, 6–22mm, estojo EVA.",
+		shortDescription: [
+			"12 chaves em aço cromo-vanádio",
+			"Medidas de 6 mm a 22 mm",
+			"Acabamento espelhado e resistente à corrosão",
+			"Estojo organizador em EVA para transporte",
+		],
 		specs: {
 			Material: "Cromo-Vanádio",
 			Peças: "12",
@@ -176,6 +214,7 @@ export const products: Product[] = [
 		images: ["/images/products/chaves-combinadas-12pcs.png"],
 		sku: "EMC-CC-1201",
 		inStock: true,
+		rating: { average: 4.9, count: 412 },
 	},
 	{
 		id: "6",
@@ -186,7 +225,12 @@ export const products: Product[] = [
 		price: 7900,
 		description:
 			'Alicate universal profissional de 8" em aço especial temperado. Empunhadura bi-material antideslizante com proteção até 1.000V.',
-		shortDescription: "Aço temperado, isolamento 1.000V.",
+		shortDescription: [
+			'Aço especial temperado, 8" (200 mm)',
+			"Isolamento elétrico até 1.000 V",
+			"Empunhadura bi-material antideslizante",
+			"Apenas 0,28 kg para uso prolongado",
+		],
 		specs: {
 			Tamanho: '8" (200mm)',
 			Material: "Aço Especial",
@@ -196,6 +240,7 @@ export const products: Product[] = [
 		images: ["/images/products/alicate-universal-8pol.png"],
 		sku: "EMC-AU-0801",
 		inStock: true,
+		rating: { average: 4.4, count: 76 },
 	},
 	{
 		id: "7",
@@ -207,7 +252,13 @@ export const products: Product[] = [
 		originalPrice: 99_900,
 		description:
 			"Nível laser autonivelante com projeção 360° horizontal e vertical. Laser verde de alta visibilidade, alcance de 30m (60m com detector). Tripé e maleta inclusos.",
-		shortDescription: "360° verde, alcance 30m, autonivelante.",
+		shortDescription: [
+			"Laser verde 520 nm de alta visibilidade",
+			"Projeção 360° horizontal e vertical",
+			"Alcance de 30 m (60 m com detector)",
+			"Precisão ±1 mm/5 m, autonivelante",
+			"Tripé e maleta inclusos",
+		],
 		specs: {
 			"Tipo laser": "Verde 520nm",
 			Alcance: "30m (60m c/ detector)",
@@ -219,6 +270,7 @@ export const products: Product[] = [
 		badge: "Promoção",
 		sku: "EMC-NL-3601",
 		inStock: true,
+		rating: { average: 4.7, count: 134 },
 	},
 	{
 		id: "8",
@@ -229,7 +281,12 @@ export const products: Product[] = [
 		price: 29_900,
 		description:
 			"Trena digital a laser com alcance de 50m e precisão de ±1.5mm. Mede distância, área e volume. Display retroiluminado e memória para 20 medições.",
-		shortDescription: "Alcance 50m, precisão ±1.5mm, display LED.",
+		shortDescription: [
+			"Alcance de 50 m com precisão ±1,5 mm",
+			"Mede distância, área e volume",
+			"Display LCD retroiluminado",
+			"Memória para 20 medições",
+		],
 		specs: {
 			Alcance: "50m",
 			Precisão: "±1.5mm",
@@ -239,6 +296,7 @@ export const products: Product[] = [
 		images: ["/images/products/trena-digital-50m.png"],
 		sku: "EMC-TD-5001",
 		inStock: true,
+		rating: { average: 4.3, count: 58 },
 	},
 	{
 		id: "9",
@@ -249,7 +307,12 @@ export const products: Product[] = [
 		price: 14_900,
 		description:
 			"Kit completo com óculos de proteção anti-risco, protetor auricular tipo concha (NRR 25dB) e luvas de alta resistência. Certificação CA.",
-		shortDescription: "Óculos + protetor auricular + luvas, certificação CA.",
+		shortDescription: [
+			"Óculos anti-risco com proteção UV400",
+			"Protetor auricular tipo concha NRR 25 dB",
+			"Luvas resistência mecânica nível 4",
+			"Certificação CA conforme NR-6",
+		],
 		specs: {
 			Óculos: "Anti-risco, UV400",
 			Protetor: "NRR 25dB",
@@ -259,6 +322,7 @@ export const products: Product[] = [
 		images: ["/images/products/kit-seguranca.png"],
 		sku: "EMC-KS-0101",
 		inStock: true,
+		rating: { average: 5.0, count: 12 },
 	},
 	{
 		id: "10",
@@ -269,7 +333,12 @@ export const products: Product[] = [
 		price: 12_900,
 		description:
 			"Jogo de 25 brocas HSS com revestimento em titânio para metal, madeira e plástico. Medidas de 1mm a 13mm em estojo metálico organizador.",
-		shortDescription: "HSS titânio, 1–13mm, estojo metálico.",
+		shortDescription: [
+			"25 brocas HSS com revestimento em titânio",
+			"Medidas de 1 mm a 13 mm",
+			"Aplicação em metal, madeira e plástico",
+			"Estojo metálico organizador",
+		],
 		specs: {
 			Material: "HSS Titânio",
 			Peças: "25",
@@ -279,6 +348,7 @@ export const products: Product[] = [
 		images: ["/images/products/brocas-hss-25pcs.png"],
 		sku: "EMC-BH-2501",
 		inStock: true,
+		rating: { average: 4.6, count: 289 },
 	},
 	{
 		id: "11",
@@ -289,7 +359,12 @@ export const products: Product[] = [
 		price: 4900,
 		description:
 			"Pack com 10 discos de corte para metal 115mm x 1.0mm. Alta velocidade de corte com mínima geração de rebarbas.",
-		shortDescription: "10 unidades, 115mm, corte rápido.",
+		shortDescription: [
+			"Pack com 10 discos de 115 mm × 1,0 mm",
+			"Rotação máxima de 13.300 RPM",
+			"Alta velocidade de corte com mínima rebarba",
+			'Compatível com esmerilhadeiras de 4½"',
+		],
 		specs: {
 			Diâmetro: "115mm",
 			Espessura: "1.0mm",
@@ -299,6 +374,7 @@ export const products: Product[] = [
 		images: ["/images/products/disco-corte-115mm.png"],
 		sku: "EMC-DC-1151",
 		inStock: true,
+		rating: { average: 4.8, count: 501 },
 	},
 ];
 
@@ -320,4 +396,121 @@ export function getProductsByCategory(categorySlug: string): Product[] {
 
 export function getFeaturedProducts(count = 4): Product[] {
 	return products.filter((p) => p.badge).slice(0, count);
+}
+
+const reviewPool: Review[] = [
+	{
+		id: "r01",
+		author: "Carlos M.",
+		date: "2026-03-12",
+		rating: 5,
+		body: "Uso diário no canteiro há 4 meses. O motor aguenta perfurações contínuas em concreto sem aquecer. Bateria dura um turno inteiro com carga média. Mandril firme, sem folga.",
+	},
+	{
+		id: "r02",
+		author: "Renata S.",
+		date: "2026-02-28",
+		rating: 5,
+		body: "Troquei a antiga por esta e a diferença de torque é absurda. Maleta bem organizada, veio com 2 baterias. Leve pro torque que entrega.",
+	},
+	{
+		id: "r03",
+		author: "Paulo F.",
+		date: "2026-02-15",
+		rating: 4,
+		body: "Ferramenta profissional de verdade. Só tiro uma estrela porque a alça podia ter um apoio melhor pra uso acima da cabeça. No resto, impecável.",
+	},
+	{
+		id: "r04",
+		author: "João B.",
+		date: "2026-02-02",
+		rating: 5,
+		body: "Comprei pra reforma da casa. Furou tudo: madeira, concreto, aço. Sem esforço extra, sem trepidação. Vale cada centavo investido.",
+	},
+	{
+		id: "r05",
+		author: "Marcos A.",
+		date: "2026-01-20",
+		rating: 5,
+		body: "Fiz uma obra inteira com ela. Pega pesado no concreto armado sem patinar. A qualidade do mandril é notável. Recomendo para profissionais.",
+	},
+	{
+		id: "r06",
+		author: "Juliana R.",
+		date: "2026-01-08",
+		rating: 4,
+		body: "Muito boa, só senti falta de uma luz LED mais forte para trabalhos em ambiente escuro. No mais, potente e precisa.",
+	},
+	{
+		id: "r07",
+		author: "Fernando L.",
+		date: "2025-12-22",
+		rating: 5,
+		body: "Trabalho com marcenaria há 15 anos e essa é a melhor que já usei. Equilíbrio perfeito, vibração mínima, acabamento impecável nas peças.",
+	},
+	{
+		id: "r08",
+		author: "Bruno T.",
+		date: "2025-12-10",
+		rating: 3,
+		body: "Produto bom mas esperava mais pelo preço. O desempenho é ok, mas já usei concorrentes por valor parecido com mais acessórios inclusos.",
+	},
+	{
+		id: "r09",
+		author: "Sérgio P.",
+		date: "2025-11-28",
+		rating: 5,
+		body: "Chegou antes do prazo, embalagem excelente. Ferramenta robusta, pesada no lugar certo, leve no lugar certo. Entrega a potência que promete.",
+	},
+	{
+		id: "r10",
+		author: "Aline C.",
+		date: "2025-11-14",
+		rating: 5,
+		body: "Primeira compra na EMACH e fiquei impressionada. Produto de ponta, atendimento rápido. Já virei cliente fiel da marca.",
+	},
+	{
+		id: "r11",
+		author: "Diego V.",
+		date: "2025-10-30",
+		rating: 4,
+		body: "Cumpre o que promete. Só achei o manual um pouco resumido para quem é iniciante, mas pra quem já tem experiência é tranquilo de usar.",
+	},
+	{
+		id: "r12",
+		author: "Roberto G.",
+		date: "2025-10-15",
+		rating: 5,
+		body: "Uso em instalações elétricas comerciais. Ferramenta que não falha, não aquece, não dá fadiga no braço. É investimento de longo prazo.",
+	},
+	{
+		id: "r13",
+		author: "Camila H.",
+		date: "2025-09-28",
+		rating: 2,
+		body: "Tive problema com a bateria após 3 meses de uso moderado. Suporte técnico foi atencioso mas a troca demorou mais do que eu gostaria.",
+	},
+	{
+		id: "r14",
+		author: "Eduardo N.",
+		date: "2025-09-10",
+		rating: 5,
+		body: "Comparando com o modelo anterior da minha marca antiga, esta é muito superior em torque e autonomia. Não volto mais pra concorrência.",
+	},
+	{
+		id: "r15",
+		author: "Patrícia O.",
+		date: "2025-08-22",
+		rating: 5,
+		body: "Presente para meu marido, que é eletricista. Ele usa todos os dias há 6 meses e só tem elogios. Resistente, silenciosa e potente.",
+	},
+];
+
+export function getReviewsByProductId(productId: string): Review[] {
+	let hash = 0;
+	for (let i = 0; i < productId.length; i++) {
+		hash = (hash * 31 + productId.charCodeAt(i)) % 2_147_483_647;
+	}
+	const offset = hash % reviewPool.length;
+	return [...reviewPool.slice(offset), ...reviewPool.slice(0, offset)];
 }

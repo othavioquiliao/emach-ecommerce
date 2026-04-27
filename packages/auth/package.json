@@ -2,20 +2,19 @@
   "name": "@emach/auth",
   "type": "module",
   "exports": {
-    ".": {
-      "default": "./src/index.ts"
+    "./dashboard": {
+      "default": "./src/dashboard.ts"
     },
-    "./*": {
-      "default": "./src/*.ts"
+    "./ecommerce": {
+      "default": "./src/ecommerce.ts"
     }
   },
   "scripts": {},
   "dependencies": {
     "@emach/db": "workspace:*",
+    "@emach/email": "workspace:*",
     "@emach/env": "workspace:*",
-    "better-auth": "catalog:",
-    "dotenv": "catalog:",
-    "zod": "catalog:"
+    "better-auth": "catalog:"
   },
   "devDependencies": {
     "@emach/config": "workspace:*",

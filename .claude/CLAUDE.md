@@ -41,7 +41,8 @@ emach-ecommerce/
     ├── config/               ← tsconfig.base.json compartilhado
     ├── env/                  ← Validação de env vars (T3 Env + Zod)
     ├── db/                   ← Drizzle ORM + schema PostgreSQL
-    ├── auth/                 ← Better Auth pré-configurado
+    ├── auth/                 ← Better Auth (instância dashboard + ecommerce)
+    ├── email/                ← Resend client + React Email templates
     └── ui/                   ← Biblioteca shadcn compartilhada
 ```
 
@@ -59,8 +60,8 @@ emach-ecommerce/
 ### `@emach/env` — Variáveis de Ambiente Tipadas
 - **Propósito:** Valida env vars em build time com Zod. Se uma var estiver faltando, o build falha com mensagem clara.
 - **Exports:**
-  - `@emach/env/server` → `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `CORS_ORIGIN`, `NODE_ENV`
-  - `@emach/env/web` → vazio (placeholder para vars client-side futuras)
+  - `@emach/env/server` → `DATABASE_URL`, `BETTER_AUTH_SECRET`, `BETTER_AUTH_URL`, `BETTER_AUTH_URL_ECOMMERCE`, `CORS_ORIGIN`, `ECOMMERCE_ORIGIN`, `RESEND_API_KEY`, `EMAIL_FROM`, `SUPABASE_SERVICE_ROLE_KEY`, `NODE_ENV`
+  - `@emach/env/web` → `NEXT_PUBLIC_ECOMMERCE_AUTH_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY`
 - **Quando modificar:** Sempre que adicionar uma nova variável de ambiente. Adicione ao schema Zod em `packages/env/src/server.ts` (server) ou `web.ts` (client).
 
 ---
@@ -69,21 +70,45 @@ emach-ecommerce/
 - **Propósito:** Client Drizzle + schema PostgreSQL. Toda interação com o banco passa por aqui.
 - **Exports:**
   - `@emach/db` → `db` (singleton) + `createDb()`
-  - `@emach/db/schema/auth` → tabelas `user`, `session`, `account`, `verification`
-- **Quando modificar:** Ao criar novas tabelas de negócio (products, orders, etc.), adicione arquivos em `packages/db/src/schema/` e exporte via `packages/db/src/schema/index.ts`.
+  - `@emach/db/schema/auth` → tabelas dashboard staff: `user`, `session`, `account`, `verification`
+  - `@emach/db/schema/client` → tabelas ecommerce: `client`, `client_session`, `client_account`, `client_verification`, `client_address`
+  - `@emach/db/schema/tools` → `category`, `supplier`, `tool` (30 cols + 7 check constraints), `tool_image`
+  - `@emach/db/schema/inventory` → `branch`, `stock_level`
+  - `@emach/db/schema/stock-movements` → `stock_movement`
+  - `@emach/db/schema/promotions` → `promotion`, `promotion_tool`
+  - `@emach/db/schema/api-keys` → `api_key`
+- **Ownership:** **Dashboard** (outro repo) é owner autoritativo de `tool`, `category`, `supplier`, `inventory`, `promotion`, `stock_movement`, `api_key` e schema `auth` (`user/session/account/verification`). **Ecommerce** é owner exclusivo de `client*` (5 tabelas).
+- **Mirror policy:** Schema do ecommerce **espelha** colunas do dashboard sem ser owner. NUNCA usar `db:push` se ele propor `DROP COLUMN` — usar `mcp__supabase__apply_migration` (DDL literal) para mudanças cirúrgicas em tabelas owned por outro app.
+- **Quando modificar:** Ao adicionar tabela ecommerce (orders, cart, etc.), criar arquivo em `packages/db/src/schema/` e re-exportar via `index.ts`.
 - **Dependências internas:** `@emach/env`
 
 ---
 
 ### `@emach/auth` — Autenticação
-- **Propósito:** Instância Better Auth pré-configurada com Drizzle adapter, email/password e `nextCookies()` para SSR.
+- **Propósito:** Duas instâncias Better Auth distintas, isoladas por modelos e cookies:
+  - **Dashboard staff** (`@emach/auth`) — usa tabelas `user`, `session`, `account`, `verification`. Para staff interno (futuro).
+  - **Ecommerce clients** (`@emach/auth/ecommerce`) — usa tabelas `client*`. Cookie prefix `ecommerce.session_token`. Email/password + `additionalFields` (`phone`, `document` opcionais). `sendVerificationEmail` + `sendResetPassword` via `@emach/email`.
 - **Exports:**
-  - `@emach/auth` → `auth` (singleton) + `createAuth()`
+  - `@emach/auth` → `auth` (dashboard) + `createAuth()`
+  - `@emach/auth/ecommerce` → `auth` (ecommerce) — usado em todos os endpoints de cliente
 - **Consumido em:**
-  - `apps/web/src/app/api/auth/[...all]/route.ts` — handler catch-all da API
-  - `apps/web/src/app/dashboard/page.tsx` — verificação de sessão server-side
-- **Quando modificar:** Para adicionar OAuth, magic link, 2FA ou outros plugins do Better Auth.
-- **Dependências internas:** `@emach/db`, `@emach/env`
+  - `apps/web/src/app/api/auth/[...all]/route.ts` — handler catch-all (ecommerce instance)
+  - `apps/web/src/lib/auth-client.ts` — `createAuthClient()` Better Auth client SDK
+  - `apps/web/src/lib/session.ts` — helper `getClientSession()` server-side
+  - `apps/web/src/middleware.ts` — guarda de rotas autenticadas
+- **Quando modificar:** Para adicionar OAuth (Google está no UI mas backend pendente), magic link, 2FA, etc.
+- **Dependências internas:** `@emach/db`, `@emach/env`, `@emach/email`
+
+---
+
+### `@emach/email` — Envio de E-mails Transacionais
+- **Propósito:** Wrapper Resend SDK + templates React Email. Usado por Better Auth ecommerce para verify-email e reset-password.
+- **Exports:**
+  - `@emach/email/send` → `sendEmail({ to, subject, react })`
+  - `@emach/email/templates/verify-email` → template `<VerifyEmail />`
+  - `@emach/email/templates/reset-password` → template `<ResetPassword />`
+- **Sandbox Resend (sem domain verificado):** `EMAIL_FROM` aponta para `onboarding@resend.dev` — Resend só entrega para o e-mail do owner da conta. Quando comprar domínio, verificar em Resend (SPF/DKIM/DMARC) e trocar `EMAIL_FROM` para `no-reply@<dominio>`.
+- **Dependências internas:** `@emach/env`
 
 ---
 
@@ -112,11 +137,11 @@ emach-ecommerce/
 ```
 @emach/config ──(devDep: tsconfig)──► todos os packages
       │
-@emach/env ──(runtime)──► @emach/db
-      │                         │
-      └────────────────────────►@emach/auth
+@emach/env ──(runtime)──► @emach/db, @emach/email
+      │                         │            │
+      └────────────────────────►@emach/auth ◄┘
                                       │
-                               apps/web (consome auth + env/web + ui)
+                               apps/web (consome auth + env + ui)
 
 @emach/ui ──(runtime, independente)──► apps/web
 ```
@@ -131,27 +156,33 @@ emach-ecommerce/
 
 ```
 apps/web/src/
-├── index.css                   ← @import "@emach/ui/globals.css" (só isso)
+├── index.css                       ← @import "@emach/ui/globals.css"
+├── middleware.ts                   ← Guard de rotas autenticadas (/dashboard etc.)
 ├── lib/
-│   └── auth-client.ts          ← createAuthClient() do Better Auth (client SDK)
-├── components/                 ← Componentes de negócio compartilhados entre rotas
-│   ├── header.tsx
-│   ├── loader.tsx
-│   ├── providers.tsx
-│   ├── sign-in-form.tsx
-│   ├── sign-up-form.tsx
-│   └── user-menu.tsx
+│   ├── auth-client.ts              ← createAuthClient() Better Auth client SDK
+│   ├── session.ts                  ← getClientSession() server-side helper
+│   ├── cart-context.tsx, cart-store.ts, constants.ts, format.ts, mock-data.ts
+│   └── validators/
+│       └── cpf-cnpj.ts             ← maskCpfCnpj, isValidCpfCnpj, maskPhone (uso futuro: checkout)
+├── components/                     ← Componentes de negócio compartilhados
+│   ├── site-header.tsx, site-footer.tsx, search-overlay.tsx
+│   ├── product-card.tsx, product-image.tsx, product-rating.tsx
+│   ├── cart-sheet.tsx, cart-item-row.tsx, freight-calculator.tsx, free-shipping-progress.tsx
+│   ├── checkout-header.tsx, quantity-stepper.tsx, category-tile.tsx
+│   ├── emach-button.tsx, emach-badge.tsx, ticker.tsx, loader.tsx
+│   ├── page-container.tsx, section-header.tsx, section-label.tsx
+│   ├── product-card-skeleton.tsx, providers.tsx
 └── app/
-    ├── layout.tsx              ← Root layout (fontes, Providers, Header)
-    ├── page.tsx                ← Rota "/"
-    ├── login/
-    │   └── page.tsx            ← Rota "/login"
-    ├── dashboard/
-    │   ├── page.tsx            ← Server component (verifica auth, redireciona)
-    │   └── dashboard.tsx       ← Client component shell (shell vazio por enquanto)
-    └── api/
-        └── auth/[...all]/
-            └── route.ts        ← Catch-all handler do Better Auth
+    ├── layout.tsx                  ← Root layout (fontes, Providers, Header)
+    ├── page.tsx                    ← Landing "/"
+    ├── not-found.tsx, manifest.ts, robots.ts, sitemap.ts
+    ├── login/page.tsx              ← Tabs Entrar/Cadastrar + Google OAuth (UI placeholder)
+    ├── esqueci-senha/              ← Solicitar link de redefinição
+    ├── redefinir-senha/            ← Confirmar nova senha via token
+    ├── verificar-email/            ← Verificar e-mail via token
+    ├── dashboard/                  ← Área autenticada (cliente logado)
+    ├── catalog/, product/, cart/, checkout/   ← Páginas ecommerce (em construção)
+    └── api/auth/[...all]/route.ts  ← Better Auth catch-all (instância ecommerce)
 ```
 
 ### Padrões de import
@@ -266,13 +297,21 @@ bunx shadcn@latest diff -c packages/ui                 # Ver atualizações disp
 
 Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em build time pelo `@emach/env`.
 
-| Variável | Tipo | Onde é validada |
-|---|---|---|
-| `DATABASE_URL` | string (min 1) | `@emach/env/server` |
-| `BETTER_AUTH_SECRET` | string (min 32) | `@emach/env/server` |
-| `BETTER_AUTH_URL` | URL válida | `@emach/env/server` |
-| `CORS_ORIGIN` | URL válida | `@emach/env/server` |
-| `NODE_ENV` | `development\|production\|test` | `@emach/env/server` |
+| Variável | Tipo | Escopo | Onde é validada |
+|---|---|---|---|
+| `DATABASE_URL` | string (min 1) | server | `@emach/env/server` |
+| `BETTER_AUTH_SECRET` | string (min 32) | server | `@emach/env/server` |
+| `BETTER_AUTH_URL` | URL | server | `@emach/env/server` |
+| `BETTER_AUTH_URL_ECOMMERCE` | URL | server | `@emach/env/server` |
+| `CORS_ORIGIN` | URL | server | `@emach/env/server` |
+| `ECOMMERCE_ORIGIN` | URL | server | `@emach/env/server` |
+| `RESEND_API_KEY` | string (`re_...`) | server | `@emach/env/server` |
+| `EMAIL_FROM` | string (formato `Nome <email>`) | server | `@emach/env/server` |
+| `SUPABASE_SERVICE_ROLE_KEY` | string (`sb_secret_...`) | server | `@emach/env/server` |
+| `NODE_ENV` | `development\|production\|test` | server | `@emach/env/server` |
+| `NEXT_PUBLIC_ECOMMERCE_AUTH_URL` | URL | client | `@emach/env/web` |
+| `NEXT_PUBLIC_SUPABASE_URL` | URL | client | `@emach/env/web` |
+| `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_DEFAULT_KEY` | string (`sb_publishable_...`) | client | `@emach/env/web` |
 
 **Para adicionar nova env var:**
 1. Adicione ao schema Zod em `packages/env/src/server.ts` (server) ou `packages/env/src/web.ts` (client)
@@ -282,12 +321,16 @@ Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em buil
 
 ## 9. O que ainda não existe (contexto de desenvolvimento)
 
-- **`apps/web/src/middleware.ts`** — Sem middleware global. Auth é verificada inline nos server components.
+- **OAuth Google/Apple backend** — Botão "Continuar com Google" no `/login` é placeholder visual com toast "Em breve". Apple removido. Backend ainda sem `socialProviders` configurado em `@emach/auth/ecommerce`.
+- **Domínio verificado no Resend** — `EMAIL_FROM=onboarding@resend.dev` (sandbox). Em sandbox, Resend só entrega para o e-mail do owner da conta. Quando comprar domínio, verificar (SPF/DKIM/DMARC) e atualizar `EMAIL_FROM`.
+- **Rate limit em endpoints auth** — Sem proteção contra brute-force em `signin`/`signup`/`reset`.
+- **RLS em `client_address`** — Sem Row Level Security; qualquer service role lê tudo.
+- **Templates de e-mail Ferrari-style** — `verify-email.tsx` e `reset-password.tsx` funcionais mas sem polish visual.
 - **`apps/web/src/hooks/`** — Diretório não criado ainda.
-- **`loading.tsx`, `error.tsx`, `not-found.tsx`** — Nenhuma rota tem esses arquivos.
+- **`loading.tsx`, `error.tsx`** — Nenhuma rota tem esses (apenas `not-found.tsx` global).
 - **Route groups** (`(shop)`, `(auth)`, etc.) — Não utilizados ainda.
-- **Schemas de ecommerce** — Apenas tabelas de auth existem. Faltam `products`, `orders`, `categories`, etc.
-- **Páginas do e-commerce** — As páginas (landing, catálogo, produto, carrinho, checkout, login) existem apenas como design no Pencil. Código React ainda não foi implementado.
+- **Schemas de pedidos** — Faltam `order`, `order_item`, `cart`, `payment` etc.
+- **Coleta de CPF/CNPJ** — Movida do signup para o checkout (campo `client.document` existe na DB e validator `cpf-cnpj.ts` está pronto para reuso).
 - **CI/CD e Docker** — Nenhuma configuração de deploy existe.
 
 ## 9.1. O que já existe (referência de design)
@@ -391,7 +434,30 @@ O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg
 
 ---
 
-## 11. Ultracite Code Standards
+## 11. MCP Servers — Configuração
+
+| Servidor | Scope | Onde | Para quê |
+|---|---|---|---|
+| `supabase` | project | `.mcp.json` | DDL/migrations no banco do projeto (`apply_migration`, `execute_sql`, `list_tables`) |
+| `better-t-stack` | project | `.mcp.json` | Stack scaffolding |
+| `context7` | project | `.mcp.json` | Docs ao vivo de libs/SDKs |
+| `shadcn` | project | `.mcp.json` | Adicionar/buscar componentes shadcn |
+| `next-devtools` | project | `.mcp.json` | Helpers Next.js 16 |
+| `better-auth` | project | `.mcp.json` (HTTP) | Docs Better Auth |
+| `resend` | **local** | `~/.claude.json` (project entry) | Envio transacional + gestão de domínios. Privado por dev — API key não vai pro repo |
+
+**Por que Resend é `local` e não `project`:** `.mcp.json` é versionado em git. `RESEND_API_KEY` é segredo — colocá-la em `.mcp.json` vazaria no repo. Scope `local` mantém a config no `~/.claude.json` (não-versionado), privado ao dev. Outros devs precisam re-adicionar com:
+```bash
+claude mcp add -s local resend -- npx -y resend-mcp -e RESEND_API_KEY=<key>
+```
+
+**Boundaries críticos** (do CLAUDE.md global):
+- `pencil`: arquivos `.pen` encriptados — **NUNCA** ler com `Read`/`Grep`. Usar `mcp__pencil__*`.
+- `filesystem`: whitelist `~/Work`. **NUNCA expandir para `~/.claude`** (contém credenciais).
+
+---
+
+## 12. Ultracite Code Standards
 
 Este projeto usa **Ultracite**, um preset zero-config que aplica formatação e linting rigorosos via Biome.
 

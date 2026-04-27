@@ -1,12 +1,25 @@
 "use client";
 
+import { Separator } from "@emach/ui/components/separator";
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@emach/ui/components/tabs";
+import { cn } from "@emach/ui/lib/utils";
 import { useForm } from "@tanstack/react-form";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import Loader from "@/components/loader";
 import { authClient } from "@/lib/auth-client";
+import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
+
+const TRIGGER_CLASS =
+	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
 
 export default function LoginPage() {
 	const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
@@ -38,347 +51,362 @@ export default function LoginPage() {
 	});
 
 	const signUpForm = useForm({
-		defaultValues: { name: "", email: "", password: "" },
+		defaultValues: {
+			name: "",
+			email: "",
+			password: "",
+			phone: "",
+		},
 		onSubmit: async ({ value }) => {
-			await authClient.signUp.email(
-				{ email: value.email, password: value.password, name: value.name },
-				{
-					onSuccess: () => {
-						router.push("/dashboard");
-						toast.success("Conta criada com sucesso");
-					},
-					onError: (error) => {
-						toast.error(error.error.message || error.error.statusText);
-					},
-				}
-			);
+			const payload: {
+				email: string;
+				password: string;
+				name: string;
+				phone?: string;
+			} = {
+				email: value.email,
+				password: value.password,
+				name: value.name,
+			};
+			const phoneDigits = onlyDigits(value.phone);
+			if (phoneDigits) {
+				payload.phone = phoneDigits;
+			}
+			await authClient.signUp.email(payload, {
+				onSuccess: () => {
+					toast.success(
+						"Conta criada. Verifique seu e-mail para ativar a conta."
+					);
+					setMode("sign-in");
+				},
+				onError: (error) => {
+					toast.error(error.error.message || error.error.statusText);
+				},
+			});
 		},
 		validators: {
 			onSubmit: z.object({
 				name: z.string().min(2, "O nome deve ter no mínimo 2 caracteres"),
 				email: z.email("E-mail inválido"),
 				password: z.string().min(8, "A senha deve ter no mínimo 8 caracteres"),
+				phone: z
+					.string()
+					.refine((v) => !v || onlyDigits(v).length >= 10, "Telefone inválido"),
 			}),
 		},
 	});
 
 	if (isPending) {
 		return (
-			<main
-				className="flex h-svh items-center justify-center"
-				style={{ background: "var(--near-black)" }}
-			>
+			<main className="flex h-svh items-center justify-center bg-near-black">
 				<Loader />
 			</main>
 		);
 	}
 
-	const isSignIn = mode === "sign-in";
-
 	return (
-		<main
-			className="grid"
-			style={{
-				gridTemplateColumns: "1fr 1fr",
-				minHeight: "100svh",
-			}}
-		>
+		<main className="grid min-h-svh grid-cols-2">
 			{/* Left — dark panel */}
-			<div
-				className="relative flex flex-col justify-between overflow-hidden px-[60px] py-20"
-				style={{ background: "#000", color: "#fff" }}
-			>
+			<div className="relative flex flex-col justify-between overflow-hidden bg-black px-[60px] py-20 text-white">
 				<div
 					aria-hidden="true"
-					className="absolute inset-0"
-					style={{
-						background:
-							"repeating-linear-gradient(35deg, transparent 0 40px, rgba(255,255,255,0.02) 40px 80px)",
-					}}
+					className="emach-bg-diagonal absolute inset-0"
 				/>
-				<span
-					className="relative font-display font-semibold text-[12px] uppercase tracking-[0.14em]"
-					style={{ color: "rgba(255,255,255,0.72)" }}
-				>
+				<span className="relative font-display font-semibold text-[12px] text-white/70 uppercase tracking-[0.14em]">
 					EMACH Profissional
 				</span>
 				<div className="relative">
-					<h2
-						className="m-0 font-medium leading-[1.05]"
-						style={{
-							fontFamily: "var(--font-display)",
-							fontSize: 44,
-							letterSpacing: "-0.01em",
-						}}
-					>
+					<h2 className="font-display font-medium text-[44px] leading-[1.05] tracking-[-0.01em]">
 						Bem-vindo de
 						<br />
-						volta à <span style={{ color: "var(--emach-red)" }}>bancada</span>.
+						volta à <span className="text-emach-red">bancada</span>.
 					</h2>
-					<p
-						className="mt-5 max-w-[380px] text-[15px] leading-relaxed"
-						style={{ color: "rgba(255,255,255,0.7)" }}
-					>
+					<p className="mt-5 max-w-[380px] text-[15px] text-white/70 leading-relaxed">
 						Acesse sua conta para acompanhar pedidos, gerenciar endereços e
 						aproveitar descontos exclusivos para profissionais.
 					</p>
 				</div>
-				<div
-					className="relative text-[12px] uppercase tracking-[0.12em]"
-					style={{ color: "rgba(255,255,255,0.45)" }}
-				>
+				<div className="relative text-[12px] text-white/45 uppercase tracking-[0.12em]">
 					© 2026 EMACH FERRAMENTAS
 				</div>
 			</div>
 
 			{/* Right — white form panel */}
 			<div className="flex items-center justify-center bg-white px-[60px] py-20">
-				<div style={{ width: "100%", maxWidth: 400 }}>
-					{/* Tabs */}
-					<div
-						className="mb-8 flex"
-						style={{ borderBottom: "1px solid var(--border)" }}
+				<div className="w-full max-w-[400px]">
+					<Tabs
+						className="mb-8 gap-0"
+						onValueChange={(v) => setMode(v as "sign-in" | "sign-up")}
+						value={mode}
 					>
-						{(["sign-in", "sign-up"] as const).map((m) => (
-							<button
-								className="flex-1 cursor-pointer border-0 bg-transparent py-3.5 font-semibold text-[14px]"
-								key={m}
-								onClick={() => setMode(m)}
-								style={{
-									color: mode === m ? "var(--near-black)" : "var(--gray-50)",
-									borderBottom:
-										mode === m
-											? "2px solid var(--emach-red)"
-											: "2px solid transparent",
-									marginBottom: -1,
+						<TabsList className="w-full" variant="line">
+							<TabsTrigger className={TRIGGER_CLASS} value="sign-in">
+								Entrar
+							</TabsTrigger>
+							<TabsTrigger className={TRIGGER_CLASS} value="sign-up">
+								Cadastrar
+							</TabsTrigger>
+						</TabsList>
+
+						<TabsContent value="sign-in">
+							<form
+								className="flex flex-col gap-3.5 pt-8"
+								onSubmit={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									signInForm.handleSubmit();
 								}}
-								type="button"
 							>
-								{m === "sign-in" ? "Entrar" : "Cadastrar"}
-							</button>
-						))}
-					</div>
+								<signInForm.Field name="email">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">E-mail</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="seu@email.com"
+												type="email"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signInForm.Field>
 
-					{isSignIn ? (
-						<form
-							className="flex flex-col gap-3.5"
-							onSubmit={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								signInForm.handleSubmit();
-							}}
-						>
-							<signInForm.Field name="email">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">E-mail</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="seu@email.com"
-											type="email"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
+								<signInForm.Field name="password">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">Senha</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="••••••••"
+												type="password"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signInForm.Field>
+
+								<div className="flex items-center justify-between">
+									<label className="emach-check-label text-[13px]">
+										<input className="emach-check" type="checkbox" />
+										Lembrar de mim
 									</label>
-								)}
-							</signInForm.Field>
+									<Link
+										className="emach-ghost-btn font-semibold text-[13px] text-emach-red"
+										href={{ pathname: "/esqueci-senha" }}
+									>
+										Esqueci a senha
+									</Link>
+								</div>
 
-							<signInForm.Field name="password">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">Senha</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="••••••••"
-											type="password"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signInForm.Field>
-
-							<div className="flex items-center justify-between">
-								<label className="emach-check-label text-[13px]">
-									<input className="emach-check" type="checkbox" />
-									Lembrar de mim
-								</label>
-								<button
-									className="emach-ghost-btn font-semibold text-[13px]"
-									style={{ color: "var(--emach-red)" }}
-									type="button"
+								<signInForm.Subscribe
+									selector={(state) => ({
+										canSubmit: state.canSubmit,
+										isSubmitting: state.isSubmitting,
+									})}
 								>
-									Esqueci a senha
-								</button>
-							</div>
+									{({ canSubmit, isSubmitting }) => (
+										<button
+											className={cn(
+												"mt-2 w-full cursor-pointer rounded-[2px] border-0 bg-emach-red py-3 font-semibold text-[14px] text-white transition-all duration-180",
+												canSubmit ? "opacity-100" : "opacity-65"
+											)}
+											disabled={!canSubmit || isSubmitting}
+											type="submit"
+										>
+											{isSubmitting ? "Entrando…" : "Entrar"}
+										</button>
+									)}
+								</signInForm.Subscribe>
+							</form>
+						</TabsContent>
 
-							<signInForm.Subscribe
-								selector={(state) => ({
-									canSubmit: state.canSubmit,
-									isSubmitting: state.isSubmitting,
-								})}
+						<TabsContent value="sign-up">
+							<form
+								className="flex flex-col gap-3.5 pt-8"
+								onSubmit={(e) => {
+									e.preventDefault();
+									e.stopPropagation();
+									signUpForm.handleSubmit();
+								}}
 							>
-								{({ canSubmit, isSubmitting }) => (
-									<button
-										className="mt-2 w-full cursor-pointer border-0 py-3 font-semibold text-[14px] text-white transition-all duration-180"
-										disabled={!canSubmit || isSubmitting}
-										style={{
-											background: "var(--emach-red)",
-											borderRadius: 2,
-											opacity: canSubmit ? 1 : 0.65,
-										}}
-										type="submit"
-									>
-										{isSubmitting ? "Entrando…" : "Entrar"}
-									</button>
-								)}
-							</signInForm.Subscribe>
-						</form>
-					) : (
-						<form
-							className="flex flex-col gap-3.5"
-							onSubmit={(e) => {
-								e.preventDefault();
-								e.stopPropagation();
-								signUpForm.handleSubmit();
-							}}
-						>
-							<signUpForm.Field name="name">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">Nome completo</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="João da Silva"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signUpForm.Field>
+								<signUpForm.Field name="name">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">Nome completo</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="João da Silva"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
 
-							<signUpForm.Field name="email">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">E-mail</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="seu@email.com"
-											type="email"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
-											</span>
-										))}
-									</label>
-								)}
-							</signUpForm.Field>
+								<signUpForm.Field name="email">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">E-mail</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="seu@email.com"
+												type="email"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
 
-							<signUpForm.Field name="password">
-								{(field) => (
-									<label className="emach-field">
-										<span className="emach-field__label">Senha</span>
-										<input
-											className="emach-input"
-											id={field.name}
-											name={field.name}
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="••••••••"
-											type="password"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<span className="emach-field__error" key={error?.message}>
-												{error?.message}
+								<signUpForm.Field name="phone">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">
+												Telefone (opcional)
 											</span>
-										))}
-									</label>
-								)}
-							</signUpForm.Field>
+											<input
+												className="emach-input"
+												id={field.name}
+												inputMode="numeric"
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) =>
+													field.handleChange(maskPhone(e.target.value))
+												}
+												placeholder="(11) 99999-9999"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
 
-							<signUpForm.Subscribe
-								selector={(state) => ({
-									canSubmit: state.canSubmit,
-									isSubmitting: state.isSubmitting,
-								})}
-							>
-								{({ canSubmit, isSubmitting }) => (
-									<button
-										className="mt-2 w-full cursor-pointer border-0 py-3 font-semibold text-[14px] text-white transition-all duration-180"
-										disabled={!canSubmit || isSubmitting}
-										style={{
-											background: "var(--emach-red)",
-											borderRadius: 2,
-											opacity: canSubmit ? 1 : 0.65,
-										}}
-										type="submit"
-									>
-										{isSubmitting ? "Criando conta…" : "Criar conta"}
-									</button>
-								)}
-							</signUpForm.Subscribe>
-						</form>
-					)}
+								<signUpForm.Field name="password">
+									{(field) => (
+										<label className="emach-field" htmlFor={field.name}>
+											<span className="emach-field__label">Senha</span>
+											<input
+												className="emach-input"
+												id={field.name}
+												name={field.name}
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="••••••••"
+												type="password"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<span
+													className="emach-field__error"
+													key={error?.message}
+												>
+													{error?.message}
+												</span>
+											))}
+										</label>
+									)}
+								</signUpForm.Field>
+
+								<signUpForm.Subscribe
+									selector={(state) => ({
+										canSubmit: state.canSubmit,
+										isSubmitting: state.isSubmitting,
+									})}
+								>
+									{({ canSubmit, isSubmitting }) => (
+										<button
+											className={cn(
+												"mt-2 w-full cursor-pointer rounded-[2px] border-0 bg-emach-red py-3 font-semibold text-[14px] text-white transition-all duration-180",
+												canSubmit ? "opacity-100" : "opacity-65"
+											)}
+											disabled={!canSubmit || isSubmitting}
+											type="submit"
+										>
+											{isSubmitting ? "Criando conta…" : "Criar conta"}
+										</button>
+									)}
+								</signUpForm.Subscribe>
+							</form>
+						</TabsContent>
+					</Tabs>
 
 					{/* Divider */}
-					<div
-						className="my-7 flex items-center gap-3"
-						style={{ color: "var(--gray-50)", fontSize: 12 }}
-					>
-						<div
-							className="flex-1"
-							style={{ height: 1, background: "var(--border)" }}
-						/>
+					<div className="my-7 flex items-center gap-3 text-[12px] text-gray-50">
+						<Separator className="flex-1" />
 						ou
-						<div
-							className="flex-1"
-							style={{ height: 1, background: "var(--border)" }}
-						/>
+						<Separator className="flex-1" />
 					</div>
 
 					{/* Social login */}
 					<div className="flex flex-col gap-2">
 						<button
-							className="flex w-full cursor-pointer items-center justify-center gap-2 border py-2.5 font-medium text-[14px] transition-colors"
-							style={{
-								borderColor: "var(--near-black)",
-								background: "transparent",
-								borderRadius: 2,
-							}}
+							className="group relative flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-all duration-200 hover:border-emach-red hover:bg-near-black hover:text-white"
+							onClick={() =>
+								toast.info("Login com Google em breve.", {
+									description: "Estamos finalizando a integração.",
+								})
+							}
 							type="button"
 						>
+							<span
+								aria-hidden="true"
+								className="absolute inset-0 origin-left scale-x-0 bg-emach-red/10 transition-transform duration-300 ease-out group-hover:scale-x-100"
+							/>
 							<svg
+								className="relative"
 								height="16"
 								viewBox="0 0 18 18"
 								width="16"
@@ -402,28 +430,10 @@ export default function LoginPage() {
 									fill="#EA4335"
 								/>
 							</svg>
-							Continuar com Google
-						</button>
-						<button
-							className="flex w-full cursor-pointer items-center justify-center gap-2 border py-2.5 font-medium text-[14px] transition-colors"
-							style={{
-								borderColor: "var(--near-black)",
-								background: "transparent",
-								borderRadius: 2,
-							}}
-							type="button"
-						>
-							<svg
-								fill="currentColor"
-								height="16"
-								viewBox="0 0 24 24"
-								width="16"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<title>Apple</title>
-								<path d="M17.05 20.28c-.98.95-2.05.8-3.08.35-1.09-.46-2.09-.48-3.24 0-1.44.62-2.2.44-3.06-.35C2.79 15.25 3.51 7.59 9.05 7.31c1.35.07 2.29.74 3.08.8 1.18-.24 2.31-.93 3.57-.84 1.51.12 2.65.72 3.4 1.8-3.12 1.87-2.38 5.98.48 7.13-.57 1.5-1.31 2.99-2.54 4.09zM12 7.25c-.15-2.23 1.66-4.07 3.74-4.25.29 2.58-2.34 4.5-3.74 4.25z" />
-							</svg>
-							Continuar com Apple
+							<span className="relative">Continuar com Google</span>
+							<span className="relative ml-auto font-display text-[10px] uppercase tracking-[0.12em] opacity-60">
+								Em breve
+							</span>
 						</button>
 					</div>
 				</div>

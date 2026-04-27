@@ -21,9 +21,16 @@ const checkoutSchema = z.object({
 	lastName: z.string().min(2, "Sobrenome é obrigatório"),
 	email: z.email("E-mail inválido"),
 	phone: z.string().min(10, "Telefone inválido"),
-	address: z.string().min(5, "Endereço é obrigatório"),
+	street: z.string().min(5, "Rua é obrigatório"),
+	neighborhood: z.string().min(5, "Bairro é obrigatório"),
 	city: z.string().min(2, "Cidade é obrigatória"),
 	zipCode: z.string().min(8, "CEP inválido"),
+	complement: z
+		.string()
+		.refine(
+			(v) => v === "" || v.length >= 5,
+			"Complemento deve ter no mínimo 5 caracteres"
+		),
 	state: z.string().min(2, "Estado é obrigatório"),
 });
 
@@ -58,9 +65,11 @@ export function CheckoutContent() {
 			lastName: "",
 			email: "",
 			phone: "",
-			address: "",
+			street: "",
+			neighborhood: "",
 			city: "",
 			zipCode: "",
+			complement: "",
 			state: "",
 		},
 		validators: {
@@ -229,35 +238,67 @@ export function CheckoutContent() {
 						<h2 className="font-medium text-lg">Endereço de Entrega</h2>
 
 						{/* Endereço */}
-						<div>
-							<Label
-								className="font-display text-xs uppercase tracking-wider"
-								htmlFor="address"
-							>
-								Endereço
-							</Label>
-							<form.Field name="address">
-								{(field) => (
-									<>
-										<Input
-											className="mt-2 h-11 rounded-none"
-											id="address"
-											onBlur={field.handleBlur}
-											onChange={(e) => field.handleChange(e.target.value)}
-											placeholder="Rua, número, complemento"
-											value={field.state.value}
-										/>
-										{field.state.meta.errors.map((error) => (
-											<p
-												className="mt-1 text-destructive text-xs"
-												key={error?.message}
-											>
-												{error?.message}
-											</p>
-										))}
-									</>
-								)}
-							</form.Field>
+						<div className="grid grid-cols-2 gap-4">
+							<div>
+								<Label
+									className="font-display text-xs uppercase tracking-wider"
+									htmlFor="street"
+								>
+									Rua
+								</Label>
+								<form.Field name="street">
+									{(field) => (
+										<>
+											<Input
+												className="mt-2 h-11 rounded-none"
+												id="address"
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="Rua 21 de Abril"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<p
+													className="mt-1 text-destructive text-xs"
+													key={error?.message}
+												>
+													{error?.message}
+												</p>
+											))}
+										</>
+									)}
+								</form.Field>
+							</div>
+							<div>
+								<Label
+									className="font-display text-xs uppercase tracking-wider"
+									htmlFor="neighborhood"
+								>
+									Bairro
+								</Label>
+								<form.Field name="neighborhood">
+									{(field) => (
+										<>
+											<Input
+												className="mt-2 h-11 rounded-none"
+												id="neighborhood"
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="Jardim das Flores"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<p
+													className="mt-1 text-destructive text-xs"
+													key={error?.message}
+												>
+													{error?.message}
+												</p>
+											))}
+										</>
+									)}
+								</form.Field>
+							</div>
 						</div>
 
 						{/* Cidade + Estado */}
@@ -357,6 +398,36 @@ export function CheckoutContent() {
 									)}
 								</form.Field>
 							</div>
+							<div>
+								<Label
+									className="font-display text-xs uppercase tracking-wider"
+									htmlFor="complement"
+								>
+									Complemento
+								</Label>
+								<form.Field name="complement">
+									{(field) => (
+										<>
+											<Input
+												className="mt-2 h-11 rounded-none"
+												id="complement"
+												onBlur={field.handleBlur}
+												onChange={(e) => field.handleChange(e.target.value)}
+												placeholder="Apartamento 101"
+												value={field.state.value}
+											/>
+											{field.state.meta.errors.map((error) => (
+												<p
+													className="mt-1 text-destructive text-xs"
+													key={error?.message}
+												>
+													{error?.message}
+												</p>
+											))}
+										</>
+									)}
+								</form.Field>
+							</div>
 						</div>
 
 						{/* Action buttons */}
@@ -409,7 +480,7 @@ export function CheckoutContent() {
 											src={item.product.images[0]}
 										/>
 									) : (
-										<div className="absolute inset-0 bg-[color:var(--gray-10)]" />
+										<div className="absolute inset-0 bg-(--gray-10)" />
 									)}
 								</div>
 								<div className="flex-1 text-sm">
