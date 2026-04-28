@@ -134,9 +134,9 @@ export default function LoginPage() {
 				<div className="relative z-2 max-w-[580px]">
 					{isSignIn ? (
 						<h2 className="font-display font-medium text-[clamp(48px,5.5vw,78px)] leading-[0.98] tracking-[-0.02em]">
-							Bem-vindo de
+							Acesse sua
 							<br />
-							<span className="text-emach-red">volta</span>.
+							<span className="text-emach-red">conta</span>.
 						</h2>
 					) : (
 						<h2 className="font-display font-medium text-[clamp(48px,5.5vw,78px)] leading-[0.98] tracking-[-0.02em]">
