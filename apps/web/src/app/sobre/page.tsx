@@ -15,17 +15,17 @@ const aboutPillars = [
 	{
 		id: "curadoria",
 		label: "Curadoria",
-		title: "Produtos escolhidos por uso real.",
+		title: "Desenvolvidas para uso profissional.",
 		description:
-			"Nada de vitrine infinita: a seleção prioriza obra, oficina e manutenção.",
+			"Projetadas para atender às demandas de aplicação industrial e construtiva.",
 		tone: "light",
 	},
 	{
 		id: "atendimento",
 		label: "Atendimento",
-		title: "Ajuda direta antes e depois da compra.",
+		title: "Suporte antes e depois da compra.",
 		description:
-			"Suporte para escolher, trocar, acionar garantia e resolver rápido.",
+			"Equipe especializada para auxiliar na escolha técnica, acionamento de garantia e resolução de ocorrências.",
 		tone: "dark",
 	},
 ] as const;
@@ -34,17 +34,17 @@ const sideNotes = [
 	{
 		id: "linha-profissional",
 		label: "Linha profissional",
-		text: "Ferramentas para quem compra pensando em uso, não em promessa.",
+		text: "Ferramentas dimensionadas para rotina profissional.",
 	},
 	{
 		id: "presenca-fisica",
 		label: "Presença física",
-		text: "Quando precisa falar com alguém, a loja não some atrás da tela.",
+		text: "Duas unidades físicas para retirada, atendimento técnico presencial e suporte pós-venda.",
 	},
 	{
-		id: "compra-clara",
-		label: "Compra clara",
-		text: "Informação técnica visível para decidir sem adivinhar.",
+		id: "garantia",
+		label: "Garantia",
+		text: "Cobertura técnica realizada pela própria Emach, com responsabilidade direta sobre projeto, peças e mão de obra.",
 	},
 ] as const;
 
@@ -95,7 +95,7 @@ export default function AboutPage() {
 									<SectionLabel tone="light">Sobre a EMACH</SectionLabel>
 								</div>
 								<h1 className="max-w-[720px] text-balance font-bold font-display text-[clamp(46px,8vw,82px)] leading-[0.88] tracking-[-0.02em]">
-									Ferramenta certa. Atendimento sem rodeio.
+									Equipamento profissional, suporte especializado.
 								</h1>
 							</div>
 
@@ -153,7 +153,7 @@ export default function AboutPage() {
 									</div>
 								</div>
 								<p className="max-w-[250px] text-[13px] text-white/85 leading-relaxed">
-									Duas bases para atendimento, retirada e suporte presencial.
+									Duas unidades físicas para retirada, atendimento técnico presencial e suporte pós-venda.
 								</p>
 							</div>
 						</div>
@@ -190,7 +190,7 @@ export default function AboutPage() {
 							<div>
 								<SectionLabel>Filiais</SectionLabel>
 								<h2 className="mt-2 max-w-[620px] font-bold font-display text-[clamp(36px,5vw,52px)] text-near-black leading-[0.95] tracking-[-0.01em]">
-									Dois pontos de contato, sem card comum.
+									Confira nossas filiais.
 								</h2>
 							</div>
 							<div
