@@ -11,23 +11,43 @@ import { CartSheet } from "@/components/cart-sheet";
 import { SearchOverlay } from "@/components/search-overlay";
 import { useCart } from "@/lib/cart-context";
 
-const navLinks = [
+const navLinks: {
+	href: "/" | "/catalog" | "/sobre" | "/sobre#filiais";
+	label: string;
+}[] = [
 	{ href: "/catalog", label: "Catálogo" },
-	{ href: "/catalog?cat=eletricas", label: "Elétricas" },
-	{ href: "/catalog?cat=manuais", label: "Manuais" },
-	{ href: "/catalog?cat=medicao", label: "Medição" },
-	{ href: "/catalog?cat=seguranca", label: "Segurança" },
-] as const;
+	{ href: "/sobre", label: "Sobre" },
+	{ href: "/sobre#filiais", label: "Filiais" },
+];
 
 export function SiteHeader() {
 	const pathname = usePathname();
 	const searchParams = useSearchParams();
 	const currentCat = searchParams.get("cat");
+	const [urlHash, setUrlHash] = useState("");
 	const { totalCount } = useCart();
 	const [searchOpen, setSearchOpen] = useState(false);
 	const [cartOpen, setCartOpen] = useState(false);
 	const [pulse, setPulse] = useState(false);
 	const prevCount = useRef(totalCount);
+
+	useEffect(() => {
+		const readHash = () => setUrlHash(window.location.hash);
+
+		readHash();
+		window.addEventListener("hashchange", readHash);
+
+		const orig = history.pushState.bind(history);
+		history.pushState = (...args: Parameters<typeof history.pushState>) => {
+			orig(...args);
+			setTimeout(readHash, 0);
+		};
+
+		return () => {
+			window.removeEventListener("hashchange", readHash);
+			history.pushState = orig;
+		};
+	}, []);
 
 	useEffect(() => {
 		if (totalCount > prevCount.current) {
@@ -54,12 +74,15 @@ export function SiteHeader() {
 					</Link>
 					<nav className="flex items-center gap-[22px]">
 						{navLinks.map((link) => {
-							const [linkPath, linkQuery] = link.href.split("?");
+							const [linkPath, linkHash] = link.href.split("#");
+							const linkHashFull = linkHash ? `#${linkHash}` : "";
+							const [, linkQuery] = link.href.split("?");
 							const linkCat = linkQuery
 								? new URLSearchParams(linkQuery).get("cat")
 								: null;
 							const active =
 								pathname === linkPath &&
+								urlHash === linkHashFull &&
 								(linkCat ? currentCat === linkCat : !currentCat);
 							return (
 								<Link

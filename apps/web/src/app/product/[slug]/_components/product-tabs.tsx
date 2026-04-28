@@ -1,13 +1,13 @@
 "use client";
 
+import {
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
+} from "@emach/ui/components/tabs";
 import { SectionLabel } from "@/components/section-label";
 import type { Product } from "@/lib/mock-data";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@emach/ui/components/tabs";
 
 interface ProductTabsProps {
 	product: Product;

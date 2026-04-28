@@ -37,53 +37,52 @@ export function ProductReviews({ product }: ProductReviewsProps) {
 
 	return (
 		<section className="w-full py-10">
-      <div className="max-w-7xl mx-auto mb-5">
-          <SectionLabel tone="accent">O que dizem os clientes</SectionLabel>
-      </div>
+			<div className="mx-auto mb-5 max-w-7xl">
+				<SectionLabel tone="accent">O que dizem os clientes</SectionLabel>
+			</div>
 			<div className="mt-5 flex flex-col items-start gap-5 border-gray-20 border-b pb-6 md:flex-row md:items-center md:gap-8">
+				<div className="mx-auto flex max-w-7xl items-center justify-center gap-5">
+					<div className="flex max-w-7xl items-baseline justify-center gap-1.5">
+						<span className="font-display font-medium text-[40px] text-foreground tabular-nums leading-none tracking-[-0.02em]">
+							{stats.average.toFixed(1)}
+						</span>
+						<span className="text-gray-50 text-sm">/5</span>
+					</div>
 
-				<div className="flex items-center justify-center gap-5 max-w-7xl mx-auto">
-          <div className="flex max-w-7xl justify-center items-baseline gap-1.5">
-					<span className="font-display font-medium text-[40px] text-foreground tabular-nums leading-none tracking-[-0.02em]">
-						{stats.average.toFixed(1)}
-					</span>
-					<span className="text-gray-50 text-sm">/5</span>
+					<StarRating rating={stats.average} size={16} />
+
+					<div className="flex items-baseline gap-1.5">
+						<span className="font-display font-medium text-[15px] text-foreground tabular-nums">
+							{stats.count}
+						</span>
+						<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
+							avaliações
+						</span>
+					</div>
+
+					<div className="flex items-baseline gap-1.5">
+						<span className="font-display font-medium text-[15px] text-foreground tabular-nums">
+							{stats.recommendPct}%
+						</span>
+						<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
+							recomendam
+						</span>
+					</div>
+
+					<div className="flex items-baseline gap-1.5">
+						<span className="font-display font-medium text-[15px] text-foreground tabular-nums">
+							{stats.recentAvg.toFixed(1)}
+						</span>
+						<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
+							últimos 30 dias
+						</span>
+					</div>
 				</div>
-
-				<StarRating rating={stats.average} size={16} />
-
-				<div className="flex items-baseline gap-1.5">
-					<span className="font-display font-medium text-[15px] text-foreground tabular-nums">
-						{stats.count}
-					</span>
-					<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
-						avaliações
-					</span>
-				</div>
-
-				<div className="flex items-baseline gap-1.5">
-					<span className="font-display font-medium text-[15px] text-foreground tabular-nums">
-						{stats.recommendPct}%
-					</span>
-					<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
-						recomendam
-					</span>
-				</div>
-
-				<div className="flex items-baseline gap-1.5">
-					<span className="font-display font-medium text-[15px] text-foreground tabular-nums">
-						{stats.recentAvg.toFixed(1)}
-					</span>
-					<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
-						últimos 30 dias
-					</span>
-				</div>
-        </div>
 			</div>
 
-			<div className="max-w-7xl mx-auto">
-        <ReviewList reviews={reviews} />
-      </div>
+			<div className="mx-auto max-w-7xl">
+				<ReviewList reviews={reviews} />
+			</div>
 		</section>
 	);
 }

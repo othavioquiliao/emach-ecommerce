@@ -528,8 +528,11 @@
 .emach-ticker {
 	display: flex;
 	align-items: center;
+	width: 100%;
+	max-width: 100vw;
 	height: 32px;
-	overflow: hidden;
+	overflow-x: clip;
+	overflow-y: hidden;
 	color: #fff;
 	background: var(--emach-red);
 }
@@ -833,6 +836,7 @@
 		@apply border-border outline-ring/50;
 	}
 	body {
+		overflow-x: clip;
 		@apply bg-background font-sans text-foreground;
 	}
 	html {

@@ -1,14 +1,14 @@
 "use client";
 
-import type { Review } from "@/lib/mock-data";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
 } from "@emach/ui/components/select";
 import { useMemo, useState } from "react";
+import type { Review } from "@/lib/mock-data";
 import { ReviewCard } from "./review-card";
 
 interface ReviewListProps {

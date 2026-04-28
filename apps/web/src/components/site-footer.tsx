@@ -68,7 +68,7 @@ export function SiteFooter() {
 					<div className="flex gap-0">
 						<input
 							aria-label="Seu e-mail"
-							className="emach-input emach-input--dark flex-1 rounded-none"
+							className="emach-input emach-input--dark min-w-0 flex-1 rounded-none"
 							placeholder="seu@email.com"
 							type="email"
 						/>
