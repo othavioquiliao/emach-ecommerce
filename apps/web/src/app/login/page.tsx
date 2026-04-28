@@ -1,15 +1,12 @@
 "use client";
 
-import Loader from "@/components/loader";
-import { authClient } from "@/lib/auth-client";
-import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
 import { Button } from "@emach/ui/components/button";
 import { Separator } from "@emach/ui/components/separator";
 import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
+	Tabs,
+	TabsContent,
+	TabsList,
+	TabsTrigger,
 } from "@emach/ui/components/tabs";
 import { cn } from "@emach/ui/lib/utils";
 import { useForm } from "@tanstack/react-form";
@@ -18,6 +15,9 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import Loader from "@/components/loader";
+import { authClient } from "@/lib/auth-client";
+import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
 
 const TRIGGER_CLASS =
 	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
@@ -236,12 +236,12 @@ export default function LoginPage() {
 								</signInForm.Field>
 
 								<div className="flex items-center justify-between">
-									<label className="emach-check-label text-sm flex items-center gap-2">
+									<label className="emach-check-label flex items-center gap-2 text-sm">
 										<input className="emach-check" type="checkbox" />
 										Lembrar de mim
 									</label>
 									<Link
-										className="emach-ghost-btn font-semibold text-sm text-emach-red"
+										className="emach-ghost-btn font-semibold text-emach-red text-sm"
 										href={{ pathname: "/esqueci-senha" }}
 									>
 										Esqueci a senha
@@ -418,7 +418,7 @@ export default function LoginPage() {
 
 					{/* Social login */}
 					<div className="flex flex-col gap-2">
-						<Button variant="outline" className="w-full h-12">
+						<Button className="h-12 w-full" variant="outline">
 							<img
 								alt="Google"
 								height={18}

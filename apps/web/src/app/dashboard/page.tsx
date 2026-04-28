@@ -1,14 +1,14 @@
-import { requireCurrentClient } from "@/lib/session";
-import Dashboard from "./dashboard";
+import { SectionLabel } from "@/components/section-label";
+import { OrdersTabs } from "./_components/orders-tabs";
 
-export default async function DashboardPage() {
-	const session = await requireCurrentClient();
-
+export default function DashboardPage() {
 	return (
-		<div>
-			<h1>Dashboard</h1>
-			<p>Welcome {session.user.name}</p>
-			<Dashboard session={session} />
-		</div>
+		<section>
+			<SectionLabel>Minha conta</SectionLabel>
+			<h1 className="mt-2 mb-7 font-display font-medium text-[36px] leading-none">
+				Pedidos
+			</h1>
+			<OrdersTabs />
+		</section>
 	);
 }
