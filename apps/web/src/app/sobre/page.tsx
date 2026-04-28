@@ -153,7 +153,8 @@ export default function AboutPage() {
 									</div>
 								</div>
 								<p className="max-w-[250px] text-[13px] text-white/85 leading-relaxed">
-									Duas unidades físicas para retirada, atendimento técnico presencial e suporte pós-venda.
+									Duas unidades físicas para retirada, atendimento técnico
+									presencial e suporte pós-venda.
 								</p>
 							</div>
 						</div>

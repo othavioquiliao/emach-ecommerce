@@ -669,6 +669,30 @@
 .emach-bg-placeholder-shadow {
 	background: radial-gradient(ellipse, rgba(0, 0, 0, 0.3), transparent 70%);
 }
+.emach-bg-login-key {
+	background: radial-gradient(
+		circle at center,
+		rgba(218, 41, 28, 0.55) 0%,
+		rgba(218, 41, 28, 0.18) 35%,
+		transparent 70%
+	);
+	filter: blur(20px);
+}
+.emach-bg-login-rim {
+	background: radial-gradient(
+		circle at center,
+		rgba(157, 34, 17, 0.35) 0%,
+		transparent 65%
+	);
+	filter: blur(20px);
+}
+.emach-bg-login-vignette {
+	background: radial-gradient(
+		ellipse at 30% 60%,
+		transparent 0%,
+		rgba(0, 0, 0, 0.55) 80%
+	);
+}
 
 /* ---------- Cart badge bounce ---------- */
 @keyframes emach-cart-bounce {

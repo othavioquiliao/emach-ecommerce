@@ -1,11 +1,15 @@
 "use client";
 
+import Loader from "@/components/loader";
+import { authClient } from "@/lib/auth-client";
+import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
+import { Button } from "@emach/ui/components/button";
 import { Separator } from "@emach/ui/components/separator";
 import {
-	Tabs,
-	TabsContent,
-	TabsList,
-	TabsTrigger,
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
 } from "@emach/ui/components/tabs";
 import { cn } from "@emach/ui/lib/utils";
 import { useForm } from "@tanstack/react-form";
@@ -14,9 +18,6 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
-import Loader from "@/components/loader";
-import { authClient } from "@/lib/auth-client";
-import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
 
 const TRIGGER_CLASS =
 	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
@@ -104,29 +105,54 @@ export default function LoginPage() {
 		);
 	}
 
+	const isSignIn = mode === "sign-in";
+
 	return (
-		<main className="grid min-h-svh grid-cols-2">
-			{/* Left — dark panel */}
-			<div className="relative flex flex-col justify-between overflow-hidden bg-black px-[60px] py-20 text-white">
+		<main className="grid min-h-svh grid-cols-[6fr_4fr]">
+			{/* Left — cinematic dark panel */}
+			<div className="relative isolate flex flex-col justify-between overflow-hidden bg-[#0d0d0d] px-[80px] py-20 text-white">
+				{/* Key light — Ferrari Red, bottom-left */}
 				<div
 					aria-hidden="true"
-					className="emach-bg-diagonal absolute inset-0"
+					className="emach-bg-login-key pointer-events-none absolute bottom-[-30%] left-[-20%] z-0 h-[90%] w-[90%]"
 				/>
-				<span className="relative font-display font-semibold text-[12px] text-white/70 uppercase tracking-[0.14em]">
+				{/* Rim light — Deep Red, top-right */}
+				<div
+					aria-hidden="true"
+					className="emach-bg-login-rim pointer-events-none absolute top-[-20%] right-[-15%] z-0 h-[60%] w-[60%]"
+				/>
+				{/* Atmospheric vignette */}
+				<div
+					aria-hidden="true"
+					className="emach-bg-login-vignette pointer-events-none absolute inset-0 z-1"
+				/>
+
+				<span className="relative z-2 font-display font-semibold text-[12px] text-white/65 uppercase tracking-[0.2em]">
 					EMACH Profissional
 				</span>
-				<div className="relative">
-					<h2 className="font-display font-medium text-[44px] leading-[1.05] tracking-[-0.01em]">
-						Bem-vindo de
-						<br />
-						volta à <span className="text-emach-red">bancada</span>.
-					</h2>
-					<p className="mt-5 max-w-[380px] text-[15px] text-white/70 leading-relaxed">
-						Acesse sua conta para acompanhar pedidos, gerenciar endereços e
-						aproveitar descontos exclusivos para profissionais.
+
+				<div className="relative z-2 max-w-[580px]">
+					{isSignIn ? (
+						<h2 className="font-display font-medium text-[clamp(48px,5.5vw,78px)] leading-[0.98] tracking-[-0.02em]">
+							Bem-vindo de
+							<br />
+							<span className="text-emach-red">volta</span>.
+						</h2>
+					) : (
+						<h2 className="font-display font-medium text-[clamp(48px,5.5vw,78px)] leading-[0.98] tracking-[-0.02em]">
+							Crie sua
+							<br />
+							conta <span className="text-emach-red">EMACH</span>.
+						</h2>
+					)}
+					<p className="mt-6 max-w-[440px] text-[15px] text-white/70 leading-relaxed">
+						{isSignIn
+							? "Acompanhe pedidos, gerencie endereços e desbloqueie descontos exclusivos para profissionais cadastrados."
+							: "Cadastre-se para acompanhar pedidos, gerenciar endereços e acessar descontos exclusivos para profissionais."}
 					</p>
 				</div>
-				<div className="relative text-[12px] text-white/45 uppercase tracking-[0.12em]">
+
+				<div className="relative z-2 font-display font-semibold text-[11px] text-white/40 uppercase tracking-[0.2em]">
 					© 2026 EMACH FERRAMENTAS
 				</div>
 			</div>
@@ -210,12 +236,12 @@ export default function LoginPage() {
 								</signInForm.Field>
 
 								<div className="flex items-center justify-between">
-									<label className="emach-check-label text-[13px]">
+									<label className="emach-check-label text-sm flex items-center gap-2">
 										<input className="emach-check" type="checkbox" />
 										Lembrar de mim
 									</label>
 									<Link
-										className="emach-ghost-btn font-semibold text-[13px] text-emach-red"
+										className="emach-ghost-btn font-semibold text-sm text-emach-red"
 										href={{ pathname: "/esqueci-senha" }}
 									>
 										Esqueci a senha
@@ -392,49 +418,15 @@ export default function LoginPage() {
 
 					{/* Social login */}
 					<div className="flex flex-col gap-2">
-						<button
-							className="group relative flex w-full cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-[2px] border border-near-black bg-transparent py-2.5 font-medium text-[14px] transition-all duration-200 hover:border-emach-red hover:bg-near-black hover:text-white"
-							onClick={() =>
-								toast.info("Login com Google em breve.", {
-									description: "Estamos finalizando a integração.",
-								})
-							}
-							type="button"
-						>
-							<span
-								aria-hidden="true"
-								className="absolute inset-0 origin-left scale-x-0 bg-emach-red/10 transition-transform duration-300 ease-out group-hover:scale-x-100"
+						<Button variant="outline" className="w-full h-12">
+							<img
+								alt="Google"
+								height={18}
+								src="/images/logos/google.png"
+								width={18}
 							/>
-							<svg
-								className="relative"
-								height="16"
-								viewBox="0 0 18 18"
-								width="16"
-								xmlns="http://www.w3.org/2000/svg"
-							>
-								<title>Google</title>
-								<path
-									d="M17.64 9.2c0-.637-.057-1.251-.164-1.84H9v3.481h4.844a4.14 4.14 0 0 1-1.796 2.716v2.259h2.908c1.702-1.567 2.684-3.875 2.684-6.615z"
-									fill="#4285F4"
-								/>
-								<path
-									d="M9 18c2.43 0 4.467-.806 5.956-2.18l-2.908-2.26c-.806.54-1.837.86-3.048.86-2.344 0-4.328-1.584-5.036-3.711H.957v2.332A8.997 8.997 0 0 0 9 18z"
-									fill="#34A853"
-								/>
-								<path
-									d="M3.964 10.71A5.41 5.41 0 0 1 3.682 9c0-.593.102-1.17.282-1.71V4.958H.957A8.996 8.996 0 0 0 0 9c0 1.452.348 2.827.957 4.042l3.007-2.332z"
-									fill="#FBBC05"
-								/>
-								<path
-									d="M9 3.58c1.321 0 2.508.454 3.44 1.345l2.582-2.58C13.463.891 11.426 0 9 0A8.997 8.997 0 0 0 .957 4.958L3.964 7.29C4.672 5.163 6.656 3.58 9 3.58z"
-									fill="#EA4335"
-								/>
-							</svg>
-							<span className="relative">Continuar com Google</span>
-							<span className="relative ml-auto font-display text-[10px] uppercase tracking-[0.12em] opacity-60">
-								Em breve
-							</span>
-						</button>
+							Continuar com Google
+						</Button>
 					</div>
 				</div>
 			</div>
