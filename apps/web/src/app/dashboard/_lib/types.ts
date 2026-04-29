@@ -56,3 +56,65 @@ export const ORDER_TABS: readonly OrderTab[] = [
 	"shipped",
 	"completed",
 ] as const;
+
+export type PaymentMethodKind = "pix" | "boleto" | "credit_card";
+
+export interface BuyerSnapshot {
+	name: string;
+	email: string;
+	phone: string;
+	document: string;
+}
+
+export interface ShippingAddress {
+	recipient: string;
+	street: string;
+	complement?: string;
+	neighborhood: string;
+	city: string;
+	state: string;
+	zip: string;
+	country: string;
+}
+
+export interface OrderBreakdown {
+	subtotalCents: number;
+	shippingCents: number;
+	shippingMethod: string;
+	discountCents?: number;
+	discountLabel?: string;
+	totalCents: number;
+}
+
+export interface PaymentInfo {
+	kind: PaymentMethodKind;
+	label: string;
+	detail?: string;
+	cardLast4?: string;
+}
+
+export interface OrderTracking {
+	carrier: string;
+	service: string;
+	code: string;
+	url?: string;
+	updatedAt: Date;
+}
+
+export interface OrderDetail extends Order {
+	buyer: BuyerSnapshot;
+	address: ShippingAddress;
+	breakdown: OrderBreakdown;
+	payment: PaymentInfo;
+	tracking?: OrderTracking;
+	cancelledAt?: Date;
+	paidAt?: Date;
+	shippedAt?: Date;
+	deliveredAt?: Date;
+}
+
+export const PAYMENT_METHOD_LABEL: Record<PaymentMethodKind, string> = {
+	pix: "Pix",
+	boleto: "Boleto bancário",
+	credit_card: "Cartão de crédito",
+};

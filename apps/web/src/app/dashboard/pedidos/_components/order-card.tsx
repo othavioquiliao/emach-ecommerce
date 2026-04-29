@@ -2,8 +2,9 @@
 
 import { cn } from "@emach/ui/lib/utils";
 import { Disc3, Drill, Ruler, Shield, Wrench } from "lucide-react";
+import Link from "next/link";
 import { toast } from "sonner";
-import { EmachButton } from "@/components/emach-button";
+import { EmachButton, emachButtonVariants } from "@/components/emach-button";
 import { fmtBRL } from "@/lib/format";
 import type { CategorySlug, Order, OrderStatus } from "../../_lib/types";
 import { OrderStatusBadge } from "./order-status-badge";
@@ -57,15 +58,16 @@ function ActionButtons({ order }: { order: Order }) {
 }
 
 function renderActions(order: Order): React.ReactNode[] {
+	const detailsHref = `/dashboard/pedidos/${order.id}` as const;
+	const trackingHref = `/dashboard/pedidos/${order.id}#rastreio` as const;
 	const detailsBtn = (
-		<EmachButton
+		<Link
+			className={cn(emachButtonVariants({ variant: "outline", size: "sm" }))}
+			href={detailsHref}
 			key="details"
-			onClick={comingSoon("Ver detalhes")}
-			size="sm"
-			variant="outline"
 		>
 			Ver detalhes
-		</EmachButton>
+		</Link>
 	);
 
 	switch (order.status) {
@@ -93,14 +95,13 @@ function renderActions(order: Order): React.ReactNode[] {
 			return [detailsBtn];
 		case "shipped":
 			return [
-				<EmachButton
+				<Link
+					className={cn(emachButtonVariants({ variant: "ghost", size: "sm" }))}
+					href={trackingHref}
 					key="track"
-					onClick={comingSoon("Rastrear envio")}
-					size="sm"
-					variant="ghost"
 				>
 					Rastrear envio
-				</EmachButton>,
+				</Link>,
 				detailsBtn,
 			];
 		case "completed": {
