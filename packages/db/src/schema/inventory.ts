@@ -1,5 +1,6 @@
-import { relations } from "drizzle-orm";
+import { relations, sql } from "drizzle-orm";
 import {
+	check,
 	index,
 	integer,
 	pgTable,
@@ -8,7 +9,7 @@ import {
 	timestamp,
 } from "drizzle-orm/pg-core";
 
-import { tool } from "./tools";
+import { toolVariant } from "./tools";
 
 export const branch = pgTable("branch", {
 	id: text("id").primaryKey(),
@@ -24,22 +25,28 @@ export const branch = pgTable("branch", {
 export const stockLevel = pgTable(
 	"stock_level",
 	{
-		toolId: text("tool_id")
+		variantId: text("variant_id")
 			.notNull()
-			.references(() => tool.id, { onDelete: "cascade" }),
+			.references(() => toolVariant.id, { onDelete: "cascade" }),
 		branchId: text("branch_id")
 			.notNull()
 			.references(() => branch.id, { onDelete: "cascade" }),
 		quantity: integer("quantity").notNull().default(0),
+		minQty: integer("min_qty").notNull().default(0),
+		reorderPoint: integer("reorder_point").notNull().default(0),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
 			.$onUpdate(() => /* @__PURE__ */ new Date())
 			.notNull(),
 	},
 	(table) => [
-		primaryKey({ columns: [table.toolId, table.branchId] }),
-		index("stock_level_tool_id_idx").on(table.toolId),
+		primaryKey({ columns: [table.variantId, table.branchId] }),
+		index("stock_level_variant_id_idx").on(table.variantId),
 		index("stock_level_branch_id_idx").on(table.branchId),
+		check("min_qty_non_negative", sql`${table.minQty} >= 0`),
+		check("reorder_point_non_negative", sql`${table.reorderPoint} >= 0`),
+		check("reorder_gte_min", sql`${table.reorderPoint} >= ${table.minQty}`),
+		check("quantity_non_negative", sql`${table.quantity} >= 0`),
 	]
 );
 
@@ -48,9 +55,9 @@ export const branchRelations = relations(branch, ({ many }) => ({
 }));
 
 export const stockLevelRelations = relations(stockLevel, ({ one }) => ({
-	tool: one(tool, {
-		fields: [stockLevel.toolId],
-		references: [tool.id],
+	variant: one(toolVariant, {
+		fields: [stockLevel.variantId],
+		references: [toolVariant.id],
 	}),
 	branch: one(branch, {
 		fields: [stockLevel.branchId],

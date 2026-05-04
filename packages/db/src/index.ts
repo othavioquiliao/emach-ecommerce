@@ -11,6 +11,12 @@ import {
 	userRelations,
 } from "./schema/auth";
 import {
+	category,
+	categoryRelations,
+	toolCategory,
+	toolCategoryRelations,
+} from "./schema/categories";
+import {
 	client,
 	clientAccount,
 	clientAccountRelations,
@@ -21,6 +27,7 @@ import {
 	clientSessionRelations,
 	clientVerification,
 } from "./schema/client";
+import { consentLog, consentLogRelations } from "./schema/consent-log";
 import {
 	branch,
 	branchRelations,
@@ -28,18 +35,27 @@ import {
 	stockLevelRelations,
 } from "./schema/inventory";
 import {
+	order,
+	orderItem,
+	orderItemRelations,
+	orderNote,
+	orderNoteRelations,
+	orderRelations,
+	orderStatusHistory,
+	orderStatusHistoryRelations,
+} from "./schema/orders";
+import {
 	promotion,
 	promotionRelations,
 	promotionTool,
 	promotionToolRelations,
 } from "./schema/promotions";
+import { review, reviewRelations } from "./schema/reviews";
 import {
 	stockMovement,
 	stockMovementRelations,
 } from "./schema/stock-movements";
 import {
-	category,
-	categoryRelations,
 	supplier,
 	supplierRelations,
 	tool,
@@ -66,10 +82,22 @@ const schema = {
 	clientSession,
 	clientSessionRelations,
 	clientVerification,
+	consentLog,
+	consentLogRelations,
+	order,
+	orderItem,
+	orderItemRelations,
+	orderNote,
+	orderNoteRelations,
+	orderRelations,
+	orderStatusHistory,
+	orderStatusHistoryRelations,
 	promotion,
 	promotionRelations,
 	promotionTool,
 	promotionToolRelations,
+	review,
+	reviewRelations,
 	session,
 	sessionRelations,
 	stockLevel,
@@ -79,6 +107,8 @@ const schema = {
 	supplier,
 	supplierRelations,
 	tool,
+	toolCategory,
+	toolCategoryRelations,
 	toolImage,
 	toolImageRelations,
 	toolRelations,
