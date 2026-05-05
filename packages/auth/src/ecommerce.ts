@@ -12,6 +12,7 @@ import { env } from "@emach/env/server";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
+import { createGoogleProviderConfig } from "./google";
 
 const db = createDb();
 const schema = { client, clientSession, clientAccount, clientVerification };
@@ -24,7 +25,8 @@ export const authEcommerce = betterAuth({
 	trustedOrigins: [env.ECOMMERCE_ORIGIN],
 	emailAndPassword: {
 		enabled: true,
-		requireEmailVerification: true,
+		requireEmailVerification: false,
+		autoSignIn: true,
 		sendResetPassword: async ({ user, url }) => {
 			await sendEmail({
 				to: user.email,
@@ -34,7 +36,7 @@ export const authEcommerce = betterAuth({
 		},
 	},
 	emailVerification: {
-		sendOnSignUp: true,
+		sendOnSignUp: false,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
 			await sendEmail({
@@ -42,6 +44,21 @@ export const authEcommerce = betterAuth({
 				subject: "Confirme seu e-mail — EMACH",
 				react: VerifyEmailEmail({ name: user.name, url }),
 			});
+		},
+	},
+	socialProviders: {
+		google: createGoogleProviderConfig({
+			clientId: env.GOOGLE_CLIENT_ID,
+			clientSecret: env.GOOGLE_CLIENT_SECRET,
+		}),
+	},
+	databaseHooks: {
+		user: {
+			create: {
+				before: async (user) => ({
+					data: { ...user, emailVerified: true },
+				}),
+			},
 		},
 	},
 	user: {

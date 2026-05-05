@@ -1,7 +1,9 @@
-# emach — Guia do Projeto para Agentes
+# emach-ecommerce — Guia do Projeto para Agentes
 
 > Este arquivo é o mapa completo do projeto. Leia antes de qualquer tarefa.
 > **Responda sempre em Português.** Termos técnicos e identificadores de código ficam em English.
+>
+> **Repo irmão:** `~/noctua/emach-dashboard` (admin staff) compartilha a **mesma DB Supabase** e parte do schema Drizzle. Quando algo aqui depender de tabelas owned-by-dashboard (`tool`, `category`, `promotion`, etc.), a fonte de verdade é o dashboard. Ver §3 (Ownership) e `docs/auth/ecommerce-integration.md`.
 
 ---
 
@@ -19,15 +21,17 @@
 | **Package manager** | Bun 1.3.11 |
 | **Orquestração** | Turborepo 2 |
 | **Frontend** | Next.js 16 + React 19 (App Router) |
-| **Banco de dados** | PostgreSQL via Supabase |
-| **ORM** | Drizzle |
-| **Auth** | Better Auth |
+| **Banco de dados** | PostgreSQL via Supabase (compartilhado com dashboard) |
+| **ORM** | Drizzle 0.45 |
+| **Auth** | Better Auth (instância `ecommerce`) |
 | **UI** | shadcn (style `base-lyra`, baseado em Base UI — não Radix) |
 | **CSS** | Tailwind CSS v4 |
 | **Linting/Format** | Biome via Ultracite |
 | **Forms** | TanStack Form + Zod |
 | **Design** | Ferrari-inspired (chiaroscuro, Barlow, `#DA291C`) |
 | **Design Tool** | Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`) |
+
+IDs em server actions/scripts: **`crypto.randomUUID()`** (sem nanoid).
 
 ---
 
@@ -40,7 +44,7 @@ emach-ecommerce/
 └── packages/
     ├── config/               ← tsconfig.base.json compartilhado
     ├── env/                  ← Validação de env vars (T3 Env + Zod)
-    ├── db/                   ← Drizzle ORM + schema PostgreSQL
+    ├── db/                   ← Drizzle ORM + schema PostgreSQL (cópia versionada do dashboard)
     ├── auth/                 ← Better Auth (instância dashboard + ecommerce)
     ├── email/                ← Resend client + React Email templates
     └── ui/                   ← Biblioteca shadcn compartilhada
@@ -67,35 +71,85 @@ emach-ecommerce/
 ---
 
 ### `@emach/db` — Banco de Dados
-- **Propósito:** Client Drizzle + schema PostgreSQL. Toda interação com o banco passa por aqui.
-- **Exports:**
-  - `@emach/db` → `db` (singleton) + `createDb()`
-  - `@emach/db/schema/auth` → tabelas dashboard staff: `user`, `session`, `account`, `verification`
-  - `@emach/db/schema/client` → tabelas ecommerce: `client`, `client_session`, `client_account`, `client_verification`, `client_address`
-  - `@emach/db/schema/tools` → `category`, `supplier`, `tool` (30 cols + 7 check constraints), `tool_image`
-  - `@emach/db/schema/inventory` → `branch`, `stock_level`
-  - `@emach/db/schema/stock-movements` → `stock_movement`
-  - `@emach/db/schema/promotions` → `promotion`, `promotion_tool`
-  - `@emach/db/schema/api-keys` → `api_key`
-- **Ownership:** **Dashboard** (outro repo) é owner autoritativo de `tool`, `category`, `supplier`, `inventory`, `promotion`, `stock_movement`, `api_key` e schema `auth` (`user/session/account/verification`). **Ecommerce** é owner exclusivo de `client*` (5 tabelas).
-- **Mirror policy:** Schema do ecommerce **espelha** colunas do dashboard sem ser owner. NUNCA usar `db:push` se ele propor `DROP COLUMN` — usar `mcp__supabase__apply_migration` (DDL literal) para mudanças cirúrgicas em tabelas owned por outro app.
-- **Quando modificar:** Ao adicionar tabela ecommerce (orders, cart, etc.), criar arquivo em `packages/db/src/schema/` e re-exportar via `index.ts`.
-- **Dependências internas:** `@emach/env`
+
+- **Propósito:** Client Drizzle + schema PostgreSQL. Toda interação com o banco passa por aqui. Schema é **cópia versionada** do `emach-dashboard` — sincronizado manualmente a cada migration do dashboard.
+- **Exports principais:**
+  - `@emach/db` → `db` (singleton) + `createDb()` (factory para evitar ciclo com `@emach/auth`)
+  - `@emach/db/schema/<arquivo>` — preferir caminho específico ao barrel
+  - `@emach/db/schema` (barrel intencional, marcado com `// biome-ignore lint/performance/noBarrelFile`)
+
+**Schemas em `packages/db/src/schema/`:**
+
+| Arquivo | Tabelas | Notas |
+|---|---|---|
+| `auth.ts` | `user`, `session`, `account`, `verification` | Dashboard staff. **Ecommerce não importa.** `user.role` = `pgEnum('user_role', ['admin','manager','user'])`. |
+| `client.ts` | `client`, `clientSession`, `clientAccount`, `clientVerification`, `clientAddress` | Clientes BR. `country` default `"BR"`, `phone`, `document` unique nullable. **Owned by ecommerce.** |
+| `tools.ts` | `supplier`, `tool` (produto-pai enxuto), **`toolVariant`** (SKU + voltagem + preço/custo + barcode), `toolImage` | `voltage` é `pgEnum('voltage', ['127V','220V','Bivolt','380V'])`. **Toda ferramenta tem ≥1 `toolVariant`** (uma marcada `isDefault=true` via partial unique index). |
+| `categories.ts` | `category`, `toolCategory` | Árvore hierárquica com `parent_id` + `path`/`depth` materializados via trigger PL/pgSQL. Anti-ciclo + cascade de path. Depth máximo 5. |
+| `attributes.ts` | `attributeDefinition`, `toolAttributeValue` | Catálogo de specs dinâmicas (Saleor-lite). `inputType` (`text`/`number`/`select`/`boolean`/`numeric_range`/`color`), `unit`, `options jsonb`, `categoryId` (herança via path). Valor tipado por coluna (`valueText`, `valueNumeric`, `valueNumericMax`, `valueBool`). |
+| `inventory.ts` | `branch`, `stockLevel` | PK `(variantId, branchId)`. `minQty` + `reorderPoint` + check `quantity >= 0`. |
+| `stock-movements.ts` | `stockMovement` | Audit trail por **variante** (`variantId`, não `toolId`). `actorType` (`user`/`apiKey`/`system`) + `actorId` + `apiKeyId`. Partial unique index garante idempotência de débito de venda. |
+| `orders.ts` | `order`, `orderItem`, `orderStatusHistory`, `orderNote` | `orderItem` carrega `toolId` + `variantId` + snapshots fiscais/dimensão. Enums: `orderStatus`, `paymentStatus`. |
+| `reviews.ts` | `review` | Moderação por admin (`status` pgEnum). Unique `(clientId, toolId, orderId)`. SELECT público filtra `status='approved'`. |
+| `promotions.ts` | `promotion`, `promotionTool` | Cupons via `promotion.type='promocode'` (não há tabela `coupon`). |
+| `api-keys.ts` | `apiKey` | `scopes` + `allowedTags` (text[]). GIN index em scopes. Usado pelo ecommerce para escrever em tabelas dashboard-owned com `actorType='apiKey'`. |
+| `consent-log.ts` | `consentLog` | LGPD: TOS/privacy/marketing/cookies por client/lead. |
+| `shared-enums.ts` | `actorTypeEnum` | `'user' \| 'apiKey' \| 'system'`. |
+
+**Ownership e escrita compartilhada:**
+
+- **Owned-by-dashboard (autoritativo):** `tool`, `toolVariant`, `category`, `supplier`, `branch`, `stockLevel`, `promotion`, `apiKey`, `attributeDefinition`, schema `auth`. Mudanças → PR no dashboard primeiro.
+- **Owned-by-ecommerce (autoritativo):** tabelas `client*` (5).
+- **Escrita compartilhada (ambos os apps inserem/atualizam):** `order`, `orderItem`, `stockMovement` (com `actorType='user'` no dashboard, `actorType='apiKey'` no ecommerce), `review`, `consentLog`, `toolAttributeValue` em fluxos cliente.
+- **Cópia de schema:** `packages/db/src/schema/*` deste repo é re-sincronizado manualmente a cada migration do dashboard. Não editar em isolamento — coordenar via PR.
+- **Drops/renames em prod:** sempre `bun db:generate` + migration versionada. **Nunca** `db:push --force` em prod. `db:push` só em dev local.
+
+**IDs e money:**
+- IDs: `crypto.randomUUID()` no caller (server actions/scripts). Sem nanoid.
+- Money: `numeric(10,2)` em `tool_variant.priceAmount`/`costAmount`; `numeric(12,2)` em totais de `order.totalAmount`. Nunca `real`/`double`.
+
+**Triggers PL/pgSQL** (`packages/db/src/migrations/_triggers.sql`):
+- Drizzle Kit não gera triggers. Aplicar via `bun db:apply-triggers` (idempotente, `CREATE OR REPLACE FUNCTION` + `DROP TRIGGER IF EXISTS`) após qualquer `db:push`/`db:migrate`.
+- Conteúdo: anti-ciclo de categoria com path/depth materializados, idempotência de débito de venda em `stockMovement`.
+
+**RLS** (`packages/db/src/migrations/_rls.sql`):
+- RLS habilitada em **todas as 30 tabelas**.
+- 13 policies SELECT públicas (catálogo: `category`, `tool`, `tool_image`, `tool_variant`, `attribute_definition`, `tool_attribute_value`, `review` filtrada por `status='approved'`, etc).
+- 17 tabelas deny-all server-side (Better Auth/service role bypass).
+- **Caveats:**
+  - `consent_log` deny-all → lead capture (form anon submit) precisa server action, não Supabase client direto.
+  - `review` INSERT user-side via server action, não via Supabase client browser.
+  - Funções com `SET search_path = public, pg_temp` para fechar advisor `function_search_path_mutable`.
+
+**`db` × `createDb()`:**
+- `db` (singleton em `src/index.ts`) — uso geral em server actions.
+- `createDb()` (factory) — usado por `@emach/auth/*` para evitar ciclo de import com `@emach/env`. **Não** consolidar em um padrão único.
+- **Regra:** o `apps/web` nunca importa `@emach/db` diretamente em código que também precisa de auth. O acesso ao banco em rotas autenticadas é mediado por `@emach/auth`.
+
+**Dependências internas:** `@emach/env`.
 
 ---
 
 ### `@emach/auth` — Autenticação
+
 - **Propósito:** Duas instâncias Better Auth distintas, isoladas por modelos e cookies:
-  - **Dashboard staff** (`@emach/auth`) — usa tabelas `user`, `session`, `account`, `verification`. Para staff interno (futuro).
-  - **Ecommerce clients** (`@emach/auth/ecommerce`) — usa tabelas `client*`. Cookie prefix `ecommerce.session_token`. Email/password + `additionalFields` (`phone`, `document` opcionais). `sendVerificationEmail` + `sendResetPassword` via `@emach/email`.
-- **Exports:**
-  - `@emach/auth` → `auth` (dashboard) + `createAuth()`
-  - `@emach/auth/ecommerce` → `auth` (ecommerce) — usado em todos os endpoints de cliente
+  - **Dashboard staff** (`@emach/auth/dashboard` → `authDashboard`, `DashboardSession`) — usa `user`, `session`, `account`, `verification`. Não usado neste app.
+  - **Ecommerce clients** (`@emach/auth/ecommerce` → `authEcommerce`, `EcommerceSession`) — usa tabelas `client*`. Cookie prefix `ecommerce.session_token`. Email/password + `additionalFields` (`phone`, `document` opcionais). `sendVerificationEmail` + `sendResetPassword` via `@emach/email`.
+
 - **Consumido em:**
-  - `apps/web/src/app/api/auth/[...all]/route.ts` — handler catch-all (ecommerce instance)
+  - `apps/web/src/app/api/auth/[...all]/route.ts` — handler catch-all (instância ecommerce)
   - `apps/web/src/lib/auth-client.ts` — `createAuthClient()` Better Auth client SDK
   - `apps/web/src/lib/session.ts` — helper `getClientSession()` server-side
   - `apps/web/src/middleware.ts` — guarda de rotas autenticadas
+
+**Invariantes P0 (qualquer violação é bug crítico):**
+
+1. **`apps/web` deste repo nunca importa `@emach/db/schema/auth` nem `@emach/auth/dashboard`.** O dashboard nunca importa `@emach/db/schema/client` nem `@emach/auth/ecommerce`.
+2. `EcommerceSession` ≠ `DashboardSession` — não há tipo "Session" genérico.
+3. **Nunca** setar `advanced.cookies.<name>.attributes.domain = ".emach.com.br"` — apps em subdomínios distintos isolam por host. Cookie prefix `ecommerce.session_token` fica preso ao host do ecommerce.
+4. CPF/CNPJ: validação responsabilidade deste app (zod refine + dígito verificador via `apps/web/src/lib/validators/cpf-cnpj.ts`). Sempre normalizar (só dígitos) antes de persistir em `client.document`.
+5. Migrations em prod: `drizzle-kit generate` + migration versionada. `--force` só em dev/staging.
+
 - **Quando modificar:** Para adicionar OAuth (Google está no UI mas backend pendente), magic link, 2FA, etc.
 - **Dependências internas:** `@emach/db`, `@emach/env`, `@emach/email`
 
@@ -120,13 +174,11 @@ emach-ecommerce/
   - `@emach/ui/lib/utils` → função `cn()` (clsx + tailwind-merge)
   - `@emach/ui/globals.css` → CSS com tokens de design Tailwind v4
   - `@emach/ui/hooks/<nome>` → hooks compartilhados (diretório existe, atualmente vazio)
-- **Componentes existentes (30):** `accordion`, `aspect-ratio`, `avatar`, `badge`, `breadcrumb`, `button`, `card`, `carousel`, `checkbox`, `command`, `dialog`, `dropdown-menu`, `input`, `input-group`, `label`, `navigation-menu`, `pagination`, `popover`, `scroll-area`, `select`, `separator`, `sheet`, `skeleton`, `sonner`, `table`, `tabs`, `textarea`, `toggle`, `toggle-group`, `tooltip`
+- **30 componentes existentes:** `accordion`, `aspect-ratio`, `avatar`, `badge`, `breadcrumb`, `button`, `card`, `carousel`, `checkbox`, `command`, `dialog`, `dropdown-menu`, `input`, `input-group`, `label`, `navigation-menu`, `pagination`, `popover`, `scroll-area`, `select`, `separator`, `sheet`, `skeleton`, `sonner`, `table`, `tabs`, `textarea`, `toggle`, `toggle-group`, `tooltip`
 - **Como adicionar componentes:**
   ```bash
   bunx shadcn@latest add <nome> -c packages/ui
-  # Exemplos:
-  bunx shadcn@latest add dialog -c packages/ui
-  bunx shadcn@latest add table sheet -c packages/ui
+  bunx shadcn@latest add table sheet -c packages/ui    # múltiplos
   ```
 - **Dependências internas:** nenhuma em runtime
 
@@ -146,8 +198,6 @@ emach-ecommerce/
 @emach/ui ──(runtime, independente)──► apps/web
 ```
 
-> **Regra:** O `apps/web` nunca importa `@emach/db` diretamente. O acesso ao banco é mediado por `@emach/auth`.
-
 ---
 
 ## 5. App Web (`apps/web`)
@@ -163,7 +213,7 @@ apps/web/src/
 │   ├── session.ts                  ← getClientSession() server-side helper
 │   ├── cart-context.tsx, cart-store.ts, constants.ts, format.ts, mock-data.ts
 │   └── validators/
-│       └── cpf-cnpj.ts             ← maskCpfCnpj, isValidCpfCnpj, maskPhone (uso futuro: checkout)
+│       └── cpf-cnpj.ts             ← maskCpfCnpj, isValidCpfCnpj, maskPhone (uso: checkout)
 ├── components/                     ← Componentes de negócio compartilhados
 │   ├── site-header.tsx, site-footer.tsx, search-overlay.tsx
 │   ├── product-card.tsx, product-image.tsx, product-rating.tsx
@@ -180,6 +230,7 @@ apps/web/src/
     ├── esqueci-senha/              ← Solicitar link de redefinição
     ├── redefinir-senha/            ← Confirmar nova senha via token
     ├── verificar-email/            ← Verificar e-mail via token
+    ├── sobre/                      ← Página institucional
     ├── dashboard/                  ← Área autenticada (cliente logado)
     ├── catalog/, product/, cart/, checkout/   ← Páginas ecommerce (em construção)
     └── api/auth/[...all]/route.ts  ← Better Auth catch-all (instância ecommerce)
@@ -191,6 +242,9 @@ apps/web/src/
 // Componentes da UI compartilhada (subpath — sem barrel)
 import { Button } from "@emach/ui/components/button";
 import { cn } from "@emach/ui/lib/utils";
+
+// Schema Drizzle preferir caminho específico
+import { tool, toolVariant } from "@emach/db/schema/tools";
 
 // Código local do app
 import { SomeComponent } from "@/components/some-component";
@@ -238,10 +292,10 @@ app/<rota>/
 | Nova página/rota | `apps/web/src/app/<rota>/page.tsx` |
 | Layout entre rotas (route group) | `apps/web/src/app/(<grupo>)/layout.tsx` |
 | API route | `apps/web/src/app/api/<rota>/route.ts` |
-| Nova tabela no banco | `packages/db/src/schema/<nome>.ts` |
+| Nova tabela no banco | `packages/db/src/schema/<nome>.ts` (coordenar com dashboard se for compartilhada) |
 | Nova variável de ambiente server | `packages/env/src/server.ts` |
 | Nova variável de ambiente client | `packages/env/src/web.ts` |
-| Novo método/plugin de auth | `packages/auth/src/index.ts` |
+| Novo método/plugin de auth | `packages/auth/src/ecommerce.ts` |
 | Middleware global (auth guard, etc.) | `apps/web/src/middleware.ts` |
 
 ### Pergunta rápida para decidir onde colocar
@@ -266,11 +320,22 @@ bun run check-types  # Verifica TypeScript em todo o monorepo
 ### Banco de dados
 
 ```bash
-bun run db:push      # Sincroniza schema com o banco (sem migration)
-bun run db:generate  # Gera arquivos de migration
+bun run db:push      # Sincroniza schema com o banco (sem migration) — apenas dev local
+bun run db:generate  # Gera arquivos de migration (staging/prod)
 bun run db:migrate   # Aplica migrations pendentes
 bun run db:studio    # Abre Drizzle Studio (UI visual do banco)
 ```
+
+### Banco de dados — utilitários (em `packages/db`)
+
+```bash
+bun --cwd packages/db db:apply-triggers       # aplica src/migrations/_triggers.sql (idempotente)
+bun --cwd packages/db db:seed-categories      # bootstrap categorias raiz
+bun --cwd packages/db db:seed-attributes      # bootstrap attribute_definitions iniciais
+bun --cwd packages/db db:anonymize-client <id># LGPD direito ao esquecimento
+```
+
+> ⚠️ Após qualquer `db:push`/`db:migrate`, rodar `db:apply-triggers`. Drizzle Kit não gera triggers PL/pgSQL.
 
 ### Qualidade de código
 
@@ -324,25 +389,24 @@ Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em buil
 - **OAuth Google/Apple backend** — Botão "Continuar com Google" no `/login` é placeholder visual com toast "Em breve". Apple removido. Backend ainda sem `socialProviders` configurado em `@emach/auth/ecommerce`.
 - **Domínio verificado no Resend** — `EMAIL_FROM=onboarding@resend.dev` (sandbox). Em sandbox, Resend só entrega para o e-mail do owner da conta. Quando comprar domínio, verificar (SPF/DKIM/DMARC) e atualizar `EMAIL_FROM`.
 - **Rate limit em endpoints auth** — Sem proteção contra brute-force em `signin`/`signup`/`reset`.
-- **RLS em `client_address`** — Sem Row Level Security; qualquer service role lê tudo.
+- **Logger central** — `apps/web/src/lib/logger.ts` ainda não existe; código atual usa `console.*` (ver §11 anti-pattern). Criar wrapper antes de adicionar mutations sensíveis em prod.
 - **Templates de e-mail Ferrari-style** — `verify-email.tsx` e `reset-password.tsx` funcionais mas sem polish visual.
 - **`apps/web/src/hooks/`** — Diretório não criado ainda.
 - **`loading.tsx`, `error.tsx`** — Nenhuma rota tem esses (apenas `not-found.tsx` global).
 - **Route groups** (`(shop)`, `(auth)`, etc.) — Não utilizados ainda.
-- **Schemas de pedidos** — Faltam `order`, `order_item`, `cart`, `payment` etc.
-- **Coleta de CPF/CNPJ** — Movida do signup para o checkout (campo `client.document` existe na DB e validator `cpf-cnpj.ts` está pronto para reuso).
+- **Coleta de CPF/CNPJ** — Movida do signup para o checkout (campo `client.document` existe e validator `cpf-cnpj.ts` está pronto para reuso).
+- **Cabear `mock-data.ts` → queries reais** — Catálogo storefront ainda lê de mock; integrar com `tool` + `toolVariant` + `toolImage` reais.
 - **CI/CD e Docker** — Nenhuma configuração de deploy existe.
 
-## 9.1. O que já existe (referência de design)
+## 9.1. O que já existe (referência)
 
 - **30 componentes shadcn** instalados em `packages/ui/` (style `base-lyra`, Base UI)
 - **Tokens CSS Ferrari** em `packages/ui/src/styles/globals.css` (cores oklch, fontes Barlow, `--radius: 2px`, chiaroscuro)
-- **Design visual completo** no Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`) com:
-  - 28 componentes reusáveis (Buttons, Inputs, Cards, Nav, Badges, Tabs, etc.)
-  - 34 variáveis de cor/tipografia
-  - 6 páginas: Landing, Catálogo, Produto Detail, Carrinho, Checkout, Login
-  - Imagens AI-generated de ferramentas vermelho/preto
-- **Design context** em `.impeccable.md` na raiz do projeto
+- **Schema completo do dashboard** sincronizado: `tool`/`toolVariant`/`category`/`attribute*`/`order*`/`stockMovement`/`review`/`consentLog` etc.
+- **RLS aplicada** em todas as 30 tabelas (catálogo público anon+authenticated; resto deny-all server-side)
+- **Triggers PL/pgSQL** ativos (anti-ciclo categoria, idempotência stock_movement)
+- **Design visual completo** no Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`) com 28 componentes, 34 vars, 6 páginas
+- **Design context** em `.impeccable.md` na raiz e `design/DESIGN.md`
 - **Specs** em `docs/superpowers/specs/`
 
 ---
@@ -395,7 +459,6 @@ O projeto segue uma linguagem visual inspirada no site Ferrari. A linguagem visu
 - **Barlow Condensed** (`--font-display`): Labels, captions, tags. Sempre **uppercase** com `letter-spacing: 1px`.
 
 ```tsx
-// Usar --font-display via Tailwind (quando o token estiver em uso):
 <span className="font-display uppercase tracking-wider text-xs">Label</span>
 ```
 
@@ -434,15 +497,47 @@ O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg
 
 ---
 
-## 11. MCP Servers — Configuração
+## 11. Anti-patterns banidos (P0/P1)
+
+- **`console.log/warn/error`** em código de produção. Usar `logger` central em `apps/web/src/lib/logger.ts` (criar quando precisar). Em catch de server action, devolver `{ ok: false, error: "mensagem" }` em vez de logar e seguir.
+- **`: any`, `<any>`, `as any`, `@ts-ignore`, `@ts-expect-error`** — exceto em `.next/` gerado.
+- **`key={index}`** em `.map()` — usar ID estável (`tool.id`, `variant.id`, etc.). Exceções (variantes/options sem id) ficam com `biome-ignore` explícito.
+- **`<img>` puro** — sempre `next/image` (exceção thumbs Supabase com `// biome-ignore lint/performance/noImgElement: Supabase public URL` documentado).
+- **`React.forwardRef`** — React 19 usa `ref` como prop normal.
+- **Barrel files** (`index.ts` que só re-exporta) em `packages/ui/src`, `apps/web/src`, `packages/auth/src`. Em `packages/db/src/schema/index.ts` o barrel é **intencional** (marcado com `// biome-ignore lint/performance/noBarrelFile`).
+- **`async function` em Client Component** (`"use client"`) — usar Server Component para fetching.
+- **`.forEach()` em hot path** — preferir `for...of`.
+- **`new RegExp(...)` ou regex literal dentro de loops** — extrair top-level.
+- **`target="_blank"` sem `rel="noopener"`**.
+- **Injeção de HTML não-sanitizado em React** — qualquer markdown/HTML de fonte não confiável precisa passar por `react-markdown` + `rehype-sanitize` (preset `defaultSchema`).
+- **Importar `@emach/db/schema/auth` ou `@emach/auth/dashboard`** deste app (P0 — quebra isolamento staff × cliente).
+
+---
+
+## 12. Workflow de mudança
+
+1. **Antes de tocar UI:** abrir `design/DESIGN.md` + `.impeccable.md` na seção relevante; invocar skill `web-design-guidelines` se for review.
+2. **Antes de tocar schema:**
+   - Tabela owned-by-ecommerce (`client*`): editar `packages/db/src/schema/client.ts` → dev `bun db:push` → `bun db:apply-triggers` → smoke.
+   - Tabela owned-by-dashboard ou compartilhada: **PR no dashboard primeiro**, depois sincronizar a cópia neste repo. Em prod sempre `bun db:generate` + commit migration + `bun db:migrate`.
+3. **Server actions:** `"use server"` no topo, `await getClientSession()` ou guarda explícita no início, validar input com Zod, normalizar antes de persistir. Padrão `ActionResult<T>` (`{ ok: true; data } | { ok: false; error }`).
+4. **Escrita em tabelas dashboard-owned:** usar `actorType='apiKey'` + `apiKeyId` em `stockMovement` e similares (nunca `actorType='user'` aqui — `user` é staff).
+5. **Imagens em forms:** quando integrar uploads, extrair helper genérico em `lib/storage.ts` aceitando `{ bucket, prefix, formData }`. Service role key em `SUPABASE_SERVICE_ROLE_KEY` (server-only).
+6. **Validação targeted:** `bun check-types` no workspace alterado, `bun fix` no escopo. Suite inteira só se necessário.
+7. **Smoke run-time:** quando refactor toca SSR, sempre rodar `bun dev:web` e visitar as rotas afetadas — `tsc` não detecta SQL inválido nem queries com colunas removidas.
+8. **Commit:** Conventional Commits em **PT** (`feat:`/`fix:`/`refactor:`/`test:`/`docs:`/`chore:`). **Nunca** commitar sem confirmação explícita do user.
+
+---
+
+## 13. MCP Servers — Configuração
 
 | Servidor | Scope | Onde | Para quê |
 |---|---|---|---|
-| `supabase` | project | `.mcp.json` | DDL/migrations no banco do projeto (`apply_migration`, `execute_sql`, `list_tables`) |
+| `supabase` | project | `.mcp.json` | DDL/migrations no banco do projeto (`apply_migration`, `execute_sql`, `list_tables`, `get_advisors`) |
 | `better-t-stack` | project | `.mcp.json` | Stack scaffolding |
 | `context7` | project | `.mcp.json` | Docs ao vivo de libs/SDKs |
 | `shadcn` | project | `.mcp.json` | Adicionar/buscar componentes shadcn |
-| `next-devtools` | project | `.mcp.json` | Helpers Next.js 16 |
+| `next-devtools` | project | `.mcp.json` | Helpers Next.js 16 (`nextjs_call <port> get_errors` para stack trace SSR) |
 | `better-auth` | project | `.mcp.json` (HTTP) | Docs Better Auth |
 | `resend` | **local** | `~/.claude.json` (project entry) | Envio transacional + gestão de domínios. Privado por dev — API key não vai pro repo |
 
@@ -457,7 +552,7 @@ claude mcp add -s local resend -- npx -y resend-mcp -e RESEND_API_KEY=<key>
 
 ---
 
-## 12. Ultracite Code Standards
+## 14. Ultracite Code Standards
 
 Este projeto usa **Ultracite**, um preset zero-config que aplica formatação e linting rigorosos via Biome.
 
@@ -493,12 +588,7 @@ Este projeto usa **Ultracite**, um preset zero-config que aplica formatação e 
 - Use the `key` prop for elements in iterables (prefer unique IDs over array indices)
 - Nest children between opening and closing tags instead of passing as props
 - Don't define components inside other components
-- Use semantic HTML and ARIA attributes for accessibility:
-  - Provide meaningful alt text for images
-  - Use proper heading hierarchy
-  - Add labels for form inputs
-  - Include keyboard event handlers alongside mouse events
-  - Use semantic elements (`<button>`, `<nav>`, etc.) instead of divs with roles
+- Use semantic HTML and ARIA attributes for accessibility
 
 ### Error Handling & Debugging
 
@@ -518,8 +608,7 @@ Este projeto usa **Ultracite**, um preset zero-config que aplica formatação e 
 ### Security
 
 - Add `rel="noopener"` when using `target="_blank"` on links
-- Avoid `dangerouslySetInnerHTML` unless absolutely necessary
-- Don't use `eval()` or assign directly to `document.cookie`
+- Avoid runtime code evaluation primitives; never assign directly to `document.cookie`
 - Validate and sanitize user input
 
 ### Performance
@@ -533,22 +622,17 @@ Este projeto usa **Ultracite**, um preset zero-config que aplica formatação e 
 ### Framework-Specific Guidance
 
 **Next.js:**
-
 - Use Next.js `<Image>` component for images
 - Use App Router metadata API for head elements
 - Use Server Components for async data fetching instead of async Client Components
-- `"use client"` only quando realmente necessário (eventos, hooks, estado local)
+- `"use client"` só quando realmente necessário (eventos, hooks, estado local)
 
 **React 19+:**
-
 - Use ref as a prop instead of `React.forwardRef`
 - React Compiler está ativo (`reactCompiler: true`) — não adicione `useMemo`/`useCallback` manual desnecessário
 
 **Typed Routes:**
-
 - `typedRoutes: true` está ativo — TypeScript valida os paths de `<Link href="...">`. Se o link não compilar, a rota não existe.
-
----
 
 ### Testing
 
@@ -567,6 +651,15 @@ Biome's linter will catch most issues automatically. Focus your attention on:
 4. **Edge cases** - Handle boundary conditions and error states
 5. **User experience** - Accessibility, performance, and usability considerations
 
+Run `bun x ultracite fix` before committing to ensure compliance.
+
 ---
 
-Run `bun x ultracite fix` before committing to ensure compliance.
+## 15. Onde se aprofundar
+
+- **Auth ecommerce passo-a-passo + footguns:** `docs/auth/ecommerce-integration.md`
+- **Convenções de schema Drizzle:** `packages/db/CLAUDE.md`
+- **Design system completo:** `design/DESIGN.md` + `.impeccable.md`
+- **Pencil design source:** `~/Work/pencil/emach-ecommerce.pen` (via `mcp__pencil__*`)
+- **Schema do dashboard (fonte de verdade para tabelas compartilhadas):** `~/noctua/emach-dashboard/.claude/CLAUDE.md` + `~/noctua/emach-dashboard/packages/db/CLAUDE.md`
+- **Specs de fases:** `docs/superpowers/specs/`
