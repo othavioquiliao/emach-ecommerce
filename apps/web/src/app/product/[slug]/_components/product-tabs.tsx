@@ -1,5 +1,6 @@
 "use client";
 
+import type { ToolDetail } from "@emach/db/queries/catalog";
 import {
 	Tabs,
 	TabsContent,
@@ -7,10 +8,10 @@ import {
 	TabsTrigger,
 } from "@emach/ui/components/tabs";
 import { SectionLabel } from "@/components/section-label";
-import type { Product } from "@/lib/mock-data";
 
 interface ProductTabsProps {
-	product: Product;
+	attributes: ToolDetail["attributes"];
+	tool: ToolDetail["tool"];
 }
 
 const RAIL_ITEMS = [
@@ -42,14 +43,61 @@ const PANEL_HEADING_CLASS =
 
 const PANEL_PROSE_CLASS = "space-y-4 text-[15px] text-gray-60 leading-relaxed";
 
-export function ProductTabs({ product }: ProductTabsProps) {
+function withUnit(value: string, unit: string): string {
+	return unit ? `${value} ${unit}` : value;
+}
+
+function formatBoolean(item: ToolDetail["attributes"][number]): string {
+	const v = item.value.valueBool;
+	if (v === null) {
+		return "—";
+	}
+	return v ? "Sim" : "Não";
+}
+
+function formatRange(item: ToolDetail["attributes"][number]): string {
+	const unit = item.definition.unit ?? "";
+	const min = item.value.valueNumeric;
+	const max = item.value.valueNumericMax;
+	if (min == null) {
+		return "—";
+	}
+	if (max == null) {
+		return withUnit(String(min), unit);
+	}
+	return withUnit(`${min} – ${max}`, unit);
+}
+
+function formatNumber(item: ToolDetail["attributes"][number]): string {
+	const unit = item.definition.unit ?? "";
+	const v = item.value.valueNumeric;
+	if (v == null) {
+		return "—";
+	}
+	return withUnit(String(v), unit);
+}
+
+function formatAttribute(item: ToolDetail["attributes"][number]): string {
+	switch (item.definition.inputType) {
+		case "boolean":
+			return formatBoolean(item);
+		case "numeric_range":
+			return formatRange(item);
+		case "number":
+			return formatNumber(item);
+		default:
+			return item.value.valueText ?? "—";
+	}
+}
+
+export function ProductTabs({ tool, attributes }: ProductTabsProps) {
 	return (
 		<section>
 			<div className="flex items-end justify-between gap-6 px-20 pt-12">
 				<div>
 					<SectionLabel tone="accent">Ficha da ferramenta</SectionLabel>
 					<h2 className="mt-3 max-w-[560px] font-display font-medium text-[36px] leading-[1.05] tracking-[-0.01em]">
-						Tudo sobre a {product.name}.
+						Tudo sobre a {tool.name}.
 					</h2>
 				</div>
 			</div>
@@ -101,18 +149,27 @@ export function ProductTabs({ product }: ProductTabsProps) {
 						<h3 className={`${PANEL_HEADING_CLASS} max-w-[620px]`}>
 							Engenharia em cada parâmetro.
 						</h3>
-						<div className="grid max-w-[920px] grid-cols-2 gap-x-14 gap-y-7">
-							{Object.entries(product.specs).map(([k, v]) => (
-								<div className="border-gray-20 border-b pb-2.5" key={k}>
-									<span className="mb-1.5 block font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.12em]">
-										{k}
-									</span>
-									<div className="font-semibold text-[17px] tracking-[-0.005em]">
-										{v}
+						{attributes.length === 0 ? (
+							<p className={PANEL_PROSE_CLASS}>
+								Nenhuma especificação cadastrada.
+							</p>
+						) : (
+							<div className="grid max-w-[920px] grid-cols-2 gap-x-14 gap-y-7">
+								{attributes.map((attr) => (
+									<div
+										className="border-gray-20 border-b pb-2.5"
+										key={attr.definition.id}
+									>
+										<span className="mb-1.5 block font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.12em]">
+											{attr.definition.label}
+										</span>
+										<div className="font-semibold text-[17px] tracking-[-0.005em]">
+											{formatAttribute(attr)}
+										</div>
 									</div>
-								</div>
-							))}
-						</div>
+								))}
+							</div>
+						)}
 					</TabsContent>
 
 					<TabsContent className="block max-w-[720px]" value="desc">
@@ -121,8 +178,11 @@ export function ProductTabs({ product }: ProductTabsProps) {
 							Projetada para uso profissional contínuo.
 						</h3>
 						<div className={PANEL_PROSE_CLASS}>
-							<p>{product.description}</p>
-							<p>Acompanha maleta, carregador e manual em português.</p>
+							{tool.description ? (
+								<p>{tool.description}</p>
+							) : (
+								<p>Descrição não disponível.</p>
+							)}
 						</div>
 					</TabsContent>
 

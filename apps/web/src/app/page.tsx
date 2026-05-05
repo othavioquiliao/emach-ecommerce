@@ -1,4 +1,9 @@
+import { db } from "@emach/db";
+import type { ToolListItem } from "@emach/db/queries/catalog";
+import { getActivePromotions, getRecentTools } from "@emach/db/queries/catalog";
+import { category } from "@emach/db/schema/categories";
 import { cn } from "@emach/ui/lib/utils";
+import { and, asc, eq, isNull } from "drizzle-orm";
 import { CreditCard, RotateCcw, ShieldCheck, Truck } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
@@ -10,7 +15,8 @@ import { SectionHeader } from "@/components/section-header";
 import { SectionLabel } from "@/components/section-label";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { categories, products } from "@/lib/mock-data";
+
+export const revalidate = 600;
 
 const TRUST_ITEMS = [
 	{ icon: Truck, title: "Frete grátis", sub: "Acima de R$ 299" },
@@ -32,16 +38,61 @@ const STATS = [
 	{ n: "12×", l: "Sem juros" },
 ];
 
-const featured = products.slice(0, 4);
-const promos = products.filter((p) => p.originalPrice);
+async function getRootCategories() {
+	return db
+		.select({
+			id: category.id,
+			slug: category.slug,
+			name: category.name,
+			description: category.description,
+			imageUrl: category.imageUrl,
+		})
+		.from(category)
+		.where(and(isNull(category.parentId), eq(category.isActive, true)))
+		.orderBy(asc(category.sortOrder))
+		.limit(5);
+}
 
-export default function HomePage() {
+function flattenPromoTools(
+	promotions: Awaited<ReturnType<typeof getActivePromotions>>,
+	limit: number
+): ToolListItem[] {
+	const seen = new Map<string, ToolListItem>();
+	for (const promo of promotions) {
+		for (const tool of promo.tools) {
+			if (!seen.has(tool.id)) {
+				seen.set(tool.id, tool);
+			}
+			if (seen.size >= limit) {
+				break;
+			}
+		}
+		if (seen.size >= limit) {
+			break;
+		}
+	}
+	return Array.from(seen.values());
+}
+
+export default async function HomePage() {
+	const [rootCategories, activePromotions, recentTools] = await Promise.all([
+		getRootCategories(),
+		getActivePromotions(db, 4),
+		getRecentTools(db, 4),
+	]);
+
+	const promoTools = flattenPromoTools(activePromotions, 4);
+	const tile0 = rootCategories[0];
+	const tile1 = rootCategories[1];
+	const tile2 = rootCategories[2];
+	const tile3 = rootCategories[3];
+	const tile4 = rootCategories[4];
+
 	return (
 		<>
 			<SiteHeader />
 
 			<main>
-				{/* ---- HERO: Cinema variant ---- */}
 				<section className="relative h-[640px] overflow-hidden bg-black text-white">
 					<div
 						aria-hidden="true"
@@ -51,7 +102,6 @@ export default function HomePage() {
 						aria-hidden="true"
 						className="emach-bg-diagonal absolute inset-0"
 					/>
-					{/* Hero product photo */}
 					<div
 						aria-hidden="true"
 						className="emach-mask-vignette absolute top-1/2 right-[-4%] aspect-square w-[56%] max-w-[720px] -translate-y-1/2 opacity-[0.72]"
@@ -91,15 +141,16 @@ export default function HomePage() {
 									Ver Catálogo
 								</EmachButton>
 							</Link>
-							<Link href="/catalog?cat=eletricas">
-								<EmachButton size="lg" variant="outline-light">
-									Elétricas
-								</EmachButton>
-							</Link>
+							{tile0 && (
+								<Link href={`/catalog?cat=${tile0.slug}`}>
+									<EmachButton size="lg" variant="outline-light">
+										{tile0.name}
+									</EmachButton>
+								</Link>
+							)}
 						</div>
 					</PageContainer>
 
-					{/* Bottom trust strip inside hero */}
 					<div className="absolute right-0 bottom-0 left-0 flex justify-between border-white/10 border-t px-10 py-4 font-display text-[11px] text-white/55 tracking-[0.2em]">
 						<div>ENTREGA EM TODO BRASIL</div>
 						<div>12× SEM JUROS</div>
@@ -108,7 +159,6 @@ export default function HomePage() {
 					</div>
 				</section>
 
-				{/* ---- Trust strip ---- */}
 				<div className="border-border border-b bg-white">
 					<PageContainer className="grid grid-cols-4 gap-6 py-[22px]">
 						{TRUST_ITEMS.map((f) => (
@@ -125,44 +175,45 @@ export default function HomePage() {
 					</PageContainer>
 				</div>
 
-				{/* ---- Categories ---- */}
-				<PageContainer as="section" className="px-[56px] py-[72px]">
-					<SectionHeader
-						label="01 · Categorias"
-						link={{ href: "/catalog", label: "Ver todas" }}
-						title="Explorar por categoria"
-					/>
+				{rootCategories.length > 0 && (
+					<PageContainer as="section" className="px-[56px] py-[72px]">
+						<SectionHeader
+							label="01 · Categorias"
+							link={{ href: "/catalog", label: "Ver todas" }}
+							title="Explorar por categoria"
+						/>
 
-					<div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-2 gap-6">
-						<div className="row-span-2">
-							<CategoryTile category={categories[0]} size="full" />
+						<div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-2 gap-6">
+							{tile0 && (
+								<div className="row-span-2">
+									<CategoryTile category={tile0} size="full" />
+								</div>
+							)}
+							{tile1 && <CategoryTile category={tile1} />}
+							{tile2 && <CategoryTile category={tile2} />}
+							{tile3 && <CategoryTile category={tile3} />}
+							{tile4 && <CategoryTile category={tile4} />}
 						</div>
-						<CategoryTile category={categories[1]} />
-						<CategoryTile category={categories[2]} />
-						<CategoryTile category={categories[3]} />
-						<CategoryTile category={categories[4]} />
-					</div>
-				</PageContainer>
+					</PageContainer>
+				)}
 
-				{/* ---- Promos ---- */}
-				{promos.length > 0 && (
+				{promoTools.length > 0 && (
 					<section className="bg-gray-10 px-[56px] py-[72px]">
 						<PageContainer>
 							<SectionHeader
 								label="02 · Ofertas"
-								link={{ href: "/catalog", label: "Ver todas" }}
-								title="Promoções da semana"
+								link={{ href: "/catalog?promo=1", label: "Ver todas" }}
+								title="Promoções ativas"
 							/>
 							<div className="grid grid-cols-4 gap-6">
-								{promos.map((p) => (
-									<ProductCard key={p.id} product={p} />
+								{promoTools.map((tool) => (
+									<ProductCard key={tool.id} tool={tool} />
 								))}
 							</div>
 						</PageContainer>
 					</section>
 				)}
 
-				{/* ---- Editorial banner ---- */}
 				<section className="bg-black text-white">
 					<PageContainer className="grid min-h-[440px] grid-cols-2 px-0">
 						<div className="flex flex-col justify-center gap-5 px-20 py-20">
@@ -209,18 +260,17 @@ export default function HomePage() {
 					</PageContainer>
 				</section>
 
-				{/* ---- Featured products ---- */}
-				{featured.length > 0 && (
+				{recentTools.length > 0 && (
 					<section className="bg-gray-10 px-[56px] py-[72px]">
 						<PageContainer>
 							<SectionHeader
-								label="02 · Ofertas"
-								link={{ href: "/catalog", label: "Ver todas" }}
-								title="Promoções da semana"
+								label="03 · Novidades"
+								link={{ href: "/catalog?sort=newest", label: "Ver todas" }}
+								title="Recém-chegadas"
 							/>
 							<div className="grid grid-cols-4 gap-6">
-								{featured.map((p) => (
-									<ProductCard key={p.id} product={p} />
+								{recentTools.map((tool) => (
+									<ProductCard key={tool.id} tool={tool} />
 								))}
 							</div>
 						</PageContainer>

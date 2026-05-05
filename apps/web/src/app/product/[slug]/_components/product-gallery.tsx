@@ -16,7 +16,7 @@ import "./product-gallery.css";
 
 interface ProductGalleryProps {
 	categorySlug: string;
-	images: string[];
+	images: { url: string }[];
 	name: string;
 }
 
@@ -64,7 +64,7 @@ export function ProductGallery({
 	images,
 	name,
 }: ProductGalleryProps) {
-	const slots = images.length > 0 ? images : [undefined];
+	const slots = images.length > 0 ? images.map((i) => i.url) : [undefined];
 	const [activeThumb, setActiveThumb] = useState(0);
 	const activeSrc = slots[activeThumb] ?? slots[0];
 	const needsCarousel = slots.length > MAX_STATIC_THUMBS;
