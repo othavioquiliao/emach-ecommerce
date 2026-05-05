@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { useCart } from "@/lib/cart-context";
-import { formatPrice } from "@/lib/mock-data";
+import { fmtBRL, numericToCents } from "@/lib/format";
 
 const checkoutSchema = z.object({
 	firstName: z.string().min(2, "Nome é obrigatório"),
@@ -47,7 +47,7 @@ export function CheckoutContent() {
 
 	const { orderItems, subtotal, shipping, total } = useMemo(() => {
 		const sub = items.reduce(
-			(sum, item) => sum + item.product.price * item.quantity,
+			(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
 			0
 		);
 		const ship = sub >= 29_900 || sub === 0 ? 0 : 2990;
@@ -469,26 +469,26 @@ export function CheckoutContent() {
 						<Separator />
 
 						{orderItems.map((item) => (
-							<div className="flex gap-4" key={item.product.id}>
+							<div className="flex gap-4" key={item.variantId}>
 								<div className="relative size-16 shrink-0 overflow-hidden bg-muted">
-									{item.product.images[0] ? (
+									{item.imageUrl ? (
 										<NextImage
-											alt={item.product.name}
+											alt={item.name}
 											className="object-cover"
 											fill
 											sizes="64px"
-											src={item.product.images[0]}
+											src={item.imageUrl}
 										/>
 									) : (
 										<div className="absolute inset-0 bg-(--gray-10)" />
 									)}
 								</div>
 								<div className="flex-1 text-sm">
-									<p className="font-medium">{item.product.name}</p>
+									<p className="font-medium">{item.name}</p>
 									<p className="text-muted-foreground">Qtd: {item.quantity}</p>
 								</div>
 								<span className="font-medium text-sm">
-									{formatPrice(item.product.price * item.quantity)}
+									{fmtBRL(numericToCents(item.priceAmount) * item.quantity)}
 								</span>
 							</div>
 						))}
@@ -498,11 +498,11 @@ export function CheckoutContent() {
 						<div className="space-y-2 text-sm">
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Subtotal</span>
-								<span>{formatPrice(subtotal)}</span>
+								<span>{fmtBRL(subtotal)}</span>
 							</div>
 							<div className="flex justify-between">
 								<span className="text-muted-foreground">Frete</span>
-								<span>{shipping === 0 ? "Grátis" : formatPrice(shipping)}</span>
+								<span>{shipping === 0 ? "Grátis" : fmtBRL(shipping)}</span>
 							</div>
 						</div>
 
@@ -510,7 +510,7 @@ export function CheckoutContent() {
 
 						<div className="flex justify-between font-bold text-base">
 							<span>Total</span>
-							<span>{formatPrice(total)}</span>
+							<span>{fmtBRL(total)}</span>
 						</div>
 					</div>
 				</div>

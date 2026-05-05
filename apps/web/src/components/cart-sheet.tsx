@@ -14,7 +14,7 @@ import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
 import { FreeShippingProgress } from "@/components/free-shipping-progress";
 import { useCart } from "@/lib/cart-context";
-import { fmtBRL } from "@/lib/format";
+import { fmtBRL, numericToCents } from "@/lib/format";
 
 interface CartSheetProps {
 	onOpenChange: (open: boolean) => void;
@@ -34,7 +34,10 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 	}
 
 	const totalItems = items.reduce((s, i) => s + i.quantity, 0);
-	const subtotal = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
+	const subtotal = items.reduce(
+		(s, i) => s + numericToCents(i.priceAmount) * i.quantity,
+		0
+	);
 	const close = () => onOpenChange(false);
 
 	return (
@@ -81,15 +84,14 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 						<FreeShippingProgress className="px-5 py-3.5" subtotal={subtotal} />
 
 						<div className="flex-1 overflow-y-auto px-5">
-							{items.map(({ product, quantity }) => (
+							{items.map((item) => (
 								<CartItemRow
-									key={product.id}
-									leaving={removing === product.id}
+									item={item}
+									key={item.variantId}
+									leaving={removing === item.variantId}
 									onLinkClick={close}
-									onQuantityChange={(next) => setQty(product.id, next)}
-									onRemove={() => handleRemove(product.id)}
-									product={product}
-									quantity={quantity}
+									onQuantityChange={(next) => setQty(item.variantId, next)}
+									onRemove={() => handleRemove(item.variantId)}
 									variant="compact"
 								/>
 							))}
