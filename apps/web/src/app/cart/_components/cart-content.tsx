@@ -11,7 +11,7 @@ import { FreeShippingProgress } from "@/components/free-shipping-progress";
 import { PageContainer } from "@/components/page-container";
 import { useCart } from "@/lib/cart-context";
 import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
-import { fmtBRL } from "@/lib/format";
+import { fmtBRL, numericToCents } from "@/lib/format";
 
 const STANDARD_SHIPPING = 2490;
 const COUPON_DISCOUNT_RATE = 0.1;
@@ -31,7 +31,10 @@ export function CartContent() {
 		}, 220);
 	}
 
-	const subtotal = items.reduce((s, i) => s + i.product.price * i.quantity, 0);
+	const subtotal = items.reduce(
+		(s, i) => s + numericToCents(i.priceAmount) * i.quantity,
+		0
+	);
 	const discount = couponApplied
 		? Math.round(subtotal * COUPON_DISCOUNT_RATE)
 		: 0;
@@ -74,14 +77,13 @@ export function CartContent() {
 				<div>
 					<FreeShippingProgress className="mb-5" subtotal={subtotal} />
 
-					{items.map(({ product, quantity }) => (
+					{items.map((item) => (
 						<CartItemRow
-							key={product.id}
-							leaving={removing === product.id}
-							onQuantityChange={(next) => setQty(product.id, next)}
-							onRemove={() => handleRemove(product.id)}
-							product={product}
-							quantity={quantity}
+							item={item}
+							key={item.variantId}
+							leaving={removing === item.variantId}
+							onQuantityChange={(next) => setQty(item.variantId, next)}
+							onRemove={() => handleRemove(item.variantId)}
 						/>
 					))}
 				</div>

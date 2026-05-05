@@ -4,28 +4,21 @@ import { cn } from "@emach/ui/lib/utils";
 import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
 import { SectionLabel } from "@/components/section-label";
-import { fmtBRL } from "@/lib/format";
-import type { Product } from "@/lib/mock-data";
+import type { CartItem } from "@/lib/cart-store";
+import { fmtNumericBRL, numericToCents } from "@/lib/format";
 import { QuantityPicker } from "./quantity-picker";
 
 interface CartItemRowProps {
+	item: CartItem;
 	leaving?: boolean;
 	onLinkClick?: () => void;
 	onQuantityChange: (next: number) => void;
 	onRemove: () => void;
-	product: Product;
-	quantity: number;
 	variant?: "full" | "compact";
 }
 
-/**
- * Linha de item de carrinho. Usada em `CartSheet` (compact) e `CartContent`
- * (full). A variante compact reduz as dimensões do thumbnail e do título
- * para caber no drawer lateral.
- */
 export function CartItemRow({
-	product,
-	quantity,
+	item,
 	leaving = false,
 	variant = "full",
 	onQuantityChange,
@@ -33,6 +26,9 @@ export function CartItemRow({
 	onLinkClick,
 }: CartItemRowProps) {
 	const isCompact = variant === "compact";
+	const lineTotalCents = numericToCents(item.priceAmount) * item.quantity;
+	const labelText =
+		item.categoryName ?? (item.voltage ? item.voltage : `SKU ${item.sku}`);
 
 	return (
 		<div
@@ -51,26 +47,26 @@ export function CartItemRow({
 				)}
 			>
 				<ProductImage
-					alt={product.name}
-					categorySlug={product.categorySlug}
+					alt={item.name}
+					categorySlug={item.categorySlug ?? ""}
 					sizes={isCompact ? "80px" : "120px"}
-					src={product.images[0]}
+					src={item.imageUrl ?? undefined}
 				/>
 			</div>
 
 			<div className="min-w-0">
-				<SectionLabel>{product.category}</SectionLabel>
+				<SectionLabel>{labelText}</SectionLabel>
 				{isCompact ? (
 					<Link
 						className="mt-0.5 block overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[14px] hover:underline"
-						href={`/product/${product.slug}`}
+						href={`/product/${item.slug}`}
 						onClick={onLinkClick}
-						title={product.name}
+						title={item.name}
 					>
-						{product.name}
+						{item.name}
 					</Link>
 				) : (
-					<div className="mt-1 font-medium text-[16px]">{product.name}</div>
+					<div className="mt-1 font-medium text-[16px]">{item.name}</div>
 				)}
 				<div
 					className={cn(
@@ -78,7 +74,8 @@ export function CartItemRow({
 						isCompact ? "mt-0.5 text-[11px]" : "mt-1 text-[12px]"
 					)}
 				>
-					SKU {product.sku}
+					SKU {item.sku}
+					{item.voltage && ` · ${item.voltage}`}
 				</div>
 				<div
 					className={cn(
@@ -88,7 +85,7 @@ export function CartItemRow({
 							: "mt-3 flex-wrap items-center gap-4"
 					)}
 				>
-					<QuantityPicker onChange={onQuantityChange} value={quantity} />
+					<QuantityPicker onChange={onQuantityChange} value={item.quantity} />
 					<button
 						className="cursor-pointer border-none bg-transparent text-[12px] text-gray-60 underline hover:text-near-black"
 						onClick={onRemove}
@@ -105,7 +102,7 @@ export function CartItemRow({
 					isCompact ? "pt-0.5 text-[14px]" : "text-[16px]"
 				)}
 			>
-				{fmtBRL(product.price * quantity)}
+				{fmtNumericBRL((lineTotalCents / 100).toFixed(2))}
 			</div>
 		</div>
 	);

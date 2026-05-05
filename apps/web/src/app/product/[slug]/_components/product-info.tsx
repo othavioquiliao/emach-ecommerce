@@ -19,8 +19,8 @@ import { ProductRating } from "@/components/product-rating";
 import { QuantityPicker } from "@/components/quantity-picker";
 import { SectionLabel } from "@/components/section-label";
 import { useCart } from "@/lib/cart-context";
+import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtBRL, fmtNumericBRL, numericToCents } from "@/lib/format";
-import type { Product } from "@/lib/mock-data";
 
 interface ProductInfoProps {
 	activePromotion: ToolDetail["activePromotion"];
@@ -99,23 +99,18 @@ export function ProductInfo({
 	const inStock = stockByVariant[selected.id] ?? false;
 	const installmentCents = Math.round(numericToCents(finalAmount) / 12);
 
-	function buildLegacyProduct(): Product {
+	function buildCartItem(): CartItemSnapshot {
 		return {
-			id: `${tool.id}:${selected.id}`,
+			toolId: tool.id,
+			variantId: selected.id,
 			slug: tool.slug ?? tool.id,
 			name: tool.name,
-			category: primaryCategoryName ?? "",
-			categorySlug: primaryCategorySlug ?? "",
-			price: numericToCents(finalAmount),
-			originalPrice:
-				discounted == null ? undefined : numericToCents(selected.priceAmount),
-			description: tool.description ?? "",
-			shortDescription: [],
-			specs: {},
-			images: primaryImageUrl ? [primaryImageUrl] : [],
-			inStock,
-			voltage: selected.voltage ? [selected.voltage] : undefined,
 			sku: selected.sku,
+			voltage: selected.voltage,
+			priceAmount: finalAmount,
+			imageUrl: primaryImageUrl,
+			categoryName: primaryCategoryName,
+			categorySlug: primaryCategorySlug,
 		};
 	}
 
@@ -124,7 +119,7 @@ export function ProductInfo({
 			toast.error("Variante esgotada");
 			return;
 		}
-		add(buildLegacyProduct(), qty);
+		add(buildCartItem(), qty);
 		toast.success(`${tool.name} adicionado ao carrinho`);
 	}
 
@@ -134,7 +129,7 @@ export function ProductInfo({
 			return;
 		}
 		clear();
-		add(buildLegacyProduct(), qty);
+		add(buildCartItem(), qty);
 		router.push("/checkout");
 	}
 
