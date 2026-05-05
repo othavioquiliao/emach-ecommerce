@@ -13,10 +13,25 @@ export interface SendEmailArgs {
 
 export async function sendEmail({ to, subject, react }: SendEmailArgs) {
 	const html = await render(react);
-	return resend.emails.send({
+	const { data, error } = await resend.emails.send({
 		from: env.EMAIL_FROM,
 		to,
 		subject,
 		html,
 	});
+
+	if (error) {
+		console.error("[email] Resend send failed", {
+			to,
+			subject,
+			from: env.EMAIL_FROM,
+			error,
+		});
+		throw new Error(
+			`Resend send failed: ${error.name ?? "unknown"} — ${error.message ?? JSON.stringify(error)}`
+		);
+	}
+
+	console.info("[email] sent", { to, subject, id: data?.id });
+	return data;
 }
