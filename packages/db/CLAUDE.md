@@ -71,6 +71,23 @@ Site ecomerce escreve em `order`, `orderItem`, `stockMovement`, `client*`, `revi
 
 **Atenção pós-refactor variants:** `stock_level`, `stock_movement` e `order_item` agora referenciam `tool_variant.id` (não mais `tool.id`). App ecomerce precisa enviar `variantId` em pedidos e movimentos, não `toolId`. Ler `tool_variant` pro SKU vendável; `tool` é produto-pai (info comum).
 
+## Storage de imagens (Supabase)
+
+- **Bucket:** `tool-images` (constante `TOOL_IMAGES_BUCKET` definida no dashboard em `apps/web/src/lib/supabase-server.ts`).
+- **Acesso:** public read. Storefront anon serve direto via `next/image` sem signed URL.
+- **Path no bucket:** flat `<uuid>.<ext>` (UUID via `crypto.randomUUID()` no upload). Sem prefixo por tool.
+- **Formatos aceitos:** `image/jpeg`, `image/png`, `image/webp`. Cap 2MB pós-compressão cliente. Upload feito pelo dashboard.
+- **`tool_image.url` armazena URL pública absoluta completa** — formato `https://<projeto>.supabase.co/storage/v1/object/public/tool-images/<uuid>.<ext>`. Drop-in via `<Image src={toolImage.url} />`.
+- **Whitelist em `apps/web/next.config.ts`:** `images.remotePatterns` deve incluir `{ protocol: "https", hostname: "<projeto>.supabase.co", pathname: "/storage/v1/object/public/tool-images/**" }`.
+
+## Queries compartilhadas com dashboard
+
+`packages/db/src/queries/*.ts` é **owned-by-dashboard**: ferramentas de leitura/regra de negócio que este storefront consome. Lista atual: `reviews.ts` (`canCreateReview`), `catalog.ts` (10 funções de catálogo: `getTools`, `getToolBySlug`, `getCategoryTree`, `getCategoryBySlug`, `getActivePromotions`, `getRecentTools`, `searchTools`, `getReviews`, `getReviewStats`, `getAllToolSlugs`/`getAllCategorySlugs`).
+
+**Regra de sync:** dashboard é fonte de verdade. Este repo sincroniza byte-a-byte (cópia manual a cada mudança). **Não editar em isolamento aqui** — mudanças de regra de negócio começam no dashboard e propagam.
+
+Padrão de assinatura: `db: NodePgDatabase<Record<string, unknown>>` parametrizado (não usar singleton `db` exportado), tipos exportados via `export type`, sem `select *` nas projeções (esconder `costAmount` em endpoints públicos).
+
 ## Testes (futuro)
 
 Suíte vitest em `test/` virá na Fase F (requer Supabase local CLI + Docker). Hoje cobertura única é `apps/web/__tests__/permissions.test.ts` (puro unit, sem DB).

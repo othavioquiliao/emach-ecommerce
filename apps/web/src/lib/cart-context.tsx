@@ -10,18 +10,19 @@ import {
 
 import {
 	addToCart,
+	type CartItem,
+	type CartItemSnapshot,
 	loadCart,
 	removeFromCart,
 	updateQty,
 } from "@/lib/cart-store";
-import type { CartItem, Product } from "@/lib/mock-data";
 
 interface CartCtx {
-	add: (product: Product, qty?: number) => void;
+	add: (item: CartItemSnapshot, qty?: number) => void;
 	clear: () => void;
 	items: CartItem[];
-	remove: (productId: string) => void;
-	setQty: (productId: string, qty: number) => void;
+	remove: (variantId: string) => void;
+	setQty: (variantId: string, qty: number) => void;
 	totalCount: number;
 }
 
@@ -41,16 +42,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 		setItems(loadCart());
 	}, []);
 
-	const add = useCallback((product: Product, qty = 1) => {
-		setItems((prev) => addToCart(prev, product, qty));
+	const add = useCallback((item: CartItemSnapshot, qty = 1) => {
+		setItems((prev) => addToCart(prev, item, qty));
 	}, []);
 
-	const setQty = useCallback((productId: string, qty: number) => {
-		setItems((prev) => updateQty(prev, productId, qty));
+	const setQty = useCallback((variantId: string, qty: number) => {
+		setItems((prev) => updateQty(prev, variantId, qty));
 	}, []);
 
-	const remove = useCallback((productId: string) => {
-		setItems((prev) => removeFromCart(prev, productId));
+	const remove = useCallback((variantId: string) => {
+		setItems((prev) => removeFromCart(prev, variantId));
 	}, []);
 
 	const clear = useCallback(() => {

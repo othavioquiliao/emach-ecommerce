@@ -1,8 +1,8 @@
-import type { Review } from "@/lib/mock-data";
+import type { Review } from "@emach/db/schema/reviews";
 import { StarRating } from "./star-rating";
 
 interface ReviewCardProps {
-	review: Review;
+	review: Review & { clientName: string };
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
@@ -12,8 +12,7 @@ const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
 });
 const TRAILING_DOT = /\.$/u;
 
-function formatReviewDate(iso: string): string {
-	const date = new Date(`${iso}T00:00:00`);
+function formatReviewDate(date: Date): string {
 	return DATE_FORMATTER.format(date).replace(TRAILING_DOT, "").toUpperCase();
 }
 
@@ -24,19 +23,26 @@ export function ReviewCard({ review }: ReviewCardProps) {
 				<div className="flex items-center gap-2.5">
 					<StarRating rating={review.rating} />
 					<span className="font-semibold text-[13px] text-foreground">
-						{review.author}
+						{review.clientName}
 					</span>
 				</div>
 				<time
 					className="font-display text-[11px] text-gray-50 uppercase tracking-[0.08em]"
-					dateTime={review.date}
+					dateTime={review.createdAt.toISOString()}
 				>
-					{formatReviewDate(review.date)}
+					{formatReviewDate(review.createdAt)}
 				</time>
 			</header>
-			<p className="text-[13.5px] text-gray-70 leading-relaxed">
-				{review.body}
-			</p>
+			{review.title && (
+				<h4 className="mb-1 font-semibold text-[14px] text-foreground">
+					{review.title}
+				</h4>
+			)}
+			{review.body && (
+				<p className="text-[13.5px] text-gray-70 leading-relaxed">
+					{review.body}
+				</p>
+			)}
 		</article>
 	);
 }

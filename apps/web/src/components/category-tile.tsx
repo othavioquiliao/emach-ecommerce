@@ -3,10 +3,16 @@ import { ArrowRight } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { SectionLabel } from "@/components/section-label";
-import type { Category } from "@/lib/mock-data";
+
+interface CategoryTileCategory {
+	description: string | null;
+	imageUrl: string | null;
+	name: string;
+	slug: string;
+}
 
 interface CategoryTileProps {
-	category: Category;
+	category: CategoryTileCategory;
 	size?: "sm" | "md" | "lg" | "full";
 }
 
@@ -30,14 +36,14 @@ export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 			href={`/catalog?cat=${category.slug}`}
 		>
 			{/* Background image */}
-			{category.image && (
+			{category.imageUrl && (
 				<div aria-hidden="true" className={OVERLAY_BASE}>
 					<Image
 						alt=""
 						className="object-cover"
 						fill
 						sizes={size === "full" ? "50vw" : "25vw"}
-						src={category.image}
+						src={category.imageUrl}
 					/>
 				</div>
 			)}
@@ -47,7 +53,7 @@ export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 				aria-hidden="true"
 				className={cn(
 					OVERLAY_BASE,
-					category.image
+					category.imageUrl
 						? "emach-bg-category-overlay"
 						: "emach-bg-category-fallback"
 				)}

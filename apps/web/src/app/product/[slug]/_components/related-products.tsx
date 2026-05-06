@@ -1,14 +1,30 @@
+import { db } from "@emach/db";
+import { getTools } from "@emach/db/queries/catalog";
 import { Separator } from "@emach/ui/components/separator";
-
 import { ProductCard } from "@/components/product-card";
-import type { Product } from "@/lib/mock-data";
 
 interface RelatedProductsProps {
-	products: Product[];
+	categoryId: string | null;
+	toolId: string;
 }
 
-export function RelatedProducts({ products }: RelatedProductsProps) {
-	if (products.length === 0) {
+export async function RelatedProducts({
+	toolId,
+	categoryId,
+}: RelatedProductsProps) {
+	if (!categoryId) {
+		return null;
+	}
+
+	const { tools } = await getTools(db, {
+		categoryId,
+		excludeToolId: toolId,
+		limit: 5,
+		offset: 0,
+		sort: "newest",
+	});
+
+	if (tools.length === 0) {
 		return null;
 	}
 
@@ -20,8 +36,8 @@ export function RelatedProducts({ products }: RelatedProductsProps) {
 					Você também pode gostar
 				</h2>
 				<div className="grid grid-cols-5 gap-6">
-					{products.map((product) => (
-						<ProductCard key={product.id} product={product} />
+					{tools.map((tool) => (
+						<ProductCard key={tool.id} tool={tool} />
 					))}
 				</div>
 			</section>
