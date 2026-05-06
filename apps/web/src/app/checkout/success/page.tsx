@@ -1,0 +1,65 @@
+import { CircleCheckBig } from "lucide-react";
+import type { Metadata } from "next";
+import Link from "next/link";
+
+import { EmachButton } from "@/components/emach-button";
+import { PageContainer } from "@/components/page-container";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+
+export const metadata: Metadata = {
+	title: "Pedido confirmado — EMACH",
+	description: "Seu pedido EMACH foi confirmado com sucesso.",
+	robots: { index: false, follow: false },
+};
+
+interface SuccessPageProps {
+	searchParams: Promise<{ order?: string }>;
+}
+
+export default async function CheckoutSuccessPage({
+	searchParams,
+}: SuccessPageProps) {
+	const { order } = await searchParams;
+	return (
+		<>
+			<SiteHeader />
+			<PageContainer
+				as="main"
+				className="flex flex-col items-center py-28 text-center"
+			>
+				<div className="flex size-[72px] items-center justify-center rounded-full bg-success/10">
+					<CircleCheckBig className="text-success" size={32} />
+				</div>
+				<div className="mt-6 font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.14em]">
+					Pedido confirmado
+				</div>
+				<h1 className="mt-3 font-display font-medium text-[clamp(36px,5vw,56px)] text-near-black leading-tight tracking-[-0.01em]">
+					Obrigado pela compra.
+				</h1>
+				<p className="mt-5 max-w-[440px] text-[15px] text-gray-60 leading-[1.6]">
+					Enviamos a confirmação por e-mail com todos os detalhes da entrega e
+					nota fiscal. Você pode acompanhar o status pelo seu painel.
+				</p>
+				{order && (
+					<div className="mt-6 font-display text-[13px] text-near-black uppercase tracking-[0.14em]">
+						Pedido #{order}
+					</div>
+				)}
+				<div className="mt-8 flex gap-3">
+					<Link href="/catalog">
+						<EmachButton size="lg" variant="primary">
+							Continuar comprando
+						</EmachButton>
+					</Link>
+					<Link href="/">
+						<EmachButton size="lg" variant="outline">
+							Página inicial
+						</EmachButton>
+					</Link>
+				</div>
+			</PageContainer>
+			<SiteFooter />
+		</>
+	);
+}

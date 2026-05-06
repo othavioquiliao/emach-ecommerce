@@ -1,0 +1,68 @@
+import { cn } from "@emach/ui/lib/utils";
+import { Disc3, Drill, Ruler, Shield, Wrench } from "lucide-react";
+import Image from "next/image";
+
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+	eletricas: Drill,
+	manuais: Wrench,
+	medicao: Ruler,
+	seguranca: Shield,
+	acessorios: Disc3,
+};
+
+interface ProductImageProps {
+	alt?: string;
+	categorySlug: string;
+	priority?: boolean;
+	sizes?: string;
+	src?: string;
+	/** Ativar zoom no hover do ancestral `.group` */
+	zoom?: boolean;
+}
+
+const WRAPPER_BASE =
+	"absolute inset-0 overflow-hidden transition-transform duration-[400ms] ease-[cubic-bezier(.2,.6,.2,1)]";
+const ZOOM_ON_HOVER = "group-hover:scale-[1.06]";
+
+export function ProductImage({
+	alt,
+	categorySlug,
+	priority = false,
+	sizes = "25vw",
+	src,
+	zoom = false,
+}: ProductImageProps) {
+	if (src) {
+		return (
+			<div className={cn(WRAPPER_BASE, zoom && ZOOM_ON_HOVER)}>
+				<Image
+					alt={alt ?? ""}
+					className="object-cover"
+					fill
+					priority={priority}
+					sizes={sizes}
+					src={src}
+				/>
+			</div>
+		);
+	}
+
+	const Icon = CATEGORY_ICONS[categorySlug] ?? Wrench;
+	return (
+		<div
+			className={cn(
+				"emach-bg-placeholder flex items-center justify-center",
+				WRAPPER_BASE,
+				zoom && ZOOM_ON_HOVER
+			)}
+		>
+			<div className="flex size-[58%] items-center justify-center text-cinema-2 opacity-[0.82]">
+				<Icon className="h-full w-full" strokeWidth={1.2} />
+			</div>
+			<div
+				aria-hidden="true"
+				className="emach-bg-placeholder-shadow absolute right-[20%] bottom-[8%] left-[20%] h-4 blur-sm"
+			/>
+		</div>
+	);
+}

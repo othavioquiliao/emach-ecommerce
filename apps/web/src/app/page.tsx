@@ -1,0 +1,234 @@
+import { cn } from "@emach/ui/lib/utils";
+import { CreditCard, RotateCcw, ShieldCheck, Truck } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+import { CategoryTile } from "@/components/category-tile";
+import { EmachButton } from "@/components/emach-button";
+import { PageContainer } from "@/components/page-container";
+import { ProductCard } from "@/components/product-card";
+import { SectionHeader } from "@/components/section-header";
+import { SectionLabel } from "@/components/section-label";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
+import { categories, products } from "@/lib/mock-data";
+
+const TRUST_ITEMS = [
+	{ icon: Truck, title: "Frete grátis", sub: "Acima de R$ 299" },
+	{
+		icon: ShieldCheck,
+		title: "2 anos de garantia",
+		sub: "Toda linha profissional",
+	},
+	{ icon: CreditCard, title: "12× sem juros", sub: "No cartão" },
+	{ icon: RotateCcw, title: "30 dias para troca", sub: "Sem burocracia" },
+];
+
+const STATS = [
+	{ n: "200+", l: "Horas de teste" },
+	{ n: "2 anos", l: "Garantia total" },
+	{ n: "98%", l: "Aprovação" },
+	{ n: "50+", l: "Cidades" },
+	{ n: "24/7", l: "Suporte" },
+	{ n: "12×", l: "Sem juros" },
+];
+
+const featured = products.slice(0, 4);
+const promos = products.filter((p) => p.originalPrice);
+
+export default function HomePage() {
+	return (
+		<>
+			<SiteHeader />
+
+			<main>
+				{/* ---- HERO: Cinema variant ---- */}
+				<section className="relative h-[640px] overflow-hidden bg-black text-white">
+					<div
+						aria-hidden="true"
+						className="emach-bg-cinema absolute inset-0"
+					/>
+					<div
+						aria-hidden="true"
+						className="emach-bg-diagonal absolute inset-0"
+					/>
+					{/* Hero product photo */}
+					<div
+						aria-hidden="true"
+						className="emach-mask-vignette absolute top-1/2 right-[-4%] aspect-square w-[56%] max-w-[720px] -translate-y-1/2 opacity-[0.72]"
+					>
+						<Image
+							alt=""
+							className="object-contain"
+							fill
+							priority
+							sizes="720px"
+							src="/images/hero-tools.png"
+						/>
+					</div>
+
+					<PageContainer className="relative flex h-full flex-col justify-center gap-6 px-20">
+						<div className="flex items-center gap-3.5">
+							<div className="h-0.5 w-12 bg-emach-red" />
+							<SectionLabel tone="light">
+								Coleção 2026 · Linha Profissional
+							</SectionLabel>
+						</div>
+
+						<h1 className="max-w-[780px] text-balance font-display font-medium text-[clamp(44px,6vw,84px)] leading-[0.95] tracking-[-0.01em]">
+							Ferramentas
+							<br />
+							feitas para <span className="text-emach-red">trabalhar</span>.
+						</h1>
+
+						<p className="max-w-[520px] text-[17px] text-white/75 leading-relaxed">
+							Desempenho industrial para obras, oficinas e profissionais que não
+							negociam com qualidade.
+						</p>
+
+						<div className="mt-2 flex gap-3">
+							<Link href="/catalog">
+								<EmachButton size="lg" variant="primary">
+									Ver Catálogo
+								</EmachButton>
+							</Link>
+							<Link href="/catalog?cat=eletricas">
+								<EmachButton size="lg" variant="outline-light">
+									Elétricas
+								</EmachButton>
+							</Link>
+						</div>
+					</PageContainer>
+
+					{/* Bottom trust strip inside hero */}
+					<div className="absolute right-0 bottom-0 left-0 flex justify-between border-white/10 border-t px-10 py-4 font-display text-[11px] text-white/55 tracking-[0.2em]">
+						<div>ENTREGA EM TODO BRASIL</div>
+						<div>12× SEM JUROS</div>
+						<div>GARANTIA 2 ANOS</div>
+						<div>SUPORTE 24/7</div>
+					</div>
+				</section>
+
+				{/* ---- Trust strip ---- */}
+				<div className="border-border border-b bg-white">
+					<PageContainer className="grid grid-cols-4 gap-6 py-[22px]">
+						{TRUST_ITEMS.map((f) => (
+							<div className="flex items-center gap-3" key={f.title}>
+								<div className="flex size-9 items-center justify-center bg-gray-10">
+									<f.icon size={18} />
+								</div>
+								<div>
+									<div className="font-semibold text-[13px]">{f.title}</div>
+									<div className="text-[12px] text-gray-60">{f.sub}</div>
+								</div>
+							</div>
+						))}
+					</PageContainer>
+				</div>
+
+				{/* ---- Categories ---- */}
+				<PageContainer as="section" className="px-[56px] py-[72px]">
+					<SectionHeader
+						label="01 · Categorias"
+						link={{ href: "/catalog", label: "Ver todas" }}
+						title="Explorar por categoria"
+					/>
+
+					<div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-2 gap-6">
+						<div className="row-span-2">
+							<CategoryTile category={categories[0]} size="full" />
+						</div>
+						<CategoryTile category={categories[1]} />
+						<CategoryTile category={categories[2]} />
+						<CategoryTile category={categories[3]} />
+						<CategoryTile category={categories[4]} />
+					</div>
+				</PageContainer>
+
+				{/* ---- Promos ---- */}
+				{promos.length > 0 && (
+					<section className="bg-gray-10 px-[56px] py-[72px]">
+						<PageContainer>
+							<SectionHeader
+								label="02 · Ofertas"
+								link={{ href: "/catalog", label: "Ver todas" }}
+								title="Promoções da semana"
+							/>
+							<div className="grid grid-cols-4 gap-6">
+								{promos.map((p) => (
+									<ProductCard key={p.id} product={p} />
+								))}
+							</div>
+						</PageContainer>
+					</section>
+				)}
+
+				{/* ---- Editorial banner ---- */}
+				<section className="bg-black text-white">
+					<PageContainer className="grid min-h-[440px] grid-cols-2 px-0">
+						<div className="flex flex-col justify-center gap-5 px-20 py-20">
+							<SectionLabel tone="accent">Feito para durar</SectionLabel>
+							<h2 className="font-display font-medium text-[48px] leading-[1.02] tracking-[-0.01em]">
+								Engenharia que
+								<br />
+								não abandona você
+								<br />
+								no meio da obra.
+							</h2>
+							<p className="max-w-[440px] text-[16px] text-white/70 leading-relaxed">
+								Cada ferramenta EMACH passa por 200+ horas de testes em campo
+								antes de chegar ao catálogo.
+							</p>
+							<div>
+								<EmachButton size="lg" variant="outline-light">
+									Conheça a marca
+								</EmachButton>
+							</div>
+						</div>
+
+						<div className="emach-bg-stats relative border-emach-red border-l-[3px]">
+							<div className="absolute inset-0 grid grid-cols-3 content-center p-10">
+								{STATS.map((s, i) => (
+									<div
+										className={cn(
+											"p-5",
+											i > 2 && "border-white/10 border-t",
+											i % 3 < 2 && "border-white/10 border-r"
+										)}
+										key={s.n}
+									>
+										<div className="font-display font-medium text-[32px] text-white">
+											{s.n}
+										</div>
+										<div className="mt-1 text-[11px] text-white/55 uppercase tracking-[0.14em]">
+											{s.l}
+										</div>
+									</div>
+								))}
+							</div>
+						</div>
+					</PageContainer>
+				</section>
+
+				{/* ---- Featured products ---- */}
+				{featured.length > 0 && (
+					<section className="bg-gray-10 px-[56px] py-[72px]">
+						<PageContainer>
+							<SectionHeader
+								label="02 · Ofertas"
+								link={{ href: "/catalog", label: "Ver todas" }}
+								title="Promoções da semana"
+							/>
+							<div className="grid grid-cols-4 gap-6">
+								{featured.map((p) => (
+									<ProductCard key={p.id} product={p} />
+								))}
+							</div>
+						</PageContainer>
+					</section>
+				)}
+			</main>
+
+			<SiteFooter />
+		</>
+	);
+}

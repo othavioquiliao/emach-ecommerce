@@ -1,0 +1,54 @@
+{
+  "name": "emach",
+  "private": true,
+  "workspaces": {
+    "packages": [
+      "apps/*",
+      "packages/*"
+    ],
+    "catalog": {
+      "dotenv": "^17.2.2",
+      "zod": "^4.1.13",
+      "lucide-react": "^0.546.0",
+      "react": "^19.2.3",
+      "react-dom": "^19.2.3",
+      "sonner": "^2.0.5",
+      "better-auth": "1.5.5",
+      "@types/react": "^19.2.10",
+      "@types/react-dom": "^19.2.3",
+      "tailwindcss": "^4.1.18",
+      "resend": "^6.12.2",
+      "@react-email/components": "^1.0.12",
+      "@react-email/render": "^2.0.7"
+    }
+  },
+  "type": "module",
+  "scripts": {
+    "dev": "turbo dev",
+    "build": "turbo build",
+    "check-types": "turbo check-types",
+    "dev:web": "turbo -F web dev",
+    "db:push": "turbo -F @emach/db db:push",
+    "db:studio": "turbo -F @emach/db db:studio",
+    "db:generate": "turbo -F @emach/db db:generate",
+    "db:migrate": "turbo -F @emach/db db:migrate",
+    "check": "ultracite check",
+    "fix": "ultracite fix"
+  },
+  "dependencies": {
+    "@emach/env": "workspace:*",
+    "dotenv": "^17.4.1",
+    "react-inner-image-zoom": "^4.0.1",
+    "resend": "^6.12.2",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.10",
+    "@emach/config": "workspace:*",
+    "@types/node": "^25.5.2",
+    "turbo": "^2.9.5",
+    "typescript": "^6.0.2",
+    "ultracite": "7.4.4"
+  },
+  "packageManager": "bun@1.3.11"
+}
