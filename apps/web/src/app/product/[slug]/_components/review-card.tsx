@@ -17,6 +17,10 @@ function formatReviewDate(date: Date): string {
 }
 
 export function ReviewCard({ review }: ReviewCardProps) {
+	const createdAt =
+		review.createdAt instanceof Date
+			? review.createdAt
+			: new Date(review.createdAt as unknown as string);
 	return (
 		<article className="border-gray-20 border-b py-7 md:even:pl-8 md:odd:pr-8">
 			<header className="mb-2.5 flex items-center justify-between gap-3">
@@ -28,9 +32,9 @@ export function ReviewCard({ review }: ReviewCardProps) {
 				</div>
 				<time
 					className="font-display text-[11px] text-gray-50 uppercase tracking-[0.08em]"
-					dateTime={review.createdAt.toISOString()}
+					dateTime={createdAt.toISOString()}
 				>
-					{formatReviewDate(review.createdAt)}
+					{formatReviewDate(createdAt)}
 				</time>
 			</header>
 			{review.title && (
