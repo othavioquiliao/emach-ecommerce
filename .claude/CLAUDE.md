@@ -3,7 +3,7 @@
 > Este arquivo é o mapa completo do projeto. Leia antes de qualquer tarefa.
 > **Responda sempre em Português.** Termos técnicos e identificadores de código ficam em English.
 >
-> **Repo irmão:** `~/noctua/emach-dashboard` (admin staff) compartilha a **mesma DB Supabase** e parte do schema Drizzle. Quando algo aqui depender de tabelas owned-by-dashboard (`tool`, `category`, `promotion`, etc.), a fonte de verdade é o dashboard. Ver §3 (Ownership) e `docs/auth/ecommerce-integration.md`.
+> **Repo irmão:** `https://github.com/othavioquiliao/emach-dashboard` (admin staff) compartilha a **mesma DB Supabase** e parte do schema Drizzle. Quando algo aqui depender de tabelas owned-by-dashboard (`tool`, `category`, `promotion`, etc.), a fonte de verdade é o dashboard. Ver §3 (Ownership) e `docs/auth/ecommerce-integration.md`.
 
 ---
 
