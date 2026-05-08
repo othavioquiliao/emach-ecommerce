@@ -11,14 +11,14 @@ import {
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-
+import { ScrollReset } from "@/components/scroll-reset";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-
 import { ProductGallery } from "./_components/product-gallery";
 import { ProductInfo } from "./_components/product-info";
 import { ProductReviews } from "./_components/product-reviews";
 import { ProductTabs } from "./_components/product-tabs";
+
 import { RelatedProducts } from "./_components/related-products";
 import type { ReviewSortKey } from "./_components/review-sort";
 
@@ -105,6 +105,7 @@ export default async function ProductPage({
 
 	return (
 		<>
+			<ScrollReset />
 			<SiteHeader />
 
 			<div className="border-border border-b px-20 py-4">

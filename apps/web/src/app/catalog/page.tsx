@@ -5,6 +5,7 @@ import {
 	getTools,
 } from "@emach/db/queries/catalog";
 import type { Metadata } from "next";
+import { ScrollReset } from "@/components/scroll-reset";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { CatalogContent } from "./_components/catalog-content";
@@ -126,6 +127,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 
 	return (
 		<>
+			<ScrollReset />
 			<SiteHeader />
 			<CatalogContent
 				categoryTree={categoryTree}

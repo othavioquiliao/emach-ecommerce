@@ -191,7 +191,7 @@ export function ProductInfo({
 
 			{orderedVariants.length > 1 && (
 				<div>
-					<div className="mb-2.5 font-semibold text-md">Opções disponíveis</div>
+					<div className="mb-2.5 font-semibold text-md">Voltagem</div>
 					<div className="flex flex-wrap gap-2">
 						{orderedVariants.map((v) => {
 							const variantStock = stockByVariant[v.id] ?? false;
@@ -199,29 +199,19 @@ export function ProductInfo({
 							return (
 								<button
 									className={cn(
-										"flex min-w-[140px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors",
+										"min-w-[88px] border-2 px-5 py-3 text-center font-display font-semibold text-[12px] uppercase tracking-[0.14em] transition-colors",
 										isActive
 											? "border-emach-red bg-near-black text-white"
-											: "border-gray-20 bg-background text-foreground hover:border-foreground"
+											: "border-gray-20 bg-background text-foreground hover:border-foreground",
+										!variantStock &&
+											"cursor-not-allowed line-through opacity-50"
 									)}
+									disabled={!variantStock}
 									key={v.id}
 									onClick={() => setSelectedVariantId(v.id)}
 									type="button"
 								>
-									<span className="font-display font-semibold text-[11px] uppercase tracking-[0.14em] opacity-70">
-										{v.voltage ?? "Padrão"}
-									</span>
-									<span className="font-bold text-[16px] tabular-nums">
-										{fmtNumericBRL(
-											applyDiscount(v.priceAmount, activePromotion) ??
-												v.priceAmount
-										)}
-									</span>
-									<span className="text-[11px] opacity-70">
-										SKU {v.sku}
-										{!variantStock && " · Esgotado"}
-										{v.isDefault && " · Padrão"}
-									</span>
+									{v.voltage ?? "Padrão"}
 								</button>
 							);
 						})}

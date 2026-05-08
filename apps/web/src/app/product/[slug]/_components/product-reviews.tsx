@@ -40,6 +40,10 @@ export function ProductReviews({
 	pathname,
 	currentSearchParams,
 }: ProductReviewsProps) {
+	if (stats.count === 0) {
+		return null;
+	}
+
 	const avg = stats.avg ?? 0;
 	const recommend = recommendPct(stats.distribution);
 
