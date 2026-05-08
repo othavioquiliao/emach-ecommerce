@@ -58,3 +58,8 @@ coverage
 .cache
 tmp
 temp
+
+# Drizzle Kit migrations geradas (DB owned-by-dashboard — schema TS é a fonte de verdade local)
+# Triggers/RLS manuais (_triggers.sql, _rls.sql) permanecem versionados.
+packages/db/src/migrations/[0-9]*.sql
+packages/db/src/migrations/meta/
