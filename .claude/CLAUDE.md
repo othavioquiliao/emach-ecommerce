@@ -3,7 +3,7 @@
 > Este arquivo é o mapa completo do projeto. Leia antes de qualquer tarefa.
 > **Responda sempre em Português.** Termos técnicos e identificadores de código ficam em English.
 >
-> **Repo irmão:** `https://github.com/othavioquiliao/emach-dashboard` (admin staff) compartilha a **mesma DB Supabase** e parte do schema Drizzle. Quando algo aqui depender de tabelas owned-by-dashboard (`tool`, `category`, `promotion`, etc.), a fonte de verdade é o dashboard. Ver §3 (Ownership) e `docs/auth/ecommerce-integration.md`.
+> **Repo irmão:** `https://github.com/othavioquiliao/emach-dashboard` (admin staff) compartilha a **mesma DB Supabase** e parte do schema Drizzle. Quando algo aqui depender de tabelas owned-by-dashboard (`tool`, `category`, `promotion`, etc.), a fonte de verdade é o dashboard. Ver §3 (Ownership) abaixo.
 
 ---
 
@@ -28,8 +28,8 @@
 | **CSS** | Tailwind CSS v4 |
 | **Linting/Format** | Biome via Ultracite |
 | **Forms** | TanStack Form + Zod |
-| **Design** | Ferrari-inspired (chiaroscuro, Barlow, `#DA291C`) |
-| **Design Tool** | Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`) |
+| **Design** | Ferrari-inspired (chiaroscuro, Barlow, `#DA291C`) — ver `DESIGN.md` + `.impeccable.md` |
+| **Logging** | `evlog` (instrumentation + middleware + `log.error` em server actions) |
 
 IDs em server actions/scripts: **`crypto.randomUUID()`** (sem nanoid).
 
@@ -174,12 +174,8 @@ emach-ecommerce/
   - `@emach/ui/lib/utils` → função `cn()` (clsx + tailwind-merge)
   - `@emach/ui/globals.css` → CSS com tokens de design Tailwind v4
   - `@emach/ui/hooks/<nome>` → hooks compartilhados (diretório existe, atualmente vazio)
-- **30 componentes existentes:** `accordion`, `aspect-ratio`, `avatar`, `badge`, `breadcrumb`, `button`, `card`, `carousel`, `checkbox`, `command`, `dialog`, `dropdown-menu`, `input`, `input-group`, `label`, `navigation-menu`, `pagination`, `popover`, `scroll-area`, `select`, `separator`, `sheet`, `skeleton`, `sonner`, `table`, `tabs`, `textarea`, `toggle`, `toggle-group`, `tooltip`
-- **Como adicionar componentes:**
-  ```bash
-  bunx shadcn@latest add <nome> -c packages/ui
-  bunx shadcn@latest add table sheet -c packages/ui    # múltiplos
-  ```
+- **Componentes existentes:** ver `packages/ui/src/components/` (lista vivo — não duplicar aqui).
+- **Adicionar componente:** `bunx shadcn@latest add <nome> -c packages/ui` (suporta múltiplos: `add table sheet ...`).
 - **Dependências internas:** nenhuma em runtime
 
 ---
@@ -389,8 +385,8 @@ Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em buil
 - **OAuth Google/Apple backend** — Botão "Continuar com Google" no `/login` é placeholder visual com toast "Em breve". Apple removido. Backend ainda sem `socialProviders` configurado em `@emach/auth/ecommerce`.
 - **Domínio verificado no Resend** — `EMAIL_FROM=onboarding@resend.dev` (sandbox). Em sandbox, Resend só entrega para o e-mail do owner da conta. Quando comprar domínio, verificar (SPF/DKIM/DMARC) e atualizar `EMAIL_FROM`.
 - **Rate limit em endpoints auth** — Sem proteção contra brute-force em `signin`/`signup`/`reset`.
-- **Logger central** — `apps/web/src/lib/logger.ts` ainda não existe; código atual usa `console.*` (ver §11 anti-pattern). Criar wrapper antes de adicionar mutations sensíveis em prod.
 - **Templates de e-mail Ferrari-style** — `verify-email.tsx` e `reset-password.tsx` funcionais mas sem polish visual.
+- **Evlog drain** — `apps/web/src/lib/evlog.ts` configurado mas sem drain externo (Axiom/Datadog/Sentry). Output só em console por enquanto.
 - **`apps/web/src/hooks/`** — Diretório não criado ainda.
 - **`loading.tsx`, `error.tsx`** — Nenhuma rota tem esses (apenas `not-found.tsx` global).
 - **Route groups** (`(shop)`, `(auth)`, etc.) — Não utilizados ainda.
@@ -405,9 +401,9 @@ Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em buil
 - **Schema completo do dashboard** sincronizado: `tool`/`toolVariant`/`category`/`attribute*`/`order*`/`stockMovement`/`review`/`consentLog` etc.
 - **RLS aplicada** em todas as 30 tabelas (catálogo público anon+authenticated; resto deny-all server-side)
 - **Triggers PL/pgSQL** ativos (anti-ciclo categoria, idempotência stock_movement)
-- **Design visual completo** no Pencil MCP (`~/Work/pencil/emach-ecommerce.pen`) com 28 componentes, 34 vars, 6 páginas
-- **Design context** em `.impeccable.md` na raiz e `design/DESIGN.md`
-- **Specs** em `docs/superpowers/specs/`
+- **Design context** em `.impeccable.md` (princípios) + `DESIGN.md` (tokens completos)
+- **PWA** wired via `manifest.ts` + ícones EMACH em `public/favicon/`
+- **evlog** instrumentation + middleware + `log.error` em `create-order` server action
 
 ---
 
@@ -416,10 +412,8 @@ Todas as vars são definidas em `apps/web/.env` (gitignored) e validadas em buil
 O projeto segue uma linguagem visual inspirada no site Ferrari. A linguagem visual é Ferrari, mas os produtos são **ferramentas**.
 
 **Referências:**
-- `design/DESIGN.md` — Referência visual completa (cores, tipografia, layout, breakpoints)
-- `design/preview.html` / `design/preview-dark.html` — Catálogo visual HTML dos tokens
-- `.impeccable.md` — Contexto de design persistente com princípios e guidelines
-- `~/Work/pencil/emach-ecommerce.pen` — Design System visual no Pencil MCP
+- `DESIGN.md` — Referência visual completa (cores, tipografia, layout, breakpoints, componentes EMACH custom)
+- `.impeccable.md` — Princípios de design + tom de marca (versão curta)
 
 ### Categorias de Produtos
 
@@ -499,7 +493,7 @@ O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg
 
 ## 11. Anti-patterns banidos (P0/P1)
 
-- **`console.log/warn/error`** em código de produção. Usar `logger` central em `apps/web/src/lib/logger.ts` (criar quando precisar). Em catch de server action, devolver `{ ok: false, error: "mensagem" }` em vez de logar e seguir.
+- **`console.log/warn/error`** em código de produção. Usar `log` do evlog: `import { log } from "@/lib/evlog"` → `log.error({ action: "...", ...context })`. Em catch de server action, **sempre** chamar `log.error` antes de retornar `{ ok: false, error }` — silenciar erro sem log é P0.
 - **`: any`, `<any>`, `as any`, `@ts-ignore`, `@ts-expect-error`** — exceto em `.next/` gerado.
 - **`key={index}`** em `.map()` — usar ID estável (`tool.id`, `variant.id`, etc.). Exceções (variantes/options sem id) ficam com `biome-ignore` explícito.
 - **`<img>` puro** — sempre `next/image` (exceção thumbs Supabase com `// biome-ignore lint/performance/noImgElement: Supabase public URL` documentado).
@@ -516,7 +510,7 @@ O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg
 
 ## 12. Workflow de mudança
 
-1. **Antes de tocar UI:** abrir `design/DESIGN.md` + `.impeccable.md` na seção relevante; invocar skill `web-design-guidelines` se for review.
+1. **Antes de tocar UI:** abrir `DESIGN.md` + `.impeccable.md` na seção relevante; invocar skill `web-design-guidelines` se for review.
 2. **Antes de tocar schema:**
    - Tabela owned-by-ecommerce (`client*`): editar `packages/db/src/schema/client.ts` → dev `bun db:push` → `bun db:apply-triggers` → smoke.
    - Tabela owned-by-dashboard ou compartilhada: **PR no dashboard primeiro**, depois sincronizar a cópia neste repo. Em prod sempre `bun db:generate` + commit migration + `bun db:migrate`.
@@ -546,120 +540,29 @@ O `@custom-variant dark (&:is(.dark *))` no Tailwind CSS v4 garante que `dark:bg
 claude mcp add -s local resend -- npx -y resend-mcp -e RESEND_API_KEY=<key>
 ```
 
-**Boundaries críticos** (do CLAUDE.md global):
-- `pencil`: arquivos `.pen` encriptados — **NUNCA** ler com `Read`/`Grep`. Usar `mcp__pencil__*`.
-- `filesystem`: whitelist `~/Work`. **NUNCA expandir para `~/.claude`** (contém credenciais).
-
 ---
 
-## 14. Ultracite Code Standards
+## 14. Code Standards (Ultracite + Biome)
 
-Este projeto usa **Ultracite**, um preset zero-config que aplica formatação e linting rigorosos via Biome.
+Linting/format zero-config via **Ultracite** (preset Biome). Comandos:
+```bash
+bun run check        # validar
+bun run fix          # auto-fix
+bun x ultracite doctor   # diagnostic
+```
 
-### Type Safety & Explicitness
+**Regras runtime específicas deste projeto** (Ultracite cobre o resto):
+- **React 19:** `ref` como prop, nunca `React.forwardRef`. React Compiler ativo (`reactCompiler: true`) — sem `useMemo`/`useCallback` manual.
+- **Next.js 16:** `typedRoutes: true` — `<Link href>` valida em tsc. Server Components default; `"use client"` só em eventos/hooks/estado local.
+- **Async em Client Component:** proibido. Data fetching SEMPRE em Server Component.
+- **Barrel files:** banidos exceto `packages/db/src/schema/index.ts` (intencional, marcado `// biome-ignore`).
 
-- Use explicit types for function parameters and return values when they enhance clarity
-- Prefer `unknown` over `any` when the type is genuinely unknown
-- Use const assertions (`as const`) for immutable values and literal types
-- Leverage TypeScript's type narrowing instead of type assertions
-- Use meaningful variable names instead of magic numbers - extract constants with descriptive names
-
-### Modern JavaScript/TypeScript
-
-- Use arrow functions for callbacks and short functions
-- Prefer `for...of` loops over `.forEach()` and indexed `for` loops
-- Use optional chaining (`?.`) and nullish coalescing (`??`) for safer property access
-- Prefer template literals over string concatenation
-- Use destructuring for object and array assignments
-- Use `const` by default, `let` only when reassignment is needed, never `var`
-
-### Async & Promises
-
-- Always `await` promises in async functions - don't forget to use the return value
-- Use `async/await` syntax instead of promise chains for better readability
-- Handle errors appropriately in async code with try-catch blocks
-- Don't use async functions as Promise executors
-
-### React & JSX
-
-- Use function components over class components
-- Call hooks at the top level only, never conditionally
-- Specify all dependencies in hook dependency arrays correctly
-- Use the `key` prop for elements in iterables (prefer unique IDs over array indices)
-- Nest children between opening and closing tags instead of passing as props
-- Don't define components inside other components
-- Use semantic HTML and ARIA attributes for accessibility
-
-### Error Handling & Debugging
-
-- Remove `console.log`, `debugger`, and `alert` statements from production code
-- Throw `Error` objects with descriptive messages, not strings or other values
-- Use `try-catch` blocks meaningfully - don't catch errors just to rethrow them
-- Prefer early returns over nested conditionals for error cases
-
-### Code Organization
-
-- Keep functions focused and under reasonable cognitive complexity limits
-- Extract complex conditions into well-named boolean variables
-- Use early returns to reduce nesting
-- Prefer simple conditionals over nested ternary operators
-- Group related code together and separate concerns
-
-### Security
-
-- Add `rel="noopener"` when using `target="_blank"` on links
-- Avoid runtime code evaluation primitives; never assign directly to `document.cookie`
-- Validate and sanitize user input
-
-### Performance
-
-- Avoid spread syntax in accumulators within loops
-- Use top-level regex literals instead of creating them in loops
-- Prefer specific imports over namespace imports
-- **Avoid barrel files** (index files that re-export everything) — use subpath imports
-- Use proper image components (Next.js `<Image>`) over `<img>` tags
-
-### Framework-Specific Guidance
-
-**Next.js:**
-- Use Next.js `<Image>` component for images
-- Use App Router metadata API for head elements
-- Use Server Components for async data fetching instead of async Client Components
-- `"use client"` só quando realmente necessário (eventos, hooks, estado local)
-
-**React 19+:**
-- Use ref as a prop instead of `React.forwardRef`
-- React Compiler está ativo (`reactCompiler: true`) — não adicione `useMemo`/`useCallback` manual desnecessário
-
-**Typed Routes:**
-- `typedRoutes: true` está ativo — TypeScript valida os paths de `<Link href="...">`. Se o link não compilar, a rota não existe.
-
-### Testing
-
-- Write assertions inside `it()` or `test()` blocks
-- Avoid done callbacks in async tests - use async/await instead
-- Don't use `.only` or `.skip` in committed code
-- Keep test suites reasonably flat - avoid excessive `describe` nesting
-
-### When Biome Can't Help
-
-Biome's linter will catch most issues automatically. Focus your attention on:
-
-1. **Business logic correctness** - Biome can't validate your algorithms
-2. **Meaningful naming** - Use descriptive names for functions, variables, and types
-3. **Architecture decisions** - Component structure, data flow, and API design
-4. **Edge cases** - Handle boundary conditions and error states
-5. **User experience** - Accessibility, performance, and usability considerations
-
-Run `bun x ultracite fix` before committing to ensure compliance.
+Skill `ultracite` carregada via plugin tem o detalhamento completo das regras Biome — invocar antes de discussões sobre patterns.
 
 ---
 
 ## 15. Onde se aprofundar
 
-- **Auth ecommerce passo-a-passo + footguns:** `docs/auth/ecommerce-integration.md`
 - **Convenções de schema Drizzle:** `packages/db/CLAUDE.md`
-- **Design system completo:** `design/DESIGN.md` + `.impeccable.md`
-- **Pencil design source:** `~/Work/pencil/emach-ecommerce.pen` (via `mcp__pencil__*`)
-- **Schema do dashboard (fonte de verdade para tabelas compartilhadas):** `~/noctua/emach-dashboard/.claude/CLAUDE.md` + `~/noctua/emach-dashboard/packages/db/CLAUDE.md`
-- **Specs de fases:** `docs/superpowers/specs/`
+- **Design system completo:** `DESIGN.md` (tokens) + `.impeccable.md` (princípios)
+- **Schema do dashboard (fonte de verdade pra tabelas compartilhadas):** repo irmão `emach-dashboard` (sincronização manual via PR cruzado).

@@ -7,7 +7,7 @@ Drizzle 0.45 + node-postgres + Supabase Postgres. Regras gerais ver `.claude/CLA
 - **Dev:** `bun db:push` (sync schema → DB sem migration). Livre em branch local. `--force` só em dev quando rename ambíguo.
 - **Staging/Prod:** `bun db:generate` (SQL versionado em `src/migrations/`) → revisar SQL → `bun db:migrate`.
 - **Nunca** `--force` fora de dev.
-- Aditivas preferidas. Drops: PR explícito + avisar app ecomerce (DB compartilhada — ver `docs/integration/admin-ecommerce.md`).
+- Aditivas preferidas. Drops: PR explícito + avisar app ecomerce (DB compartilhada — coordenar via PR no repo dashboard).
 
 ## Triggers PL/pgSQL
 
@@ -67,7 +67,7 @@ await client.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL 
 
 ## Schema compartilhado com app ecomerce
 
-Site ecomerce escreve em `order`, `orderItem`, `stockMovement`, `client*`, `review`, `lead`. Cópia versionada do schema sincronizada manual a cada migration. Ver `docs/integration/admin-ecommerce.md` pro contrato completo. Mudanças nessas tabelas exigem coordenação.
+Site ecomerce escreve em `order`, `orderItem`, `stockMovement`, `client*`, `review`, `lead`. Cópia versionada do schema sincronizada manual a cada migration. Mudanças nessas tabelas exigem coordenação cruzada via PR no repo dashboard (fonte de verdade).
 
 **Atenção pós-refactor variants:** `stock_level`, `stock_movement` e `order_item` agora referenciam `tool_variant.id` (não mais `tool.id`). App ecomerce precisa enviar `variantId` em pedidos e movimentos, não `toolId`. Ler `tool_variant` pro SKU vendável; `tool` é produto-pai (info comum).
 
