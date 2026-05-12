@@ -1,3 +1,7 @@
+"use client";
+
+import { usePathname } from "next/navigation";
+
 const tickerItems = [
 	{ text: "Frete grátis acima de R$ 299" },
 	{ text: "12× sem juros no cartão" },
@@ -21,6 +25,10 @@ function TickerContent() {
 }
 
 export function Ticker() {
+	const pathname = usePathname();
+	if (pathname.startsWith("/dashboard")) {
+		return null;
+	}
 	return (
 		<div
 			aria-label="Informações da loja"

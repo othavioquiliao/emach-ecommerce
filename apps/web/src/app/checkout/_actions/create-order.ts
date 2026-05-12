@@ -15,19 +15,12 @@ import { z } from "zod";
 import { getDefaultBranchId } from "@/lib/default-branch";
 import { log } from "@/lib/evlog";
 import { requireCurrentClient } from "@/lib/session";
-import { isValidCpfCnpj, onlyDigits } from "@/lib/validators/cpf-cnpj";
+import { addressFieldsSchema } from "@/lib/validators/address";
+import { isValidCpfCnpj } from "@/lib/validators/cpf-cnpj";
 
 const PRICE_TOLERANCE_CENTS = 1;
 
-const newAddressSchema = z.object({
-	zipCode: z.string().refine((v) => onlyDigits(v).length === 8, "CEP inválido"),
-	street: z.string().min(2),
-	number: z.string().min(1),
-	complement: z.string(),
-	neighborhood: z.string().min(2),
-	city: z.string().min(2),
-	state: z.string().length(2),
-});
+const newAddressSchema = addressFieldsSchema;
 
 const inputSchema = z.object({
 	name: z.string().min(2),

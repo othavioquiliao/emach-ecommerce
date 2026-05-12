@@ -25,6 +25,7 @@ import z from "zod";
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
+import { addressFieldsSchema } from "@/lib/validators/address";
 import {
 	isValidCpfCnpj,
 	maskCpfCnpj,
@@ -36,7 +37,7 @@ const NEW_ADDRESS_ID = "__new__";
 const FREE_SHIPPING_CENTS = 29_900;
 const STANDARD_SHIPPING_CENTS = 2990;
 
-const addressFieldsSchema = z.object({
+const newAddressFormShape = z.object({
 	zipCode: z.string(),
 	street: z.string(),
 	number: z.string(),
@@ -55,7 +56,7 @@ const checkoutSchema = z
 			.refine((v) => onlyDigits(v).length >= 10, "Telefone inválido"),
 		document: z.string().refine(isValidCpfCnpj, "CPF ou CNPJ inválido"),
 		addressId: z.string().min(1, "Selecione ou cadastre um endereço"),
-		newAddress: addressFieldsSchema,
+		newAddress: newAddressFormShape,
 		acceptTos: z.literal(true, {
 			error: () => ({ message: "Aceite os termos para continuar" }),
 		}),
@@ -68,47 +69,15 @@ const checkoutSchema = z
 		if (data.addressId !== NEW_ADDRESS_ID) {
 			return;
 		}
-		const a = data.newAddress;
-		if (onlyDigits(a.zipCode).length !== 8) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["newAddress", "zipCode"],
-				message: "CEP inválido",
-			});
+		const result = addressFieldsSchema.safeParse(data.newAddress);
+		if (result.success) {
+			return;
 		}
-		if (a.street.trim().length < 2) {
+		for (const issue of result.error.issues) {
 			ctx.addIssue({
 				code: "custom",
-				path: ["newAddress", "street"],
-				message: "Rua é obrigatória",
-			});
-		}
-		if (a.number.trim().length < 1) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["newAddress", "number"],
-				message: "Número é obrigatório",
-			});
-		}
-		if (a.neighborhood.trim().length < 2) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["newAddress", "neighborhood"],
-				message: "Bairro é obrigatório",
-			});
-		}
-		if (a.city.trim().length < 2) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["newAddress", "city"],
-				message: "Cidade é obrigatória",
-			});
-		}
-		if (a.state.trim().length < 2) {
-			ctx.addIssue({
-				code: "custom",
-				path: ["newAddress", "state"],
-				message: "Estado é obrigatório",
+				path: ["newAddress", ...issue.path],
+				message: issue.message,
 			});
 		}
 	});
