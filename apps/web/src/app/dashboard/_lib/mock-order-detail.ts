@@ -1,4 +1,5 @@
 import { mockOrders } from "./mock-orders";
+import { mockRefunds } from "./mock-refunds";
 import type {
 	BuyerSnapshot,
 	OrderBreakdown,
@@ -185,5 +186,10 @@ export const mockOrderDetails: Record<string, OrderDetail> = {
 };
 
 export function getOrderDetail(id: string): OrderDetail | undefined {
-	return mockOrderDetails[id];
+	const detail = mockOrderDetails[id];
+	if (!detail) {
+		return undefined;
+	}
+	const refund = mockRefunds.find((r) => r.orderId === id);
+	return refund ? { ...detail, refund } : detail;
 }
