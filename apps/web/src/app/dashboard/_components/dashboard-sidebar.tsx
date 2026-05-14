@@ -18,7 +18,11 @@ type NavItem =
 
 const NAV_ITEMS: NavItem[] = [
 	{ kind: "link", label: "Pedidos", href: "/dashboard/pedidos" },
-	{ kind: "soon", label: "Reembolso e devoluções" },
+	{
+		kind: "link",
+		label: "Reembolso e devoluções",
+		href: "/dashboard/reembolso",
+	},
 	{ kind: "link", label: "Meus dados", href: "/dashboard/dados-pessoais" },
 ];
 

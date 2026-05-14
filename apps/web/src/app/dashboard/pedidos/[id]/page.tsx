@@ -4,6 +4,7 @@ import { BuyerInfo } from "./_components/buyer-info";
 import { OrderActions } from "./_components/order-actions";
 import { OrderDetailHeader } from "./_components/order-detail-header";
 import { OrderItems } from "./_components/order-items";
+import { OrderRefundBlock } from "./_components/order-refund-block";
 import { OrderTotals } from "./_components/order-totals";
 import { OrderTracking } from "./_components/order-tracking";
 import { ShippingAddress } from "./_components/shipping-address";
@@ -37,6 +38,18 @@ export default async function OrderDetailPage({ params }: PageProps) {
 				itemCount={itemCount}
 				payment={detail.payment}
 			/>
+
+			{detail.refund ? (
+				<section className="mb-3.5 border border-border bg-white">
+					<div className="flex items-center justify-between border-border border-b bg-gray-10 px-[18px] py-3.5">
+						<h2 className="font-display font-semibold text-[12px] text-near-black uppercase tracking-[0.16em]">
+							Devolução #{detail.refund.id}
+						</h2>
+					</div>
+					<OrderRefundBlock refund={detail.refund} variant="page" />
+				</section>
+			) : null}
+
 			<OrderItems items={detail.items} />
 			<OrderTracking detail={detail} />
 
