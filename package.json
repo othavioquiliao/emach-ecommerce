@@ -33,17 +33,14 @@
     "db:generate": "turbo -F @emach/db db:generate",
     "db:migrate": "turbo -F @emach/db db:migrate",
     "check": "ultracite check",
-    "fix": "ultracite fix",
-    "clean": "bash scripts/clean.sh",
-    "clean-all": "bash scripts/clean.sh -y --cache",
-    "clean-dry": "bash scripts/clean.sh --dry-run"
+    "fix": "ultracite fix"
   },
   "devDependencies": {
     "@biomejs/biome": "2.4.15",
     "@emach/config": "workspace:*",
-    "@types/node": "^25.8.0",
-    "turbo": "^2.9.14",
-    "typescript": "^6.0.3",
+    "@types/node": "^22.13.14",
+    "turbo": "^2.9.5",
+    "typescript": "^6",
     "ultracite": "7.7.0"
   },
   "packageManager": "bun@1.3.11"
