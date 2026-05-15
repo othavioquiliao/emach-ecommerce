@@ -17,7 +17,7 @@ Drizzle 0.45 + node-postgres + Supabase Postgres. Regras gerais ver `CLAUDE.md` 
 bun db:apply-triggers   # idempotente (CREATE OR REPLACE FUNCTION + DROP TRIGGER IF EXISTS)
 ```
 
-⚠️ **`packages/db/src/migrations/` não existe neste repo hoje** — `_triggers.sql` (e `_rls.sql`, se aplicar RLS daqui) são owned-by-dashboard. Copiar do repo dashboard para `packages/db/src/migrations/` antes de rodar `db:apply-triggers`; sem o arquivo o script falha.
+A idempotência de débito de venda em `stock_movement` **não** é trigger — é um partial unique index no schema. RLS é aplicada direto no Supabase (sem arquivo `_rls.sql`). `_triggers.sql` é owned-by-dashboard — mudanças começam lá e re-sincronizam aqui.
 
 ## Convenções de schema
 
