@@ -45,7 +45,6 @@ async function getRootCategories() {
 			slug: category.slug,
 			name: category.name,
 			description: category.description,
-			imageUrl: category.imageUrl,
 		})
 		.from(category)
 		.where(and(isNull(category.parentId), eq(category.isActive, true)))
@@ -186,13 +185,13 @@ export default async function HomePage() {
 						<div className="grid grid-cols-[2fr_1fr_1fr] grid-rows-2 gap-6">
 							{tile0 && (
 								<div className="row-span-2">
-									<CategoryTile category={tile0} size="full" />
+									<CategoryTile category={tile0} index={0} size="full" />
 								</div>
 							)}
-							{tile1 && <CategoryTile category={tile1} />}
-							{tile2 && <CategoryTile category={tile2} />}
-							{tile3 && <CategoryTile category={tile3} />}
-							{tile4 && <CategoryTile category={tile4} />}
+							{tile1 && <CategoryTile category={tile1} index={1} />}
+							{tile2 && <CategoryTile category={tile2} index={2} />}
+							{tile3 && <CategoryTile category={tile3} index={3} />}
+							{tile4 && <CategoryTile category={tile4} index={4} />}
 						</div>
 					</PageContainer>
 				)}
