@@ -17,7 +17,7 @@ Drizzle 0.45 + node-postgres + Supabase Postgres. Regras gerais ver `CLAUDE.md` 
 bun db:apply-triggers   # idempotente (CREATE OR REPLACE FUNCTION + DROP TRIGGER IF EXISTS)
 ```
 
-A idempotência de débito de venda em `stock_movement` **não** é trigger — é um partial unique index no schema. RLS é aplicada direto no Supabase (sem arquivo `_rls.sql`). `_triggers.sql` é owned-by-dashboard — mudanças começam lá e re-sincronizam aqui.
+⚠️ **`packages/db/src/migrations/` não existe neste repo hoje** — `_triggers.sql` (e `_rls.sql`, se aplicar RLS daqui) são owned-by-dashboard. Copiar do repo dashboard para `packages/db/src/migrations/` antes de rodar `db:apply-triggers`; sem o arquivo o script falha.
 
 ## Convenções de schema
 
@@ -61,7 +61,9 @@ bun db:anonymize-client <id>  # LGPD direito ao esquecimento
 
 ```ts
 // snippet via pg client direto
-await client.query("DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres, public;");
+await client.query(
+  "DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres, public;",
+);
 // depois: bunx drizzle-kit push && bun db:apply-triggers && bun db:seed-categories && bun db:seed-attributes
 ```
 
@@ -85,6 +87,7 @@ Site ecomerce escreve em `order`, `orderItem`, `stockMovement`, `client*`, `revi
 ## Queries compartilhadas com dashboard
 
 `packages/db/src/queries/*.ts` é **owned-by-dashboard**: ferramentas de leitura/regra de negócio que este storefront consome. Lista atual:
+
 - `reviews.ts` — `canCreateReview`
 - `catalog.ts` — funções de catálogo (`getTools`, `getToolBySlug`, `getCategoryTree`, `getCategoryBySlug`, `getActivePromotions`, `getRecentTools`, `searchTools`, `getReviews`, `getReviewStats`, `getAllToolSlugs`, `getAllCategorySlugs`)
 
@@ -97,6 +100,7 @@ Padrão de assinatura: `db: NodePgDatabase<Record<string, unknown>>` parametriza
 ## Testes
 
 Vitest tem scripts configurados em `packages/db`, mas **ainda não há testes escritos** (diretório `test/` não existe):
+
 ```bash
 bun test                        # roda suite vitest (vazia hoje)
 bun test:watch                  # watch mode
