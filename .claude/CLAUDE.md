@@ -100,9 +100,10 @@ emach-ecommerce/
 
 **Money:** `numeric(10,2)` em `tool_variant.priceAmount`/`costAmount`; `numeric(12,2)` em `order.totalAmount`. Nunca `real`/`double`.
 
-**Triggers PL/pgSQL e RLS — `_triggers.sql` / `_rls.sql`:**
-- Triggers (anti-ciclo de categoria com path/depth; idempotência de débito de venda em `stockMovement`) e RLS são **owned-by-dashboard** — gerenciados a partir do repo dashboard. RLS está ativa na DB Supabase: catálogo com SELECT público (anon+authenticated), demais tabelas deny-all (acesso server-side via service role / Better Auth).
-- `bun db:apply-triggers` aplica `packages/db/src/migrations/_triggers.sql`. ⚠️ **Esses arquivos SQL não estão versionados neste repo hoje** (`packages/db/src/migrations/` não existe). Para rodar o script localmente, copiar `_triggers.sql` (e `_rls.sql` se for aplicar RLS daqui) do dashboard para `packages/db/src/migrations/`. Sem eles, o script falha.
+**Triggers PL/pgSQL — `_triggers.sql`:**
+- `packages/db/src/migrations/_triggers.sql` (owned-by-dashboard, cópia versionada aqui) tem 4 triggers que Drizzle Kit não gera: anti-ciclo de categoria + `path`/`depth` materializados, cascade de path, `client.last_seen`, derivação de `client.type`. Aplicar via `bun db:apply-triggers` (idempotente) após qualquer `db:push`/`db:migrate`.
+- A idempotência de débito de venda em `stockMovement` **não** é trigger — é um partial unique index no schema.
+- **RLS** é gerenciada direto no Supabase (não há arquivo `_rls.sql`): catálogo com SELECT público (anon+authenticated), demais tabelas deny-all (acesso server-side via service role / Better Auth).
 
 **`db` × `createDb()`:**
 - `db` (singleton, `src/index.ts`) — uso geral em server actions.
@@ -262,7 +263,7 @@ bun run db:migrate   # aplica migrations pendentes
 bun run db:studio    # Drizzle Studio
 
 # Banco de dados — utilitários (packages/db)
-bun --cwd packages/db db:apply-triggers       # aplica _triggers.sql (ver §3 — arquivo precisa existir)
+bun --cwd packages/db db:apply-triggers       # aplica _triggers.sql (idempotente)
 bun --cwd packages/db db:seed-categories      # bootstrap categorias raiz
 bun --cwd packages/db db:seed-attributes      # bootstrap attribute_definitions
 bun --cwd packages/db db:anonymize-client <id># LGPD direito ao esquecimento
