@@ -1,18 +1,17 @@
 import { cn } from "@emach/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
-import Image from "next/image";
 import Link from "next/link";
 import { SectionLabel } from "@/components/section-label";
 
 interface CategoryTileCategory {
 	description: string | null;
-	imageUrl: string | null;
 	name: string;
 	slug: string;
 }
 
 interface CategoryTileProps {
 	category: CategoryTileCategory;
+	index: number;
 	size?: "sm" | "md" | "lg" | "full";
 }
 
@@ -23,10 +22,13 @@ const SIZE_CLASS: Record<NonNullable<CategoryTileProps["size"]>, string> = {
 	full: "h-full min-h-[664px]",
 };
 
-const OVERLAY_BASE =
-	"pointer-events-none absolute inset-0 transition-transform duration-[400ms] ease-out group-hover:scale-[1.05]";
+export function CategoryTile({
+	category,
+	index,
+	size = "md",
+}: CategoryTileProps) {
+	const indexLabel = String(index + 1).padStart(2, "0");
 
-export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 	return (
 		<Link
 			className={cn(
@@ -35,28 +37,10 @@ export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 			)}
 			href={`/catalog?cat=${category.slug}`}
 		>
-			{/* Background image */}
-			{category.imageUrl && (
-				<div aria-hidden="true" className={OVERLAY_BASE}>
-					<Image
-						alt=""
-						className="object-cover"
-						fill
-						sizes={size === "full" ? "50vw" : "25vw"}
-						src={category.imageUrl}
-					/>
-				</div>
-			)}
-
-			{/* Gradient darken / fallback */}
+			{/* Gradient fallback */}
 			<div
 				aria-hidden="true"
-				className={cn(
-					OVERLAY_BASE,
-					category.imageUrl
-						? "emach-bg-category-overlay"
-						: "emach-bg-category-fallback"
-				)}
+				className="emach-bg-category-fallback pointer-events-none absolute inset-0"
 			/>
 
 			{/* Texture overlay */}
@@ -71,6 +55,17 @@ export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 				className="emach-bg-vignette-bottom pointer-events-none absolute inset-0"
 			/>
 
+			{/* Ghost index number */}
+			<span
+				aria-hidden="true"
+				className={cn(
+					"pointer-events-none absolute -top-[0.14em] -right-[0.02em] font-display text-white/[0.05] leading-none",
+					size === "full" ? "text-[200px]" : "text-[120px]"
+				)}
+			>
+				{indexLabel}
+			</span>
+
 			{/* Red accent bar on hover */}
 			<div
 				aria-hidden="true"
@@ -79,7 +74,7 @@ export function CategoryTile({ category, size = "md" }: CategoryTileProps) {
 
 			{/* Content */}
 			<div className="absolute right-6 bottom-6 left-6 flex flex-col gap-1.5 text-white">
-				<SectionLabel tone="light">{category.slug}</SectionLabel>
+				<SectionLabel tone="light">{`${indexLabel} · ${category.slug}`}</SectionLabel>
 				<div className="font-medium text-[24px]">{category.name}</div>
 				<div className="max-w-[320px] text-[13px] text-white/70 leading-relaxed">
 					{category.description}
