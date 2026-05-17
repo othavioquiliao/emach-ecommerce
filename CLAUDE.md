@@ -398,3 +398,21 @@ claude mcp add -s local resend -- npx -y resend-mcp -e RESEND_API_KEY=<key>
 - **Design system completo:** `DESIGN.md`
 - **Pointer para agentes externos** (Codex, Cursor, etc.): `AGENTS.md`
 - **Schema do dashboard** (fonte de verdade das tabelas compartilhadas): repo irmão `emach-dashboard`.
+
+---
+
+## Agent skills
+
+Configuração consumida pelas skills de engenharia (Matt Pocock — `triage`, `to-issues`, `to-prd`, `qa`, `diagnose`, `tdd`, `improve-codebase-architecture`, `grill-with-docs`). Detalhe vivo em `docs/agents/*.md` — editáveis diretamente.
+
+### Issue tracker
+
+Issues e PRDs vivem no **GitHub Issues** de `othavioquiliao/emach-ecommerce` (via CLI `gh`). Ver `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Cinco papéis de triagem com os nomes default — `needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`. Ver `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Layout **multi-context**: `CONTEXT-MAP.md` na raiz aponta para um `CONTEXT.md` por app/package. Ver `docs/agents/domain.md`.

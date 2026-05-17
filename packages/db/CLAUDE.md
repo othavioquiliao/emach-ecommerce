@@ -1,6 +1,6 @@
 # packages/db — Convenções
 
-Drizzle 0.45 + node-postgres + Supabase Postgres. Regras gerais ver `.claude/CLAUDE.md`.
+Drizzle 0.45 + node-postgres + Supabase Postgres. Regras gerais ver `CLAUDE.md` na raiz do monorepo.
 
 ## Migrations
 
