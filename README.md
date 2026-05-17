@@ -77,8 +77,9 @@ bunx shadcn@latest diff -c packages/ui
 
 ## Documentação para agentes
 
-- **`.claude/CLAUDE.md`** — instruções completas: packages, ownership de tabelas, invariantes P0 auth, anti-patterns, MCP servers, workflow.
+- **`CLAUDE.md`** — instruções completas: packages, ownership de tabelas, invariantes P0 auth, anti-patterns, MCP servers, workflow.
 - **`AGENTS.md`** — pointer pra agentes externos (Codex, Amp, Cursor).
+- **`docs/agents/*.md`** — config das skills de engenharia (issue tracker, triage labels, domain docs).
 - **`DESIGN.md`** — tokens completos do design Ferrari-inspired (cores, tipografia, princípios, componentes EMACH custom).
 - **`packages/db/CLAUDE.md`** — convenções de schema Drizzle (FKs, enums, money, triggers, queries compartilhadas).
 
