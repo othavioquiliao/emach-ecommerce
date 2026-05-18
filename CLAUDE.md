@@ -82,19 +82,18 @@ emach-ecommerce/
 | `categories.ts` | `category`, `toolCategory` | Árvore hierárquica `parent_id` + `path`/`depth` materializados via trigger. Anti-ciclo + cascade. Depth máx. 5. |
 | `attributes.ts` | `attributeDefinition`, `toolAttributeValue`, `toolAttributeAssignment` | Specs dinâmicas (Saleor-lite). Enum `attribute_input_type` (`text`/`number`/`select`/`boolean`/`numeric_range`/`color`). Valor tipado por coluna (`valueText`, `valueNumeric`, `valueNumericMax`, `valueBool`). |
 | `inventory.ts` | `branch`, `stockLevel`, `userBranch` | `stockLevel` PK `(variantId, branchId)`, `minQty` + `reorderPoint` + check `quantity >= 0`. `userBranch` é owned-by-dashboard (staff × filial). |
-| `stock-movements.ts` | `stockMovement` | Audit por **variante** (`variantId`). `actorType` + `actorId` + `apiKeyId`. Partial unique index → idempotência de débito de venda. |
-| `orders.ts` | `order`, `orderItem`, `orderStatusHistory`, `orderNote` | `orderItem` carrega `toolId` + `variantId` + snapshots fiscais/dimensão. Enums `order_status`, `payment_status`. |
+| `stock-movements.ts` | `stockMovement` | Audit por **variante** (`variantId`). `actorType` (`user`/`system`) + `actorId`. Partial unique index → idempotência de débito de venda. |
+| `orders.ts` | `order`, `orderItem`, `orderStatusHistory`, `orderNote` | `orderItem` carrega `toolId` + `variantId` + snapshots fiscais/dimensão. Enum `order_status`. |
 | `reviews.ts` | `review` | Enum `review_status`. Unique `(clientId, toolId, orderId)`. SELECT público filtra `status='approved'`. |
 | `promotions.ts` | `promotion`, `promotionTool` | Cupons via `promotion.type='promocode'` (não há tabela `coupon`). |
-| `api-keys.ts` | `apiKey` | `scopes` + `allowedTags` (text[]), GIN index em scopes. Ecommerce escreve em tabelas dashboard-owned com `actorType='apiKey'`. |
-| `consent-log.ts` | `consentLog` | LGPD. Enums `consent_kind` (tos/privacy/marketing_email/cookies) e `consent_actor` (client/lead). |
-| `shared-enums.ts` | — | Enum `actor_type` (`user`/`apiKey`/`system`). |
+| `consent-log.ts` | `consentLog` | LGPD. Enum `consent_kind` (tos/privacy/marketing_email/cookies). |
+| `shared-enums.ts` | — | Enum `actor_type` (`user`/`system`). |
 
 **Ownership e escrita compartilhada:**
 
-- **Owned-by-dashboard (autoritativo):** `tool`, `toolVariant`, `category`, `supplier`, `branch`, `stockLevel`, `userBranch`, `promotion`, `apiKey`, `attribute*`, schema `auth`. Mudanças → PR no dashboard primeiro.
+- **Owned-by-dashboard (autoritativo):** `tool`, `toolVariant`, `category`, `supplier`, `branch`, `stockLevel`, `userBranch`, `promotion`, `attribute*`, schema `auth`. Mudanças → PR no dashboard primeiro.
 - **Owned-by-ecommerce (autoritativo):** tabelas `client*` (5).
-- **Escrita compartilhada:** `order`, `orderItem`, `stockMovement` (`actorType='user'` no dashboard, `actorType='apiKey'` no ecommerce), `review`, `consentLog`, `toolAttributeValue` em fluxos cliente.
+- **Escrita compartilhada:** `order`, `orderItem`, `stockMovement` (`actorType='user'` no dashboard, `actorType='system'` no ecommerce), `review`, `consentLog`, `toolAttributeValue` em fluxos cliente.
 - **Cópia de schema:** `packages/db/src/schema/*` é re-sincronizado manualmente. Não editar em isolamento — coordenar via PR no dashboard.
 - **Drops/renames em prod:** sempre `bun db:generate` + migration versionada. **Nunca** `db:push --force` em prod.
 
@@ -365,7 +364,7 @@ Linting zero-config via **Ultracite** (preset Biome). A skill `ultracite` tem o 
 2. **Antes de tocar schema:**
    - Tabela owned-by-ecommerce (`client*`): editar `schema/client.ts` → dev `bun db:push` → `db:apply-triggers` → smoke.
    - Tabela owned-by-dashboard ou compartilhada: **PR no dashboard primeiro**, depois sincronizar a cópia aqui. Em prod sempre `db:generate` + commit migration + `db:migrate`.
-3. **Escrita em tabelas dashboard-owned:** usar `actorType='apiKey'` + `apiKeyId` em `stockMovement` e similares (nunca `actorType='user'` — `user` é staff).
+3. **Escrita em tabelas dashboard-owned:** usar `actorType='system'` em `stockMovement` e similares (nunca `actorType='user'` — `user` é staff).
 4. **Imagens em forms:** ao integrar uploads, extrair helper genérico `lib/storage.ts` (`{ bucket, prefix, formData }`). Service role key em `SUPABASE_SERVICE_ROLE_KEY` (server-only).
 5. **Validação:** `bun check-types` no workspace alterado, `bun fix` no escopo. Suite inteira só se necessário.
 6. **Smoke run-time:** refactor que toca SSR → rodar `bun dev:web` e visitar as rotas afetadas (`tsc` não pega SQL inválido nem coluna removida).
