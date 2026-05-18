@@ -95,10 +95,8 @@ export default function LoginPage() {
 			}
 			await authClient.signUp.email(payload, {
 				onSuccess: () => {
-					toast.success(
-						"Conta criada. Verifique seu e-mail para ativar a conta."
-					);
-					setMode("sign-in");
+					toast.success("Conta criada com sucesso");
+					router.push("/dashboard");
 				},
 				onError: (error) => {
 					toast.error(error.error.message || error.error.statusText);
