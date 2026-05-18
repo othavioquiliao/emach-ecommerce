@@ -33,9 +33,11 @@ export const review = pgTable(
 		clientId: text("client_id")
 			.notNull()
 			.references(() => client.id, { onDelete: "restrict" }),
-		orderId: text("order_id").references(() => order.id, {
-			onDelete: "restrict",
-		}),
+		orderId: text("order_id")
+			.notNull()
+			.references(() => order.id, {
+				onDelete: "restrict",
+			}),
 		rating: integer("rating").notNull(),
 		title: text("title"),
 		body: text("body").notNull(),
