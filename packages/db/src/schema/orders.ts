@@ -161,7 +161,7 @@ export const orderStatusHistory = pgTable(
     check(
       "actor_coherence",
       sql`(
-				(${table.actorType} = 'user' AND ${table.actorUserId} IS NOT NULL)
+				(${table.actorType} = 'user'   AND ${table.actorUserId} IS NOT NULL)
 				OR (${table.actorType} = 'system' AND ${table.actorUserId} IS NULL)
 			)`,
     ),
@@ -183,6 +183,31 @@ export const orderNote = pgTable(
   },
   (table) => [
     index("order_note_order_idx").on(table.orderId, table.createdAt.desc()),
+  ],
+);
+
+export const orderAttachment = pgTable(
+  "order_attachment",
+  {
+    id: text("id").primaryKey(),
+    orderId: text("order_id")
+      .notNull()
+      .references(() => order.id, { onDelete: "cascade" }),
+    fileUrl: text("file_url").notNull(),
+    fileName: text("file_name").notNull(),
+    fileSize: integer("file_size"),
+    mimeType: text("mime_type"),
+    label: text("label"),
+    uploadedBy: text("uploaded_by").references(() => user.id, {
+      onDelete: "set null",
+    }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("order_attachment_order_created_idx").on(
+      table.orderId,
+      table.createdAt.desc(),
+    ),
   ],
 );
 
