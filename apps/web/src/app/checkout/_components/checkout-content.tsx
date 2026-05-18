@@ -13,7 +13,7 @@ import {
 	SelectValue,
 } from "@emach/ui/components/select";
 import { Separator } from "@emach/ui/components/separator";
-import { useForm } from "@tanstack/react-form";
+import { revalidateLogic, useForm } from "@tanstack/react-form";
 import type { Route } from "next";
 import NextImage from "next/image";
 import Link from "next/link";
@@ -149,8 +149,9 @@ export function CheckoutContent({
 			acceptPrivacy: false as boolean,
 			acceptMarketing: false,
 		},
+		validationLogic: revalidateLogic(),
 		validators: {
-			onSubmit: checkoutSchema,
+			onDynamic: checkoutSchema,
 		},
 		onSubmit: async ({ value }) => {
 			const result = await createOrderAction({
