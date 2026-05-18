@@ -7,6 +7,9 @@ export default defineConfig({
       "@": resolve(import.meta.dirname, "src"),
     },
   },
+  css: {
+    postcss: {},
+  },
   test: {
     environment: "node",
   },
