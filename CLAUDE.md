@@ -266,6 +266,7 @@ bun --cwd packages/db db:apply-triggers       # aplica _triggers.sql (idempotent
 bun --cwd packages/db db:seed-categories      # bootstrap categorias raiz
 bun --cwd packages/db db:seed-attributes      # bootstrap attribute_definitions
 bun --cwd packages/db db:anonymize-client <id># LGPD direito ao esquecimento
+bun --cwd packages/db db:check-drift          # verifica drift schema Drizzle × DB
 
 # Qualidade de código
 bun run check        # lint/format (Ultracite/Biome)

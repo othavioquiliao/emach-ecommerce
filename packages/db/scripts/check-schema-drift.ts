@@ -4,19 +4,15 @@
  * faltante (DB, não schema), e divergência de nullability ou categoria de tipo
  * coluna a coluna. Sai com exit 1 em qualquer drift.
  *
- * Uso: DATABASE_URL=... bun src/scripts/check-schema-drift.ts
+ * Uso: bun --cwd packages/db db:check-drift
  */
+import { env } from "@emach/env/server";
 import { is } from "drizzle-orm";
 import { getTableConfig, PgTable } from "drizzle-orm/pg-core";
 import { Client } from "pg";
 
 // biome-ignore lint/performance/noNamespaceImport: enumera todas as tabelas exportadas do schema
-import * as schema from "../schema/index";
-
-const connectionString = process.env.DATABASE_URL;
-if (!connectionString) {
-	throw new Error("DATABASE_URL não definida");
-}
+import * as schema from "../src/schema/index";
 
 /** Categoria coarse do tipo da DB (a partir de `udt_name`). */
 function dbCategory(udt: string): string {
@@ -76,7 +72,7 @@ interface DbColumn {
 	udt_name: string;
 }
 
-const client = new Client({ connectionString });
+const client = new Client({ connectionString: env.DATABASE_URL });
 await client.connect();
 
 let driftCount = 0;
