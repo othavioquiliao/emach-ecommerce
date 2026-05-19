@@ -14,9 +14,12 @@ export function ProductCard({ tool }: ProductCardProps) {
 	const hasDiscount = tool.defaultVariant.discountedAmount != null;
 
 	return (
-		<Link className="group block cursor-pointer" href={`/product/${tool.slug}`}>
-			<div className="overflow-hidden rounded-[2px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-240 ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
-				<div className="relative aspect-square overflow-hidden rounded-[2px] bg-image-bg">
+		<Link
+			className="group block h-full cursor-pointer"
+			href={`/product/${tool.slug}`}
+		>
+			<div className="flex h-full flex-col overflow-hidden rounded-[2px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-240 ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
+				<div className="relative aspect-square shrink-0 overflow-hidden rounded-[2px] bg-image-bg">
 					<ProductImage
 						alt={tool.name}
 						categorySlug={categorySlug}
@@ -45,30 +48,32 @@ export function ProductCard({ tool }: ProductCardProps) {
 					</div>
 				</div>
 
-				<div className="flex flex-col gap-1 bg-gray-10 px-2 py-3">
+				<div className="flex flex-1 flex-col gap-1 bg-gray-10 px-2 py-3">
 					<SectionLabel>{categoryName}</SectionLabel>
 					<p className="mt-1 font-medium text-[14px] text-near-black leading-tight">
 						{tool.name}
 					</p>
-					<div className="mt-1 flex items-baseline gap-2">
-						<span className="font-bold text-[15px] text-near-black tabular-nums">
-							{fmtNumericBRL(
-								hasDiscount
-									? tool.defaultVariant.discountedAmount
-									: tool.defaultVariant.priceAmount
-							)}
-						</span>
-						{hasDiscount && (
-							<span className="text-[11px] text-gray-50 tabular-nums line-through">
-								{fmtNumericBRL(tool.defaultVariant.priceAmount)}
+					<div className="mt-auto pt-2">
+						<div className="flex items-baseline gap-2">
+							<span className="font-bold text-[15px] text-near-black tabular-nums">
+								{fmtNumericBRL(
+									hasDiscount
+										? tool.defaultVariant.discountedAmount
+										: tool.defaultVariant.priceAmount
+								)}
 							</span>
+							{hasDiscount && (
+								<span className="text-[11px] text-gray-50 tabular-nums line-through">
+									{fmtNumericBRL(tool.defaultVariant.priceAmount)}
+								</span>
+							)}
+						</div>
+						{tool.hasOtherVariants && (
+							<div className="mt-1 font-display text-[10px] text-gray-60 uppercase tracking-[0.14em]">
+								Mais opções de voltagem
+							</div>
 						)}
 					</div>
-					{tool.hasOtherVariants && (
-						<div className="mt-1 font-display text-[10px] text-gray-60 uppercase tracking-[0.14em]">
-							Mais opções de voltagem
-						</div>
-					)}
 				</div>
 			</div>
 		</Link>
