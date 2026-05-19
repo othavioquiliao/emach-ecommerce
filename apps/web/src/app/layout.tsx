@@ -50,6 +50,7 @@ export default function RootLayout({
 		<html lang="pt-BR">
 			<body
 				className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}
+				suppressHydrationWarning
 			>
 				<Ticker />
 				<Providers>{children}</Providers>

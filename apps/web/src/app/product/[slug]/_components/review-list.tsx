@@ -98,8 +98,15 @@ export function ReviewList({
 				</div>
 			) : (
 				<div className="grid grid-cols-1 md:grid-cols-2">
-					{reviews.map((review) => (
-						<ReviewCard key={review.id} review={review} />
+					{reviews.map((review, index) => (
+						<ReviewCard
+							isLast={index === reviews.length - 1}
+							isPenultimateOnEven={
+								index === reviews.length - 2 && reviews.length % 2 === 0
+							}
+							key={review.id}
+							review={review}
+						/>
 					))}
 				</div>
 			)}
