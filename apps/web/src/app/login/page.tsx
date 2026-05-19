@@ -13,12 +13,13 @@ import { useForm } from "@tanstack/react-form";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import Loader from "@/components/loader";
 import { authClient } from "@/lib/auth-client";
 import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
+import { PasswordInput } from "./_components/password-input";
 
 const TRIGGER_CLASS =
 	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
@@ -27,7 +28,13 @@ export default function LoginPage() {
 	const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
 	const [isGooglePending, setIsGooglePending] = useState(false);
 	const router = useRouter();
-	const { isPending } = authClient.useSession();
+	const { data: session, isPending } = authClient.useSession();
+
+	useEffect(() => {
+		if (session?.user) {
+			router.replace("/dashboard");
+		}
+	}, [session, router]);
 
 	const handleGoogleSignIn = async () => {
 		setIsGooglePending(true);
@@ -115,7 +122,7 @@ export default function LoginPage() {
 		},
 	});
 
-	if (isPending) {
+	if (isPending || session?.user) {
 		return (
 			<main className="flex h-svh items-center justify-center bg-near-black">
 				<Loader />
@@ -231,14 +238,12 @@ export default function LoginPage() {
 									{(field) => (
 										<label className="emach-field" htmlFor={field.name}>
 											<span className="emach-field__label">Senha</span>
-											<input
-												className="emach-input"
+											<PasswordInput
 												id={field.name}
 												name={field.name}
 												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
+												onChange={field.handleChange}
 												placeholder="••••••••"
-												type="password"
 												value={field.state.value}
 											/>
 											{field.state.meta.errors.map((error) => (
@@ -382,14 +387,12 @@ export default function LoginPage() {
 									{(field) => (
 										<label className="emach-field" htmlFor={field.name}>
 											<span className="emach-field__label">Senha</span>
-											<input
-												className="emach-input"
+											<PasswordInput
 												id={field.name}
 												name={field.name}
 												onBlur={field.handleBlur}
-												onChange={(e) => field.handleChange(e.target.value)}
+												onChange={field.handleChange}
 												placeholder="••••••••"
-												type="password"
 												value={field.state.value}
 											/>
 											{field.state.meta.errors.map((error) => (

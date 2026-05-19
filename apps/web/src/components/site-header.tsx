@@ -1,10 +1,11 @@
 "use client";
 
-import { Search, ShoppingBag, User } from "lucide-react";
+import { Search, ShoppingBag } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 import { Suspense, useEffect, useRef, useState } from "react";
 
+import { AccountMenu } from "@/components/account-menu";
 import { CartSheet } from "@/components/cart-sheet";
 import { HeaderNav } from "@/components/header-nav";
 import { SearchOverlay } from "@/components/search-overlay";
@@ -54,13 +55,7 @@ export function SiteHeader() {
 					>
 						<Search className="size-[18px]" />
 					</button>
-					<Link
-						aria-label="Conta"
-						className="text-white/80 hover:text-white"
-						href="/login"
-					>
-						<User className="size-[18px]" />
-					</Link>
+					<AccountMenu />
 					<button
 						aria-label={`Carrinho com ${totalCount} itens`}
 						className="relative cursor-pointer text-white/80 hover:text-white"
