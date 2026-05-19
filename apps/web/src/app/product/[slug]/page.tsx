@@ -154,18 +154,20 @@ export default async function ProductPage({
 			</div>
 
 			<ProductTabs attributes={detail.attributes} tool={detail.tool} />
-			<ProductReviews
-				currentSearchParams={sp}
-				page={reviewPage}
-				pageSize={REVIEWS_PER_PAGE}
-				pathname={pathname}
-				reviews={reviewsResult.reviews}
-				sort={reviewSort}
-				stats={detail.reviewStats}
-				total={reviewsResult.total}
-			/>
+			{reviewsResult.total > 0 && (
+				<ProductReviews
+					currentSearchParams={sp}
+					page={reviewPage}
+					pageSize={REVIEWS_PER_PAGE}
+					pathname={pathname}
+					reviews={reviewsResult.reviews}
+					sort={reviewSort}
+					stats={detail.reviewStats}
+					total={reviewsResult.total}
+				/>
+			)}
 			<RelatedProducts
-				categoryId={detail.primaryCategory?.id ?? null}
+				categoryPath={detail.primaryCategory?.path ?? null}
 				toolId={detail.tool.id}
 			/>
 			<SiteFooter />
