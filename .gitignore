@@ -66,7 +66,7 @@ temp
 # Agent skills instaladas (npx skills add) — reinstaláveis via skills-lock.json
 .agents/skills/
 
-# Drizzle Kit migrations geradas (DB owned-by-dashboard — schema TS é a fonte de verdade local)
-# _triggers.sql (manual) permanece versionado — NÃO ignorar o diretório.
+# Drizzle Kit migrations geradas (DB owned-by-dashboard — schema TS é espelho local)
+# Triggers manuais ficam versionados em packages/db/src/sql/triggers.sql.
 packages/db/src/migrations/[0-9]*.sql
 packages/db/src/migrations/meta/
