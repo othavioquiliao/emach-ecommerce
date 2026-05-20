@@ -57,7 +57,7 @@ export function SectionHeader({
 			{link &&
 				(link.variant === "arrow" ? (
 					<Link
-						className="group inline-flex items-center gap-2 font-semibold text-[13px] text-white"
+						className="group inline-flex items-center gap-2 font-semibold text-[13px] text-current"
 						href={link.href}
 					>
 						<span className="relative">
