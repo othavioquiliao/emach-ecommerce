@@ -17,7 +17,7 @@ bun.lock
 dist
 build
 *.tsbuildinfo
-
+.impeccable
 # Environment variables
 .env
 .env*.local
