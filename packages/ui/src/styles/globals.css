@@ -555,7 +555,7 @@
   );
 }
 .emach-bg-card-hover {
-  background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent 52%);
+  background: linear-gradient(to top, rgba(0, 0, 0, 0.45), transparent 52%);
 }
 .emach-bg-stats {
   background: linear-gradient(135deg, var(--cinema-2), var(--black));
