@@ -14,6 +14,7 @@ import {
 	type CartItemSnapshot,
 	loadCart,
 	removeFromCart,
+	saveCart,
 	updateQty,
 } from "@/lib/cart-store";
 
@@ -56,6 +57,7 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 	const clear = useCallback(() => {
 		setItems([]);
+		saveCart([]);
 	}, []);
 
 	const totalCount = items.reduce((acc, i) => acc + i.quantity, 0);
