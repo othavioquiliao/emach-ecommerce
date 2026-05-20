@@ -3,7 +3,6 @@
 import { db } from "@emach/db";
 import { headers } from "next/headers";
 
-import { getDefaultBranchId } from "@/lib/default-branch";
 import { log } from "@/lib/evlog";
 import { requireCurrentClient } from "@/lib/session";
 
@@ -31,7 +30,6 @@ export async function createOrderAction(
 
 	const session = await requireCurrentClient();
 	const clientId = session.user.id;
-	const branchId = await getDefaultBranchId();
 
 	const reqHeaders = await headers();
 	const ipAddress =
@@ -42,7 +40,6 @@ export async function createOrderAction(
 		const result = await db.transaction((tx) =>
 			placeOrder(tx as unknown as typeof db, {
 				clientId,
-				branchId,
 				input,
 				ipAddress,
 				userAgent,
@@ -54,11 +51,8 @@ export async function createOrderAction(
 		log.error({
 			action: "create_order_failed",
 			clientId,
-			branchId,
 			error: rawMessage,
 		});
-		// Só erros de negócio (OrderError) têm mensagem segura para o cliente;
-		// qualquer outra falha vira mensagem genérica para não vazar detalhe.
 		const userError =
 			err instanceof OrderError ? err.message : GENERIC_ORDER_ERROR;
 		return { ok: false, error: userError };
