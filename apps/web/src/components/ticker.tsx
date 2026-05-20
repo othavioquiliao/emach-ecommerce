@@ -26,7 +26,7 @@ function TickerContent() {
 
 export function Ticker() {
 	const pathname = usePathname();
-	if (pathname.startsWith("/dashboard")) {
+	if (pathname.startsWith("/dashboard") || pathname === "/") {
 		return null;
 	}
 	return (
