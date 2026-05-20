@@ -1,6 +1,5 @@
 import { relations, sql } from "drizzle-orm";
 import {
-	boolean,
 	check,
 	index,
 	integer,
@@ -8,7 +7,6 @@ import {
 	primaryKey,
 	text,
 	timestamp,
-	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
 import { user } from "./auth";
@@ -20,7 +18,6 @@ export const branch = pgTable(
 		id: text("id").primaryKey(),
 		name: text("name").notNull(),
 		address: text("address"),
-		isDefault: boolean("is_default").notNull().default(false),
 		createdAt: timestamp("created_at").defaultNow().notNull(),
 		updatedAt: timestamp("updated_at")
 			.defaultNow()
@@ -29,9 +26,6 @@ export const branch = pgTable(
 	},
 	(table) => [
 		index("branch_created_idx").on(table.createdAt.desc(), table.id.desc()),
-		uniqueIndex("branch_is_default_unique")
-			.on(table.isDefault)
-			.where(sql`${table.isDefault} = true`),
 	]
 );
 
