@@ -14,7 +14,6 @@
     "@emach/db": "workspace:*",
     "@emach/env": "workspace:*",
     "@emach/ui": "workspace:*",
-    "drizzle-orm": "^0.45.1",
     "@tanstack/react-form": "^1.28.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
@@ -22,14 +21,16 @@
     "better-auth": "catalog:",
     "class-variance-authority": "^0.7.1",
     "dotenv": "catalog:",
+    "drizzle-orm": "^0.45.1",
+    "evlog": "^2.14.1",
+    "framer-motion": "^12.39.0",
     "lucide-react": "catalog:",
     "next": "^16.2.0",
     "react": "catalog:",
     "react-dom": "catalog:",
     "react-inner-image-zoom": "^4.0.1",
     "sonner": "catalog:",
-    "zod": "catalog:",
-    "evlog": "^2.14.1"
+    "zod": "catalog:"
   },
   "devDependencies": {
     "@emach/config": "workspace:*",

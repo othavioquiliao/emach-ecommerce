@@ -14,6 +14,7 @@ const nextConfig: NextConfig = {
 		root: path.join(import.meta.dirname, "../.."),
 	},
 	images: {
+		qualities: [75, 100],
 		remotePatterns: [
 			{
 				protocol: "https",
