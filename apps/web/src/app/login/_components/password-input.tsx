@@ -3,14 +3,14 @@
 import { Eye, EyeOff } from "lucide-react";
 import { useState } from "react";
 
-type PasswordInputProps = {
+interface PasswordInputProps {
 	id: string;
 	name: string;
-	value: string;
 	onBlur: () => void;
 	onChange: (value: string) => void;
 	placeholder?: string;
-};
+	value: string;
+}
 
 export function PasswordInput({
 	id,
