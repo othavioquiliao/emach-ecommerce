@@ -2,6 +2,7 @@ import { db } from "@emach/db";
 import { client, clientAddress } from "@emach/db/schema/client";
 import { cn } from "@emach/ui/lib/utils";
 import { desc, eq } from "drizzle-orm";
+import { AlertTriangle } from "lucide-react";
 import type { Metadata } from "next";
 import { Fragment } from "react";
 
@@ -40,6 +41,7 @@ export default async function CheckoutPage() {
 			<CheckoutHeader>
 				<StepIndicator currentStep={1} />
 			</CheckoutHeader>
+			<DemoBanner />
 			<CheckoutContent
 				addresses={addresses}
 				clientDocument={profile?.document ?? null}
@@ -51,6 +53,24 @@ export default async function CheckoutPage() {
 				© 2026 EMACH. Todos os direitos reservados.
 			</footer>
 		</>
+	);
+}
+
+function DemoBanner() {
+	return (
+		<div className="bg-near-black px-10 py-3 text-white">
+			<div className="mx-auto flex max-w-6xl items-center gap-3">
+				<AlertTriangle className="size-4 shrink-0 text-amber-400" />
+				<div className="flex flex-1 flex-wrap items-baseline justify-between gap-x-4 gap-y-1">
+					<span className="font-display font-semibold text-[11px] uppercase tracking-[0.16em]">
+						Ambiente de demonstração · Pagamento não integrado
+					</span>
+					<span className="text-[12px] text-white/60">
+						Nenhuma cobrança real será realizada
+					</span>
+				</div>
+			</div>
+		</div>
 	);
 }
 
