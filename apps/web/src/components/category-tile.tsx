@@ -40,7 +40,7 @@ export function CategoryTile({ category, index }: CategoryTileProps) {
 			{/* Gradient bottom→top sobre a imagem pra legibilidade do texto */}
 			<div
 				aria-hidden="true"
-				className="absolute inset-0 bg-gradient-to-t from-black/78 via-black/42 to-transparent"
+				className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent"
 			/>
 
 			{/* Outline gigante "01" — sai parcialmente do card */}
