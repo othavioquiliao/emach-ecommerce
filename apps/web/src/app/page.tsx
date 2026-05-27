@@ -14,7 +14,6 @@ import { SectionHeader } from "@/components/section-header";
 import { SectionLabel } from "@/components/section-label";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
-import { TrustBar } from "@/components/trust-bar";
 
 export const revalidate = 600;
 
@@ -151,8 +150,6 @@ export default async function HomePage() {
 
 			<main>
 				<HeroCarousel />
-
-				<TrustBar />
 
 				{rootCategories.length > 0 && (
 					<section className="bg-gray-10">

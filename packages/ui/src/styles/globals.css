@@ -402,7 +402,7 @@
 	border: none;
 }
 
-/* ---------- Ticker / Marquee ---------- */
+/* ---------- Toast (sonner) EMACH style ---------- */
 @keyframes toast-in {
 	from {
 		transform: translateY(12px);
@@ -413,51 +413,7 @@
 		opacity: 1;
 	}
 }
-@keyframes marquee {
-	from {
-		transform: translateX(0);
-	}
-	to {
-		transform: translateX(-50%);
-	}
-}
 
-.emach-marquee {
-	display: flex;
-	white-space: nowrap;
-	animation: marquee 48s linear infinite;
-}
-.emach-ticker {
-	display: flex;
-	align-items: center;
-	width: 100%;
-	max-width: 100vw;
-	height: 32px;
-	overflow-x: clip;
-	overflow-y: hidden;
-	color: #fff;
-	background: var(--emach-red);
-}
-.emach-ticker span {
-	display: inline-flex;
-	gap: 10px;
-	align-items: center;
-	padding: 0 28px;
-	font-family: var(--font-display);
-	font-size: 12px;
-	font-weight: 600;
-	text-transform: uppercase;
-	letter-spacing: 0.16em;
-}
-.emach-ticker .dot {
-	width: 3px;
-	height: 3px;
-	background: #fff;
-	border-radius: 50%;
-	opacity: 0.6;
-}
-
-/* ---------- Toast (sonner) EMACH style ---------- */
 .emach-toast {
 	position: relative;
 	padding-left: 18px !important;

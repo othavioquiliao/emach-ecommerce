@@ -4,7 +4,6 @@ import type { Metadata, Viewport } from "next";
 import { Barlow, Barlow_Condensed } from "next/font/google";
 
 import Providers from "@/components/providers";
-import { Ticker } from "@/components/ticker";
 import "../index.css";
 
 const barlow = Barlow({
@@ -52,7 +51,6 @@ export default function RootLayout({
 				className={`${barlow.variable} ${barlowCondensed.variable} antialiased`}
 				suppressHydrationWarning
 			>
-				<Ticker />
 				<Providers>{children}</Providers>
 				<Analytics />
 				<SpeedInsights />
