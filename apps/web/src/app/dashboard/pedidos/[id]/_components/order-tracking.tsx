@@ -18,6 +18,7 @@ import { SectionBlock } from "./section-block";
 const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
 	day: "2-digit",
 	month: "2-digit",
+	year: "2-digit",
 	hour: "2-digit",
 	minute: "2-digit",
 });
@@ -256,6 +257,8 @@ export function OrderTracking({
 			)}
 
 			<button
+				aria-controls="order-history"
+				aria-expanded={open}
 				className="mt-5 inline-flex items-center gap-1.5 font-semibold text-[12px] text-gray-60 hover:text-near-black"
 				onClick={() => setOpen((v) => !v)}
 				type="button"
@@ -270,7 +273,7 @@ export function OrderTracking({
 				{open ? "Ocultar histórico" : "Ver histórico completo"}
 			</button>
 			{open ? (
-				<div className="mt-3 border-border border-t pt-4">
+				<div className="mt-3 border-border border-t pt-4" id="order-history">
 					<HistoryTimeline history={history} />
 				</div>
 			) : null}
