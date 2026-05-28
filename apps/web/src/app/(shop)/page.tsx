@@ -8,8 +8,7 @@ import { CategoryGrid } from "@/components/category-grid";
 import { EmachButton } from "@/components/emach-button";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { PageContainer } from "@/components/page-container";
-import { ProductCard } from "@/components/product-card";
-import { ProductGrid } from "@/components/product-grid";
+import { ProductCarousel } from "@/components/product-carousel";
 import { SectionHeader } from "@/components/section-header";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
@@ -39,8 +38,6 @@ async function getRootCategories() {
 		.limit(4);
 }
 
-// Postgres ARRAY[$1, $2, ...]::T[] — drizzle-orm interpola arrays como tupla
-// `($1, $2)`, que Postgres recusa em ANY()/= ANY().
 function arrayLiteral<T>(values: T[], castType: string) {
 	return sql`ARRAY[${sql.join(
 		values.map((v) => sql`${v}`),
@@ -129,8 +126,8 @@ function flattenPromoTools(
 export default async function HomePage() {
 	const [rootCategories, activePromotions, recentTools] = await Promise.all([
 		getRootCategories(),
-		getActivePromotions(db, 4),
-		getRecentTools(db, 4),
+		getActivePromotions(db, 8),
+		getRecentTools(db, 8),
 	]);
 
 	const categoryImages = await getCategoryImages(
@@ -141,7 +138,7 @@ export default async function HomePage() {
 		imageUrl: categoryImages.get(c.slug) ?? null,
 	}));
 
-	const promoTools = flattenPromoTools(activePromotions, 4);
+	const promoTools = flattenPromoTools(activePromotions, 8);
 
 	return (
 		<>
@@ -150,42 +147,25 @@ export default async function HomePage() {
 			<main>
 				<HeroCarousel />
 
-				{rootCategories.length > 0 && (
-					<section className="bg-gray-10">
-						<PageContainer className="px-[56px] py-[72px]">
-							<SectionHeader
-								label="01 · Categorias"
-								link={{
-									href: "/catalog",
-									label: "Ver todas",
-									variant: "arrow",
-								}}
-								title="Explorar por categoria"
-							/>
-							<CategoryGrid categories={rootCategoriesWithImages} />
-						</PageContainer>
-					</section>
-				)}
-
 				{promoTools.length > 0 && (
-					<section className="bg-white">
-						<PageContainer className="px-[56px] py-[72px]">
-							<SectionHeader
+					<section className="bg-gray-10">
+						<PageContainer className="px-14 py-18">
+							<ProductCarousel
 								label="02 · Ofertas"
 								link={{
 									href: "/catalog?promo=1",
 									label: "Ver todas",
 									variant: "arrow",
 								}}
-								title="Promoções ativas"
+								title="Promoções"
+								tools={promoTools}
 							/>
-							<ProductGrid tools={promoTools} />
 						</PageContainer>
 					</section>
 				)}
 
 				<section className="bg-black text-white">
-					<PageContainer className="grid min-h-[440px] grid-cols-2 px-0">
+					<PageContainer className="grid min-h-110 grid-cols-2 px-0">
 						<div className="flex flex-col justify-center gap-5 px-20 py-20">
 							<SectionLabel tone="accent">Feito para durar</SectionLabel>
 							<h2 className="font-display font-medium text-[48px] leading-[1.02] tracking-[-0.01em]">
@@ -195,7 +175,7 @@ export default async function HomePage() {
 								<br />
 								no meio da obra.
 							</h2>
-							<p className="max-w-[440px] text-[16px] text-white/70 leading-relaxed">
+							<p className="max-w-110 text-[16px] text-white/70 leading-relaxed">
 								Cada ferramenta EMACH passa por 200+ horas de testes em campo
 								antes de chegar ao catálogo.
 							</p>
@@ -231,18 +211,34 @@ export default async function HomePage() {
 				</section>
 
 				{recentTools.length > 0 && (
-					<section className="bg-gray-10 px-[56px] py-[72px]">
+					<section className="bg-gray-10 px-14 py-18">
 						<PageContainer>
-							<SectionHeader
-								label="03 · Novidades"
-								link={{ href: "/catalog?sort=newest", label: "Ver todas" }}
-								title="Recém-chegadas"
+							<ProductCarousel
+								label="03 · Recém chegadas"
+								link={{
+									href: "/catalog?sort=newest",
+									label: "Ver todas",
+									variant: "arrow",
+								}}
+								title="Novidades"
+								tools={recentTools}
 							/>
-							<div className="grid grid-cols-4 gap-6">
-								{recentTools.map((tool) => (
-									<ProductCard key={tool.id} tool={tool} />
-								))}
-							</div>
+						</PageContainer>
+					</section>
+				)}
+				{rootCategories.length > 0 && (
+					<section className="bg-gray-10">
+						<PageContainer className="px-14 py-18">
+							<SectionHeader
+								label="01 · Categorias"
+								link={{
+									href: "/catalog",
+									label: "Ver todas",
+									variant: "arrow",
+								}}
+								title="Explorar por categoria"
+							/>
+							<CategoryGrid categories={rootCategoriesWithImages} />
 						</PageContainer>
 					</section>
 				)}

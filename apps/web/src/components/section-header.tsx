@@ -1,6 +1,7 @@
 import { cn } from "@emach/ui/lib/utils";
 import { ArrowRight } from "lucide-react";
 import Link, { type LinkProps } from "next/link";
+import type { ReactNode } from "react";
 import { SectionLabel } from "@/components/section-label";
 
 type AnyLinkProps = LinkProps<string>;
@@ -8,6 +9,8 @@ type AnyLinkProps = LinkProps<string>;
 type LinkVariant = "underline" | "arrow";
 
 interface SectionHeaderProps {
+	/** Conteúdo extra à direita, antes do link (ex.: setas de carrossel). */
+	actions?: ReactNode;
 	className?: string;
 	label?: string;
 	link?: {
@@ -34,6 +37,7 @@ const TITLE_SIZE: Record<
  * chiaroscuro das vinhetas EMACH.
  */
 export function SectionHeader({
+	actions,
 	label,
 	title,
 	link,
@@ -41,6 +45,36 @@ export function SectionHeader({
 	tone = "accent",
 	className,
 }: SectionHeaderProps) {
+	const linkNode =
+		link &&
+		(link.variant === "arrow" ? (
+			<Link
+				className="group inline-flex items-center gap-2 font-semibold text-[13px] text-current"
+				href={link.href}
+			>
+				<span className="relative">
+					{link.label}
+					<span
+						aria-hidden="true"
+						className="absolute inset-x-0 -bottom-1 h-[1px] origin-left scale-x-0 bg-emach-red transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none"
+					/>
+				</span>
+				<ArrowRight
+					aria-hidden="true"
+					className="transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
+					size={14}
+					strokeWidth={2}
+				/>
+			</Link>
+		) : (
+			<Link
+				className="border-emach-red border-b-2 pb-0.5 font-semibold text-[13px]"
+				href={link.href}
+			>
+				{link.label}
+			</Link>
+		));
+
 	return (
 		<div className={cn("mb-8 flex items-end justify-between", className)}>
 			<div>
@@ -54,34 +88,12 @@ export function SectionHeader({
 					{title}
 				</h2>
 			</div>
-			{link &&
-				(link.variant === "arrow" ? (
-					<Link
-						className="group inline-flex items-center gap-2 font-semibold text-[13px] text-current"
-						href={link.href}
-					>
-						<span className="relative">
-							{link.label}
-							<span
-								aria-hidden="true"
-								className="absolute inset-x-0 -bottom-1 h-[1px] origin-left scale-x-0 bg-emach-red transition-transform duration-300 ease-out group-hover:scale-x-100 motion-reduce:transition-none"
-							/>
-						</span>
-						<ArrowRight
-							aria-hidden="true"
-							className="transition-transform duration-200 ease-out group-hover:translate-x-1 motion-reduce:transition-none motion-reduce:group-hover:translate-x-0"
-							size={14}
-							strokeWidth={2}
-						/>
-					</Link>
-				) : (
-					<Link
-						className="border-emach-red border-b-2 pb-0.5 font-semibold text-[13px]"
-						href={link.href}
-					>
-						{link.label}
-					</Link>
-				))}
+			{(actions || linkNode) && (
+				<div className="flex items-center gap-5">
+					{actions}
+					{linkNode}
+				</div>
+			)}
 		</div>
 	);
 }
