@@ -2,6 +2,7 @@
 
 import { db } from "@emach/db";
 import { order, orderStatusHistory } from "@emach/db/schema/orders";
+import type { Voltage } from "@emach/db/schema/tools";
 import { and, eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
@@ -91,7 +92,7 @@ export interface RebuySnapshot {
 	slug: string;
 	toolId: string;
 	variantId: string;
-	voltage: string | null;
+	voltage: Voltage | null;
 }
 
 export async function rebuyAction(raw: {

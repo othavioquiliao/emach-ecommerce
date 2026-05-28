@@ -7,6 +7,8 @@ import { emachButtonVariants } from "@/components/emach-button";
 import { fmtNumericBRL } from "@/lib/format";
 import type { OrderListItem } from "@/lib/orders/queries";
 import { isTerminalNegative } from "@/lib/orders/status";
+import { CancelOrderButton } from "../[id]/_components/cancel-order-button";
+import { RebuyButton } from "../[id]/_components/rebuy-button";
 import { OrderStatusBadge } from "./order-status-badge";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
@@ -50,6 +52,11 @@ function ItemThumb({ url, alt }: { url: string | null; alt: string }) {
 
 export function OrderCard({ order }: { order: OrderListItem }) {
 	const detailsHref = `/dashboard/pedidos/${order.id}` as Route;
+	const pagarHref = `/dashboard/pedidos/${order.id}/pagar` as Route;
+	const isPending =
+		order.status === "pending_payment" || order.status === "payment_failed";
+	const canRebuy =
+		order.status === "delivered" || isTerminalNegative(order.status);
 
 	return (
 		<article
@@ -110,13 +117,23 @@ export function OrderCard({ order }: { order: OrderListItem }) {
 				</div>
 			</div>
 
-			<footer className="flex justify-end gap-2 border-border border-t bg-white px-[18px] py-2.5">
+			<footer className="flex flex-wrap justify-end gap-2 border-border border-t bg-white px-[18px] py-2.5">
+				{isPending ? <CancelOrderButton orderId={order.id} /> : null}
 				<Link
 					className={emachButtonVariants({ variant: "outline", size: "sm" })}
 					href={detailsHref}
 				>
 					Ver detalhes
 				</Link>
+				{isPending ? (
+					<Link
+						className={emachButtonVariants({ variant: "primary", size: "sm" })}
+						href={pagarHref}
+					>
+						Pagar agora
+					</Link>
+				) : null}
+				{canRebuy ? <RebuyButton orderId={order.id} /> : null}
 			</footer>
 		</article>
 	);

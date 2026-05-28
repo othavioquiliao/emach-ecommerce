@@ -2,7 +2,12 @@ import { db } from "@emach/db";
 import { category, toolCategory } from "@emach/db/schema/categories";
 import { stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
-import { tool, toolImage, toolVariant } from "@emach/db/schema/tools";
+import {
+	tool,
+	toolImage,
+	toolVariant,
+	type Voltage,
+} from "@emach/db/schema/tools";
 import { and, asc, eq, inArray, sql } from "drizzle-orm";
 
 export interface RebuyItem {
@@ -17,7 +22,7 @@ export interface RebuyItem {
 	slug: string;
 	toolId: string;
 	variantId: string;
-	voltage: string | null;
+	voltage: Voltage | null;
 }
 
 export async function getRebuyItems(

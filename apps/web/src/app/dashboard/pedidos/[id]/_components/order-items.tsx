@@ -1,8 +1,10 @@
+import type { OrderStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
 import { Package } from "lucide-react";
 import Image from "next/image";
 import { fmtNumericBRL } from "@/lib/format";
 import type { OrderDetailData } from "@/lib/orders/queries";
+import { ReviewItemButton } from "./review-item-button";
 import { SectionBlock } from "./section-block";
 
 type Item = OrderDetailData["items"][number];
@@ -29,7 +31,17 @@ function ItemThumb({ url, alt }: { url: string | null; alt: string }) {
 	);
 }
 
-export function OrderItems({ items }: { items: Item[] }) {
+export function OrderItems({
+	items,
+	orderId,
+	reviewedToolIds,
+	status,
+}: {
+	items: Item[];
+	orderId: string;
+	reviewedToolIds: string[];
+	status: OrderStatus;
+}) {
 	return (
 		<SectionBlock title="Itens do pedido">
 			<div>
@@ -55,8 +67,18 @@ export function OrderItems({ items }: { items: Item[] }) {
 								Quantidade: {item.quantity}
 							</div>
 						</div>
-						<div className="min-w-[100px] text-right font-semibold text-[13px] text-near-black">
-							{fmtNumericBRL(item.lineTotal)}
+						<div className="flex min-w-[100px] flex-col items-end gap-1.5">
+							<span className="font-semibold text-[13px] text-near-black">
+								{fmtNumericBRL(item.lineTotal)}
+							</span>
+							{status === "delivered" ? (
+								<ReviewItemButton
+									orderId={orderId}
+									productName={item.name}
+									reviewed={reviewedToolIds.includes(item.toolId)}
+									toolId={item.toolId}
+								/>
+							) : null}
 						</div>
 					</div>
 				))}

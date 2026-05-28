@@ -2,6 +2,7 @@ import { notFound } from "next/navigation";
 import { getClientOrderDetail } from "@/lib/orders/queries";
 import { requireCurrentClient } from "@/lib/session";
 import { BuyerInfo } from "./_components/buyer-info";
+import { OrderActions } from "./_components/order-actions";
 import { OrderDetailHeader } from "./_components/order-detail-header";
 import { OrderItems } from "./_components/order-items";
 import { OrderTotals } from "./_components/order-totals";
@@ -21,7 +22,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
 		notFound();
 	}
 
-	const { order, items, history } = detail;
+	const { order, items, history, reviewedToolIds } = detail;
 	const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
 	// phone/document são additionalFields do Better Auth, não inferidos no tipo
@@ -52,8 +53,18 @@ export default async function OrderDetailPage({ params }: PageProps) {
 				subtotalAmount={order.subtotalAmount}
 				totalAmount={order.totalAmount}
 			/>
-			<OrderItems items={items} />
+			<OrderItems
+				items={items}
+				orderId={order.id}
+				reviewedToolIds={reviewedToolIds}
+				status={order.status}
+			/>
 			<OrderTracking history={history} order={order} />
+			<OrderActions
+				nfeUrl={order.nfeUrl}
+				orderId={order.id}
+				status={order.status}
+			/>
 		</div>
 	);
 }

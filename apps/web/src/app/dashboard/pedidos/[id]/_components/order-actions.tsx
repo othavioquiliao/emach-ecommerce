@@ -1,5 +1,61 @@
-// Placeholder até o plano de ações (cancelar, pagar, comprar novamente,
-// avaliar). Mantém o arquivo para reintroduzir as ações por status.
-export function OrderActions() {
-	return null;
+import type { OrderStatus } from "@emach/db/schema/orders";
+import { Download } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { emachButtonVariants } from "@/components/emach-button";
+import { CancelOrderButton } from "./cancel-order-button";
+import { RebuyButton } from "./rebuy-button";
+
+export function OrderActions({
+	orderId,
+	status,
+	nfeUrl,
+}: {
+	nfeUrl: string | null;
+	orderId: string;
+	status: OrderStatus;
+}) {
+	const pagarHref = `/dashboard/pedidos/${orderId}/pagar` as Route;
+	const isPending = status === "pending_payment" || status === "payment_failed";
+	const canRebuy =
+		status === "delivered" ||
+		status === "canceled" ||
+		status === "refunded" ||
+		status === "returned";
+
+	const buttons: React.ReactNode[] = [];
+	if (nfeUrl) {
+		buttons.push(
+			<a
+				className={emachButtonVariants({ variant: "ghost", size: "sm" })}
+				href={nfeUrl}
+				key="nfe"
+				rel="noopener"
+				target="_blank"
+			>
+				<Download className="mr-1.5 h-3.5 w-3.5" /> Nota fiscal
+			</a>
+		);
+	}
+	if (isPending) {
+		buttons.push(<CancelOrderButton key="cancel" orderId={orderId} />);
+		buttons.push(
+			<Link
+				className={emachButtonVariants({ variant: "primary", size: "sm" })}
+				href={pagarHref}
+				key="pay"
+			>
+				Pagar agora
+			</Link>
+		);
+	} else if (canRebuy) {
+		buttons.push(
+			<RebuyButton key="rebuy" orderId={orderId} variant="primary" />
+		);
+	}
+
+	if (buttons.length === 0) {
+		return null;
+	}
+	return <div className="mt-6 flex flex-wrap justify-end gap-2">{buttons}</div>;
 }
