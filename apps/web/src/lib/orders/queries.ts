@@ -1,6 +1,7 @@
 import { db } from "@emach/db";
 import type { OrderStatus } from "@emach/db/schema/orders";
 import { order, orderItem, orderStatusHistory } from "@emach/db/schema/orders";
+import { review } from "@emach/db/schema/reviews";
 import { toolImage } from "@emach/db/schema/tools";
 import { and, asc, desc, eq, inArray } from "drizzle-orm";
 
@@ -64,6 +65,7 @@ export interface OrderDetailData {
 	history: (typeof orderStatusHistory.$inferSelect)[];
 	items: (OrderItemRow & { imageUrl: string | null })[];
 	order: typeof order.$inferSelect;
+	reviewedToolIds: string[];
 }
 
 /** Mapa toolId -> URL da imagem primária (menor sortOrder). */
@@ -173,6 +175,11 @@ export async function getClientOrderDetail(
 		.where(eq(orderStatusHistory.orderId, orderId))
 		.orderBy(desc(orderStatusHistory.createdAt));
 
+	const reviewed = await db
+		.select({ toolId: review.toolId })
+		.from(review)
+		.where(and(eq(review.orderId, orderId), eq(review.clientId, clientId)));
+
 	return {
 		order: orderRow,
 		items: items.map((i) => ({
@@ -180,5 +187,6 @@ export async function getClientOrderDetail(
 			imageUrl: imageByTool.get(i.toolId) ?? null,
 		})),
 		history,
+		reviewedToolIds: reviewed.map((r) => r.toolId),
 	};
 }
