@@ -2,7 +2,7 @@ import type { OrderStatus } from "@emach/db/schema/orders";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SectionLabel } from "@/components/section-label";
-import { ORDER_STATUS_BADGE } from "@/lib/orders/status";
+import { type BadgeTone, ORDER_STATUS_BADGE } from "@/lib/orders/status";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	day: "2-digit",
@@ -10,8 +10,8 @@ const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	year: "numeric",
 });
 
-const TONE_BG: Record<string, string> = {
-	neutral: "bg-warning text-white",
+const TONE_BG: Record<BadgeTone, string> = {
+	neutral: "bg-gray-50 text-white",
 	danger: "bg-emach-red text-white",
 	info: "bg-info text-white",
 	progress: "bg-near-black text-white",
