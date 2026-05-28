@@ -5,6 +5,7 @@ import { BuyerInfo } from "./_components/buyer-info";
 import { OrderDetailHeader } from "./_components/order-detail-header";
 import { OrderItems } from "./_components/order-items";
 import { OrderTotals } from "./_components/order-totals";
+import { OrderTracking } from "./_components/order-tracking";
 import { ShippingAddress } from "./_components/shipping-address";
 
 interface PageProps {
@@ -20,7 +21,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
 		notFound();
 	}
 
-	const { order, items } = detail;
+	const { order, items, history } = detail;
 	const itemCount = items.reduce((sum, i) => sum + i.quantity, 0);
 
 	// phone/document são additionalFields do Better Auth, não inferidos no tipo
@@ -52,6 +53,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
 				totalAmount={order.totalAmount}
 			/>
 			<OrderItems items={items} />
+			<OrderTracking history={history} order={order} />
 		</div>
 	);
 }

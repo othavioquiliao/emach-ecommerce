@@ -1,53 +1,19 @@
 "use client";
 
+import type { OrderStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
-import { Check, Copy, X } from "lucide-react";
+import { Check, ChevronDown, Copy, X } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
-import type { OrderDetail, OrderStatus } from "../../../_lib/types";
+import type { OrderDetailData } from "@/lib/orders/queries";
+import {
+	isTerminalNegative,
+	ORDER_STATUS_BADGE,
+	STEPPER_PHASES,
+	type StepperPhase,
+	stepStateFor,
+} from "@/lib/orders/status";
 import { SectionBlock } from "./section-block";
-
-const STEPS = [
-	{ key: "awaiting", label: "Aguardando\npagamento" },
-	{ key: "paid", label: "Pago" },
-	{ key: "in_transit", label: "A caminho" },
-	{ key: "delivered", label: "Recebido" },
-] as const;
-
-type StepKey = (typeof STEPS)[number]["key"];
-type StepState = "done" | "current" | "upcoming";
-
-function stepStateFor(status: OrderStatus, step: StepKey): StepState {
-	const order: StepKey[] = ["awaiting", "paid", "in_transit", "delivered"];
-	const stepIdx = order.indexOf(step);
-	const currentIdx = (() => {
-		switch (status) {
-			case "pending_payment":
-				return 0;
-			case "to_ship":
-				return 1.5; // paid done, in_transit upcoming
-			case "shipped":
-				return 2;
-			case "completed":
-				return 4; // all done
-			default:
-				return -1;
-		}
-	})();
-
-	if (currentIdx === -1) {
-		return "upcoming";
-	}
-	if (stepIdx < Math.floor(currentIdx)) {
-		return "done";
-	}
-	if (stepIdx === currentIdx) {
-		return "current";
-	}
-	if (stepIdx < currentIdx) {
-		return "done";
-	}
-	return "upcoming";
-}
 
 const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
 	day: "2-digit",
@@ -56,22 +22,34 @@ const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
 	minute: "2-digit",
 });
 
-function stepDateFor(detail: OrderDetail, step: StepKey): string {
-	switch (step) {
-		case "awaiting":
-			return DATETIME_FMT.format(detail.createdAt);
-		case "paid":
-			return detail.paidAt ? DATETIME_FMT.format(detail.paidAt) : "—";
-		case "in_transit":
-			return detail.shippedAt ? DATETIME_FMT.format(detail.shippedAt) : "—";
-		case "delivered":
-			return detail.deliveredAt ? DATETIME_FMT.format(detail.deliveredAt) : "—";
-		default:
-			return "—";
-	}
+const PHASE_LABEL: Record<StepperPhase, string> = {
+	paid: "Pago",
+	preparing: "Preparação",
+	shipped: "A caminho",
+	delivered: "Recebido",
+};
+
+function phaseDate(
+	order: OrderDetailData["order"],
+	phase: StepperPhase
+): string {
+	const phaseDates: Record<StepperPhase, Date | null> = {
+		paid: order.paidAt,
+		preparing: order.preparingAt,
+		shipped: order.shippedAt,
+		delivered: order.deliveredAt,
+	};
+	const ts = phaseDates[phase];
+	return ts ? DATETIME_FMT.format(ts) : "—";
 }
 
-function StepDot({ index, state }: { index: number; state: StepState }) {
+function StepDot({
+	index,
+	state,
+}: {
+	index: number;
+	state: "done" | "current" | "upcoming";
+}) {
 	const base =
 		"relative z-10 flex h-9 w-9 items-center justify-center rounded-full border-2 font-display font-bold text-[12px]";
 	if (state === "done") {
@@ -100,40 +78,20 @@ function StepDot({ index, state }: { index: number; state: StepState }) {
 	);
 }
 
-function CancelledStepper({ cancelledAt }: { cancelledAt?: Date }) {
-	return (
-		<div className="flex items-center gap-3 border border-warning bg-warning/5 px-4 py-4">
-			<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-warning bg-warning text-white">
-				<X className="h-4 w-4" strokeWidth={2.5} />
-			</div>
-			<div>
-				<div className="font-display font-semibold text-[12px] text-warning uppercase tracking-[0.14em]">
-					Pedido cancelado
-				</div>
-				{cancelledAt ? (
-					<div className="text-[12px] text-gray-60">
-						Cancelado em {DATETIME_FMT.format(cancelledAt)}
-					</div>
-				) : null}
-			</div>
-		</div>
-	);
-}
-
-function NormalStepper({ detail }: { detail: OrderDetail }) {
+function Stepper({ order }: { order: OrderDetailData["order"] }) {
 	return (
 		<ol
 			aria-label="Etapas do envio"
 			className="relative grid grid-cols-4 gap-2"
 		>
-			{STEPS.map((step, idx) => {
-				const state = stepStateFor(detail.status, step.key);
-				const isLast = idx === STEPS.length - 1;
+			{STEPPER_PHASES.map((phase, idx) => {
+				const state = stepStateFor(order.status, phase);
+				const isLast = idx === STEPPER_PHASES.length - 1;
 				return (
 					<li
 						aria-current={state === "current" ? "step" : undefined}
 						className="flex flex-col items-center gap-2"
-						key={step.key}
+						key={phase}
 					>
 						<div className="relative flex w-full items-center justify-center">
 							<StepDot index={idx} state={state} />
@@ -149,14 +107,14 @@ function NormalStepper({ detail }: { detail: OrderDetail }) {
 						</div>
 						<div
 							className={cn(
-								"whitespace-pre-line text-center font-display font-semibold text-[11px] uppercase leading-tight tracking-[0.12em]",
+								"text-center font-display font-semibold text-[11px] uppercase leading-tight tracking-[0.12em]",
 								state === "upcoming" ? "text-gray-50" : "text-near-black"
 							)}
 						>
-							{step.label}
+							{PHASE_LABEL[phase]}
 						</div>
 						<div className="-mt-1 text-[10px] text-gray-50">
-							{stepDateFor(detail, step.key)}
+							{phaseDate(order, phase)}
 						</div>
 					</li>
 				);
@@ -165,13 +123,43 @@ function NormalStepper({ detail }: { detail: OrderDetail }) {
 	);
 }
 
-function TrackingCard({ tracking }: { tracking: OrderDetail["tracking"] }) {
-	if (!tracking) {
-		return null;
-	}
+function NegativeNotice({
+	status,
+	at,
+}: {
+	status: OrderStatus;
+	at: Date | null;
+}) {
+	const { label } = ORDER_STATUS_BADGE[status];
+	return (
+		<div className="flex items-center gap-3 border border-warning bg-warning/5 px-4 py-4">
+			<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border-2 border-warning bg-warning text-white">
+				<X className="h-4 w-4" strokeWidth={2.5} />
+			</div>
+			<div>
+				<div className="font-display font-semibold text-[12px] text-warning uppercase tracking-[0.14em]">
+					{label}
+				</div>
+				{at ? (
+					<div className="text-[12px] text-gray-60">
+						{DATETIME_FMT.format(at)}
+					</div>
+				) : null}
+			</div>
+		</div>
+	);
+}
+
+function TrackingCode({
+	code,
+	method,
+}: {
+	code: string;
+	method: string | null;
+}) {
 	const handleCopy = async () => {
 		try {
-			await navigator.clipboard.writeText(tracking.code);
+			await navigator.clipboard.writeText(code);
 			toast.success("Código copiado");
 		} catch {
 			toast.error("Não foi possível copiar");
@@ -180,11 +168,13 @@ function TrackingCard({ tracking }: { tracking: OrderDetail["tracking"] }) {
 	return (
 		<div className="mt-6 grid grid-cols-1 gap-4 border border-border bg-gray-10 px-4 py-3.5 sm:grid-cols-[1fr_auto] sm:items-center">
 			<div>
-				<div className="mb-1 font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
-					{tracking.carrier} · {tracking.service}
-				</div>
+				{method ? (
+					<div className="mb-1 font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+						{method}
+					</div>
+				) : null}
 				<div className="font-mono font-semibold text-[16px] text-near-black tracking-[0.04em]">
-					{tracking.code}
+					{code}
 				</div>
 			</div>
 			<button
@@ -200,44 +190,90 @@ function TrackingCard({ tracking }: { tracking: OrderDetail["tracking"] }) {
 	);
 }
 
-function TrackingPlaceholder({ status }: { status: OrderStatus }) {
-	const message =
-		status === "pending_payment"
-			? "Aguardando confirmação de pagamento. O código de rastreio aparecerá aqui assim que o pedido for enviado."
-			: "Seu pedido está em preparação. O código de rastreio aparecerá aqui assim que sair para entrega.";
+function placeholderMessage(status: OrderStatus): string {
+	if (status === "pending_payment" || status === "payment_failed") {
+		return "Aguardando confirmação de pagamento. O código de rastreio aparece aqui quando o pedido for enviado.";
+	}
+	return "Pedido em preparação. O código de rastreio aparece aqui assim que sair para entrega.";
+}
+
+function HistoryTimeline({ history }: { history: OrderDetailData["history"] }) {
+	if (history.length === 0) {
+		return (
+			<p className="text-[12px] text-gray-50">Sem histórico registrado.</p>
+		);
+	}
 	return (
-		<div className="mt-6 border border-border border-dashed bg-gray-10 px-4 py-3.5 text-[12px] text-gray-60">
-			{message}
-		</div>
+		<ol className="space-y-3">
+			{history.map((h) => (
+				<li className="flex gap-3 text-[12px]" key={h.id}>
+					<div className="mt-1 h-2.5 w-2.5 shrink-0 rounded-full bg-near-black" />
+					<div>
+						<div className="font-semibold text-near-black">
+							{ORDER_STATUS_BADGE[h.toStatus].label}
+						</div>
+						<div className="text-gray-50">
+							{DATETIME_FMT.format(h.createdAt)}
+							{h.reason ? ` · ${h.reason}` : ""}
+						</div>
+					</div>
+				</li>
+			))}
+		</ol>
 	);
 }
 
-export function OrderTracking({ detail }: { detail: OrderDetail }) {
-	const isCancelled = detail.status === "cancelled";
+export function OrderTracking({
+	order,
+	history,
+}: {
+	history: OrderDetailData["history"];
+	order: OrderDetailData["order"];
+}) {
+	const [open, setOpen] = useState(false);
+	const negative = isTerminalNegative(order.status);
+	const negativeAt =
+		order.canceledAt ?? order.refundedAt ?? order.returnedAt ?? null;
+
 	return (
-		<SectionBlock
-			id="rastreio"
-			rightSlot={
-				detail.tracking ? (
-					<span className="font-display font-semibold text-[10px] text-gray-50 uppercase tracking-[0.16em]">
-						Atualizado em {DATETIME_FMT.format(detail.tracking.updatedAt)}
-					</span>
-				) : null
-			}
-			title="Rastreio do envio"
-		>
-			{isCancelled ? (
-				<CancelledStepper cancelledAt={detail.cancelledAt} />
+		<SectionBlock id="rastreio" title="Rastreio do envio">
+			{negative ? (
+				<NegativeNotice at={negativeAt} status={order.status} />
 			) : (
 				<>
-					<NormalStepper detail={detail} />
-					{detail.tracking ? (
-						<TrackingCard tracking={detail.tracking} />
+					<Stepper order={order} />
+					{order.shippingTrackingCode ? (
+						<TrackingCode
+							code={order.shippingTrackingCode}
+							method={order.shippingMethod}
+						/>
 					) : (
-						<TrackingPlaceholder status={detail.status} />
+						<div className="mt-6 border border-border border-dashed bg-gray-10 px-4 py-3.5 text-[12px] text-gray-60">
+							{placeholderMessage(order.status)}
+						</div>
 					)}
 				</>
 			)}
+
+			<button
+				className="mt-5 inline-flex items-center gap-1.5 font-semibold text-[12px] text-gray-60 hover:text-near-black"
+				onClick={() => setOpen((v) => !v)}
+				type="button"
+			>
+				<ChevronDown
+					className={cn(
+						"h-3.5 w-3.5 transition-transform",
+						open && "rotate-180"
+					)}
+					strokeWidth={1.8}
+				/>
+				{open ? "Ocultar histórico" : "Ver histórico completo"}
+			</button>
+			{open ? (
+				<div className="mt-3 border-border border-t pt-4">
+					<HistoryTimeline history={history} />
+				</div>
+			) : null}
 		</SectionBlock>
 	);
 }
