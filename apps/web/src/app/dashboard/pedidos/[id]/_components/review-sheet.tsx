@@ -27,11 +27,11 @@ function StarInput({
 	const [hover, setHover] = useState(0);
 	const clearHover = () => setHover(0);
 	return (
-		<div
+		// biome-ignore lint/a11y/noNoninteractiveElementInteractions: onMouseLeave só limpa o hover visual; a interação real está nos <button> filhos
+		<fieldset
 			aria-label="Nota do produto"
 			className="flex gap-1"
 			onMouseLeave={clearHover}
-			role="group"
 		>
 			{STARS.map((n) => (
 				<button
@@ -54,7 +54,7 @@ function StarInput({
 					/>
 				</button>
 			))}
-		</div>
+		</fieldset>
 	);
 }
 
