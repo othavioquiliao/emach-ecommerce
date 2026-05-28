@@ -1,7 +1,8 @@
+import type { OrderStatus } from "@emach/db/schema/orders";
 import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 import { SectionLabel } from "@/components/section-label";
-import { ORDER_STATUS_LABEL, type OrderStatus } from "../../../_lib/types";
+import { ORDER_STATUS_BADGE } from "@/lib/orders/status";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	day: "2-digit",
@@ -9,25 +10,27 @@ const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	year: "numeric",
 });
 
-const STATUS_TONE: Record<OrderStatus, string> = {
-	pending_payment: "bg-warning text-white",
-	to_ship: "bg-near-black text-white",
-	shipped: "bg-near-black text-white",
-	completed: "bg-success text-white",
-	cancelled: "bg-gray-50 text-white",
+const TONE_BG: Record<string, string> = {
+	neutral: "bg-warning text-white",
+	danger: "bg-emach-red text-white",
+	info: "bg-info text-white",
+	progress: "bg-near-black text-white",
+	transit: "bg-near-black text-white",
+	success: "bg-success text-white",
+	muted: "bg-gray-50 text-white",
+	warning: "bg-warning text-white",
 };
-
-interface OrderDetailHeaderProps {
-	createdAt: Date;
-	id: string;
-	status: OrderStatus;
-}
 
 export function OrderDetailHeader({
 	createdAt,
-	id,
+	number,
 	status,
-}: OrderDetailHeaderProps) {
+}: {
+	createdAt: Date;
+	number: string;
+	status: OrderStatus;
+}) {
+	const { label, tone } = ORDER_STATUS_BADGE[status];
 	return (
 		<header className="mb-7">
 			<Link
@@ -37,10 +40,9 @@ export function OrderDetailHeader({
 				<ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} />
 				Voltar para Pedidos
 			</Link>
-
 			<SectionLabel>Pedido</SectionLabel>
 			<h1 className="mt-1.5 mb-1.5 break-all font-display font-medium text-[36px] leading-none">
-				#{id}
+				#{number}
 			</h1>
 			<div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 text-[12px] text-gray-60">
 				<span>
@@ -51,13 +53,13 @@ export function OrderDetailHeader({
 				</span>
 				<span aria-hidden="true">·</span>
 				<span
-					className={`inline-flex h-[22px] items-center gap-1.5 px-2.5 font-display font-semibold text-[11px] uppercase tracking-[0.12em] ${STATUS_TONE[status]}`}
+					className={`inline-flex h-[22px] items-center gap-1.5 px-2.5 font-display font-semibold text-[11px] uppercase tracking-[0.12em] ${TONE_BG[tone]}`}
 				>
 					<span
 						aria-hidden="true"
 						className="h-1.5 w-1.5 rounded-full bg-current"
 					/>
-					{ORDER_STATUS_LABEL[status]}
+					{label}
 				</span>
 			</div>
 		</header>

@@ -1,12 +1,27 @@
-import { fmtBRL } from "@/lib/format";
-import type { OrderBreakdown, PaymentInfo } from "../../../_lib/types";
+import { fmtNumericBRL } from "@/lib/format";
 import { SectionBlock } from "./section-block";
 
 interface OrderTotalsProps {
-	breakdown: OrderBreakdown;
+	discountAmount: string;
 	itemCount: number;
-	payment: PaymentInfo;
+	paymentMethod: string | null;
+	shippingAmount: string;
+	shippingMethod: string | null;
+	subtotalAmount: string;
+	totalAmount: string;
 }
+
+const PAYMENT_LABEL: Record<string, string> = {
+	pix: "Pago via Pix",
+	boleto: "Boleto bancário",
+	credit_card: "Cartão de crédito",
+};
+
+const PAYMENT_BADGE: Record<string, string> = {
+	pix: "PIX",
+	boleto: "BOL",
+	credit_card: "CRD",
+};
 
 function PriceRow({
 	emphasis,
@@ -26,67 +41,54 @@ function PriceRow({
 	);
 }
 
-const PAYMENT_BADGE_TEXT: Partial<Record<PaymentInfo["kind"], string>> = {
-	boleto: "BOL",
-	pix: "PIX",
-};
-
-function PaymentBadge({ kind }: { kind: PaymentInfo["kind"] }) {
-	const text = PAYMENT_BADGE_TEXT[kind] ?? "CRD";
-	return (
-		<div className="flex h-7 w-7 shrink-0 items-center justify-center border border-near-black font-bold font-display text-[10px] tracking-[0.06em]">
-			{text}
-		</div>
-	);
-}
-
 export function OrderTotals({
-	breakdown,
+	discountAmount,
 	itemCount,
-	payment,
+	paymentMethod,
+	shippingAmount,
+	shippingMethod,
+	subtotalAmount,
+	totalAmount,
 }: OrderTotalsProps) {
+	const hasDiscount = Number(discountAmount) > 0;
+	const shippingFree = Number(shippingAmount) === 0;
 	return (
 		<SectionBlock title="Valores">
 			<PriceRow
 				label={`Subtotal (${itemCount} ${itemCount === 1 ? "item" : "itens"})`}
-				value={fmtBRL(breakdown.subtotalCents)}
+				value={fmtNumericBRL(subtotalAmount)}
 			/>
 			<PriceRow
-				label={`Frete (${breakdown.shippingMethod})`}
-				value={
-					breakdown.shippingCents === 0
-						? "Grátis"
-						: fmtBRL(breakdown.shippingCents)
-				}
+				label={`Frete${shippingMethod ? ` (${shippingMethod})` : ""}`}
+				value={shippingFree ? "Grátis" : fmtNumericBRL(shippingAmount)}
 			/>
-			{breakdown.discountCents && breakdown.discountCents > 0 ? (
+			{hasDiscount ? (
 				<PriceRow
 					emphasis="discount"
-					label={`Desconto${breakdown.discountLabel ? ` (${breakdown.discountLabel})` : ""}`}
-					value={`−${fmtBRL(breakdown.discountCents)}`}
+					label="Desconto"
+					value={`−${fmtNumericBRL(discountAmount)}`}
 				/>
 			) : null}
-
 			<div className="mt-2 flex items-center justify-between border-near-black border-t pt-3.5">
 				<span className="font-display font-semibold text-[12px] text-near-black uppercase tracking-[0.16em]">
 					Total
 				</span>
 				<span className="font-bold text-[22px] text-near-black">
-					{fmtBRL(breakdown.totalCents)}
+					{fmtNumericBRL(totalAmount)}
 				</span>
 			</div>
-
-			<div className="mt-3.5 flex items-center gap-2.5 border border-border-strong border-dashed bg-gray-10 px-3 py-2.5">
-				<PaymentBadge kind={payment.kind} />
-				<div className="text-[12px] leading-tight">
-					<strong className="block text-[13px] text-near-black">
-						{payment.label}
-					</strong>
-					{payment.detail ? (
-						<span className="text-gray-60">{payment.detail}</span>
-					) : null}
+			{paymentMethod ? (
+				<div className="mt-3.5 flex items-center gap-2.5 border border-border-strong border-dashed bg-gray-10 px-3 py-2.5">
+					<div className="flex h-7 w-7 shrink-0 items-center justify-center border border-near-black font-bold font-display text-[10px] tracking-[0.06em]">
+						{PAYMENT_BADGE[paymentMethod] ?? "CRD"}
+					</div>
+					<div className="text-[12px] leading-tight">
+						<strong className="block text-[13px] text-near-black">
+							{PAYMENT_LABEL[paymentMethod] ?? paymentMethod}
+						</strong>
+					</div>
 				</div>
-			</div>
+			) : null}
 		</SectionBlock>
 	);
 }
