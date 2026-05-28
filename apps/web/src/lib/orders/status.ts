@@ -87,27 +87,27 @@ export const STEPPER_PHASES = [
 export type StepperPhase = (typeof STEPPER_PHASES)[number];
 export type StepState = "done" | "current" | "upcoming";
 
-const PHASE_RANK: Record<OrderStatus, number> = {
-	pending_payment: 0,
-	payment_failed: 0,
-	paid: 1,
-	preparing: 2,
-	shipped: 3,
-	delivered: 4,
-	canceled: -1,
-	refunded: -1,
-	returned: -1,
-};
+// Rank da fase do pedido. Derivado de STEPPER_PHASES para não dessincronizar
+// se a ordem das fases mudar (paid=1 … delivered=4). Antes de qualquer fase:
+// pending_payment/payment_failed = 0. Terminal negativo = -1.
+function statusRank(status: OrderStatus): number {
+	if (isTerminalNegative(status)) {
+		return -1;
+	}
+	if (status === "pending_payment" || status === "payment_failed") {
+		return 0;
+	}
+	return (STEPPER_PHASES as readonly OrderStatus[]).indexOf(status) + 1;
+}
 
 export function stepStateFor(
 	status: OrderStatus,
 	phase: StepperPhase
 ): StepState {
-	const rank = PHASE_RANK[status];
-	if (rank < 0) {
-		return "upcoming"; // cancelado/devolvido: stepper substituído por aviso
-	}
+	const rank = statusRank(status);
 	const phaseRank = STEPPER_PHASES.indexOf(phase) + 1;
+	// rank < 0 = terminal negativo; rank = 0 = aguardando pagamento.
+	// Ambos renderizam todas as fases como "upcoming".
 	if (rank > phaseRank) {
 		return "done";
 	}
@@ -117,6 +117,7 @@ export function stepStateFor(
 	return "upcoming";
 }
 
+// Default seguro: status terminal-negativo desconhecido retorna false.
 export function isTerminalNegative(status: OrderStatus): boolean {
 	return (
 		status === "canceled" || status === "refunded" || status === "returned"

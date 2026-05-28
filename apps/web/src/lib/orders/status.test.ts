@@ -1,9 +1,10 @@
 import { describe, expect, it } from "vitest";
 import {
 	countByTab,
+	isTerminalNegative,
 	ORDER_STATUS_BADGE,
-	ORDER_TABS,
 	statusToTab,
+	stepStateFor,
 } from "./status";
 
 describe("statusToTab", () => {
@@ -62,5 +63,49 @@ describe("countByTab", () => {
 		expect(counts.em_preparacao).toBe(1);
 		expect(counts.a_caminho).toBe(1);
 		expect(counts.concluidos).toBe(1);
+	});
+});
+
+describe("stepStateFor", () => {
+	it("aguardando pagamento: todas as fases 'upcoming'", () => {
+		for (const phase of [
+			"paid",
+			"preparing",
+			"shipped",
+			"delivered",
+		] as const) {
+			expect(stepStateFor("pending_payment", phase)).toBe("upcoming");
+		}
+	});
+	it("shipped: paid/preparing 'done', shipped 'current', delivered 'upcoming'", () => {
+		expect(stepStateFor("shipped", "paid")).toBe("done");
+		expect(stepStateFor("shipped", "preparing")).toBe("done");
+		expect(stepStateFor("shipped", "shipped")).toBe("current");
+		expect(stepStateFor("shipped", "delivered")).toBe("upcoming");
+	});
+	it("delivered: todas as fases 'done' (delivered é a última, vira 'current')", () => {
+		expect(stepStateFor("delivered", "paid")).toBe("done");
+		expect(stepStateFor("delivered", "shipped")).toBe("done");
+		expect(stepStateFor("delivered", "delivered")).toBe("current");
+	});
+	it("terminal negativo: todas as fases 'upcoming'", () => {
+		for (const phase of [
+			"paid",
+			"preparing",
+			"shipped",
+			"delivered",
+		] as const) {
+			expect(stepStateFor("canceled", phase)).toBe("upcoming");
+		}
+	});
+});
+
+describe("isTerminalNegative", () => {
+	it("true para canceled/refunded/returned, false para o resto", () => {
+		expect(isTerminalNegative("canceled")).toBe(true);
+		expect(isTerminalNegative("refunded")).toBe(true);
+		expect(isTerminalNegative("returned")).toBe(true);
+		expect(isTerminalNegative("delivered")).toBe(false);
+		expect(isTerminalNegative("pending_payment")).toBe(false);
 	});
 });
