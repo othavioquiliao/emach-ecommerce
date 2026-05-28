@@ -1,29 +1,25 @@
+import type { OrderStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
-import { ORDER_STATUS_LABEL, type OrderStatus } from "../../_lib/types";
+import { BADGE_TONE_CLASS, ORDER_STATUS_BADGE } from "@/lib/orders/status";
 
-const VARIANT: Record<OrderStatus, string> = {
-	pending_payment: "text-emach-red border-emach-red",
-	to_ship: "text-success border-success",
-	shipped: "text-near-black border-near-black",
-	completed: "text-gray-60 border-border",
-	cancelled: "text-gray-50 border-border bg-gray-10 line-through",
-};
-
-interface OrderStatusBadgeProps {
+export function OrderStatusBadge({
+	status,
+	className,
+}: {
 	className?: string;
 	status: OrderStatus;
-}
-
-export function OrderStatusBadge({ status, className }: OrderStatusBadgeProps) {
+}) {
+	const { label, tone } = ORDER_STATUS_BADGE[status];
 	return (
 		<span
 			className={cn(
 				"inline-flex items-center border px-2.5 py-1 font-display font-semibold text-[10px] uppercase tracking-[0.14em]",
-				VARIANT[status],
+				BADGE_TONE_CLASS[tone],
+				tone === "muted" && "line-through",
 				className
 			)}
 		>
-			{ORDER_STATUS_LABEL[status]}
+			{label}
 		</span>
 	);
 }

@@ -6,13 +6,37 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@emach/ui/components/tabs";
-import { getOrderCounts, getOrdersByTab } from "../../_lib/mock-orders";
-import { ORDER_TAB_LABEL, ORDER_TABS, type OrderTab } from "../../_lib/types";
+import type { OrderListItem } from "@/lib/orders/queries";
+import {
+	ORDER_TAB_LABEL,
+	ORDER_TABS,
+	type OrderTab,
+	statusToTab,
+} from "@/lib/orders/status";
 import { OrderCard } from "./order-card";
 import { OrdersEmptyState } from "./orders-empty-state";
 
-export function OrdersTabs() {
-	const counts = getOrderCounts();
+function filterByTab(orders: OrderListItem[], tab: OrderTab): OrderListItem[] {
+	if (tab === "all") {
+		return orders;
+	}
+	return orders.filter((o) => statusToTab(o.status) === tab);
+}
+
+export function OrdersTabs({ orders }: { orders: OrderListItem[] }) {
+	const counts: Record<OrderTab, number> = {
+		all: orders.length,
+		a_pagar: 0,
+		em_preparacao: 0,
+		a_caminho: 0,
+		concluidos: 0,
+	};
+	for (const o of orders) {
+		const tab = statusToTab(o.status);
+		if (tab) {
+			counts[tab] += 1;
+		}
+	}
 
 	return (
 		<Tabs defaultValue="all">
@@ -31,25 +55,22 @@ export function OrdersTabs() {
 				))}
 			</TabsList>
 
-			{ORDER_TABS.map((tab) => (
-				<TabsContent className="mt-6" key={tab} value={tab}>
-					<OrdersList tab={tab} />
-				</TabsContent>
-			))}
+			{ORDER_TABS.map((tab) => {
+				const list = filterByTab(orders, tab);
+				return (
+					<TabsContent className="mt-6" key={tab} value={tab}>
+						{list.length === 0 ? (
+							<OrdersEmptyState statusLabel={ORDER_TAB_LABEL[tab]} />
+						) : (
+							<div>
+								{list.map((o) => (
+									<OrderCard key={o.id} order={o} />
+								))}
+							</div>
+						)}
+					</TabsContent>
+				);
+			})}
 		</Tabs>
-	);
-}
-
-function OrdersList({ tab }: { tab: OrderTab }) {
-	const orders = getOrdersByTab(tab);
-	if (orders.length === 0) {
-		return <OrdersEmptyState statusLabel={ORDER_TAB_LABEL[tab]} />;
-	}
-	return (
-		<div>
-			{orders.map((order) => (
-				<OrderCard key={order.id} order={order} />
-			))}
-		</div>
 	);
 }
