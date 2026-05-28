@@ -25,9 +25,44 @@ export interface OrderListItem {
 	totalAmount: string;
 }
 
+/**
+ * Colunas de `orderItem` expostas ao cliente. Exclui `cost` (custo de
+ * aquisição) e campos fiscais/dimensionais não exibidos — convenção
+ * "sem select * / esconder costAmount" do packages/db/CLAUDE.md.
+ */
+const ORDER_ITEM_COLUMNS = {
+	id: orderItem.id,
+	orderId: orderItem.orderId,
+	toolId: orderItem.toolId,
+	variantId: orderItem.variantId,
+	sku: orderItem.sku,
+	name: orderItem.name,
+	model: orderItem.model,
+	voltage: orderItem.voltage,
+	unitPrice: orderItem.unitPrice,
+	quantity: orderItem.quantity,
+	lineTotal: orderItem.lineTotal,
+	discountAmount: orderItem.discountAmount,
+} as const;
+
+export interface OrderItemRow {
+	discountAmount: string;
+	id: string;
+	lineTotal: string;
+	model: string | null;
+	name: string;
+	orderId: string;
+	quantity: number;
+	sku: string | null;
+	toolId: string;
+	unitPrice: string;
+	variantId: string;
+	voltage: string | null;
+}
+
 export interface OrderDetailData {
-	history: Array<typeof orderStatusHistory.$inferSelect>;
-	items: Array<typeof orderItem.$inferSelect & { imageUrl: string | null }>;
+	history: (typeof orderStatusHistory.$inferSelect)[];
+	items: (OrderItemRow & { imageUrl: string | null })[];
 	order: typeof order.$inferSelect;
 }
 
@@ -71,7 +106,7 @@ export async function listClientOrders(
 
 	const orderIds = orders.map((o) => o.id);
 	const items = await db
-		.select()
+		.select(ORDER_ITEM_COLUMNS)
 		.from(orderItem)
 		.where(inArray(orderItem.orderId, orderIds));
 
@@ -124,7 +159,7 @@ export async function getClientOrderDetail(
 	}
 
 	const items = await db
-		.select()
+		.select(ORDER_ITEM_COLUMNS)
 		.from(orderItem)
 		.where(eq(orderItem.orderId, orderId));
 

@@ -1337,4 +1337,6 @@ git commit -m "chore: remover mocks de pedido após migração"
 **Riscos a verificar durante execução:**
 - Tokens de tema `info`/`border-info`/`bg-info` podem não existir → fallback documentado na Task 1 Step 3.
 - `next.config.ts > images.remotePatterns` precisa do host Supabase pras imagens → confirmar na Task 3.
-- `server-only` disponível → confirmar na Task 2.
+- `server-only` disponível → confirmar na Task 2. (Resolvido: não instalado, import removido.)
+
+**Dívida conhecida (Task 2):** `listClientOrders` não tem paginação — carrega todos os pedidos do cliente em memória. Aceitável agora (volume por cliente é limitado), mas adicionar `limit`/cursor depois será breaking na assinatura. Tratar quando houver cliente com muitos pedidos.
