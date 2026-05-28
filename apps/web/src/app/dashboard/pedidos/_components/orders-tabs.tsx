@@ -8,6 +8,7 @@ import {
 } from "@emach/ui/components/tabs";
 import type { OrderListItem } from "@/lib/orders/queries";
 import {
+	countByTab,
 	ORDER_TAB_LABEL,
 	ORDER_TABS,
 	type OrderTab,
@@ -24,19 +25,7 @@ function filterByTab(orders: OrderListItem[], tab: OrderTab): OrderListItem[] {
 }
 
 export function OrdersTabs({ orders }: { orders: OrderListItem[] }) {
-	const counts: Record<OrderTab, number> = {
-		all: orders.length,
-		a_pagar: 0,
-		em_preparacao: 0,
-		a_caminho: 0,
-		concluidos: 0,
-	};
-	for (const o of orders) {
-		const tab = statusToTab(o.status);
-		if (tab) {
-			counts[tab] += 1;
-		}
-	}
+	const counts = countByTab(orders.map((o) => o.status));
 
 	return (
 		<Tabs defaultValue="all">
