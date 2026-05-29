@@ -1,5 +1,25 @@
-import type { BuyerSnapshot } from "../../../_lib/types";
 import { SectionBlock } from "./section-block";
+
+function maskDocument(doc: string | null): string {
+	if (!doc) {
+		return "—";
+	}
+	const d = doc.replace(/\D/g, "");
+	if (d.length === 11) {
+		return `***.***.${d.slice(6, 9)}-${d.slice(9)}`;
+	}
+	if (d.length === 14) {
+		return `**.***.***/${d.slice(8, 12)}-${d.slice(12)}`;
+	}
+	return "—";
+}
+
+interface Buyer {
+	document: string | null;
+	email: string;
+	name: string;
+	phone: string | null;
+}
 
 function Field({ label, value }: { label: string; value: string }) {
 	return (
@@ -14,14 +34,14 @@ function Field({ label, value }: { label: string; value: string }) {
 	);
 }
 
-export function BuyerInfo({ buyer }: { buyer: BuyerSnapshot }) {
+export function BuyerInfo({ buyer }: { buyer: Buyer }) {
 	return (
 		<SectionBlock title="Comprador">
 			<div className="grid grid-cols-1 gap-x-6 gap-y-3.5 sm:grid-cols-2">
 				<Field label="Nome" value={buyer.name} />
 				<Field label="E-mail" value={buyer.email} />
-				<Field label="Telefone" value={buyer.phone} />
-				<Field label="CPF / CNPJ" value={buyer.document} />
+				<Field label="Telefone" value={buyer.phone ?? "—"} />
+				<Field label="CPF / CNPJ" value={maskDocument(buyer.document)} />
 			</div>
 		</SectionBlock>
 	);

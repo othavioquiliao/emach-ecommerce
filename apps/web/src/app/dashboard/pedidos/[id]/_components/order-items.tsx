@@ -1,27 +1,47 @@
+import type { OrderStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
-import { Disc3, Drill, Ruler, Shield, Wrench } from "lucide-react";
-import { fmtBRL } from "@/lib/format";
-import type { CategorySlug, OrderItem } from "../../../_lib/types";
+import { Package } from "lucide-react";
+import Image from "next/image";
+import { fmtNumericBRL } from "@/lib/format";
+import type { OrderDetailData } from "@/lib/orders/queries";
+import { ReviewItemButton } from "./review-item-button";
 import { SectionBlock } from "./section-block";
 
-const CATEGORY_ICONS: Record<CategorySlug, React.ElementType> = {
-	eletricas: Drill,
-	manuais: Wrench,
-	medicao: Ruler,
-	seguranca: Shield,
-	acessorios: Disc3,
-};
+type Item = OrderDetailData["items"][number];
 
-function ItemThumb({ categorySlug }: { categorySlug: CategorySlug }) {
-	const Icon = CATEGORY_ICONS[categorySlug];
+function ItemThumb({ url, alt }: { url: string | null; alt: string }) {
+	if (!url) {
+		return (
+			<div className="emach-bg-placeholder flex h-16 w-16 shrink-0 items-center justify-center">
+				<Package
+					className="h-8 w-8 text-cinema-2 opacity-80"
+					strokeWidth={1.2}
+				/>
+			</div>
+		);
+	}
 	return (
-		<div className="emach-bg-placeholder flex h-16 w-16 shrink-0 items-center justify-center">
-			<Icon className="h-8 w-8 text-cinema-2 opacity-80" strokeWidth={1.2} />
-		</div>
+		<Image
+			alt={alt}
+			className="h-16 w-16 shrink-0 object-cover"
+			height={64}
+			src={url}
+			width={64}
+		/>
 	);
 }
 
-export function OrderItems({ items }: { items: OrderItem[] }) {
+export function OrderItems({
+	items,
+	orderId,
+	reviewedToolIds,
+	status,
+}: {
+	items: Item[];
+	orderId: string;
+	reviewedToolIds: string[];
+	status: OrderStatus;
+}) {
 	return (
 		<SectionBlock title="Itens do pedido">
 			<div>
@@ -35,20 +55,30 @@ export function OrderItems({ items }: { items: OrderItem[] }) {
 						)}
 						key={item.id}
 					>
-						<ItemThumb categorySlug={item.categorySlug} />
+						<ItemThumb alt={item.name} url={item.imageUrl} />
 						<div className="min-w-0 flex-1">
 							<div className="font-semibold text-[13px] text-near-black">
 								{item.name}
 							</div>
-							{item.variant ? (
-								<div className="text-[11px] text-gray-60">{item.variant}</div>
+							{item.voltage ? (
+								<div className="text-[11px] text-gray-60">{item.voltage}</div>
 							) : null}
 							<div className="mt-0.5 text-[11px] text-gray-50">
 								Quantidade: {item.quantity}
 							</div>
 						</div>
-						<div className="min-w-[100px] text-right font-semibold text-[13px] text-near-black">
-							{fmtBRL(item.unitPriceCents * item.quantity)}
+						<div className="flex min-w-[100px] flex-col items-end gap-1.5">
+							<span className="font-semibold text-[13px] text-near-black">
+								{fmtNumericBRL(item.lineTotal)}
+							</span>
+							{status === "delivered" ? (
+								<ReviewItemButton
+									orderId={orderId}
+									productName={item.name}
+									reviewed={reviewedToolIds.includes(item.toolId)}
+									toolId={item.toolId}
+								/>
+							) : null}
 						</div>
 					</div>
 				))}

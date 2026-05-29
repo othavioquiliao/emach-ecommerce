@@ -1,105 +1,58 @@
-"use client";
+import type { OrderStatus } from "@emach/db/schema/orders";
+import { Download } from "lucide-react";
+import type { Route } from "next";
+import Link from "next/link";
+import { emachButtonVariants } from "@/components/emach-button";
+import { isTerminalNegative } from "@/lib/orders/status";
+import { CancelOrderButton } from "./cancel-order-button";
+import { RebuyButton } from "./rebuy-button";
 
-import { toast } from "sonner";
-import { EmachButton } from "@/components/emach-button";
-import type { Order } from "../../../_lib/types";
+export function OrderActions({
+	orderId,
+	status,
+	nfeUrl,
+}: {
+	nfeUrl: string | null;
+	orderId: string;
+	status: OrderStatus;
+}) {
+	const pagarHref = `/dashboard/pedidos/${orderId}/pagar` as Route;
+	const isPending = status === "pending_payment" || status === "payment_failed";
+	const canRebuy = status === "delivered" || isTerminalNegative(status);
 
-const comingSoon = (label: string) => () => toast.info(`${label}: em breve`);
-
-export function OrderActions({ order }: { order: Order }) {
 	const buttons: React.ReactNode[] = [];
-
-	switch (order.status) {
-		case "pending_payment":
-			buttons.push(
-				<EmachButton
-					key="cancel"
-					onClick={comingSoon("Cancelar pedido")}
-					size="md"
-					variant="ghost"
-				>
-					Cancelar pedido
-				</EmachButton>,
-				<EmachButton
-					key="pay"
-					onClick={comingSoon("Pagar agora")}
-					size="md"
-					variant="primary"
-				>
-					Pagar agora
-				</EmachButton>
-			);
-			break;
-		case "to_ship":
-			buttons.push(
-				<EmachButton
-					key="rebuy"
-					onClick={comingSoon("Comprar novamente")}
-					size="md"
-					variant="primary"
-				>
-					Comprar novamente
-				</EmachButton>
-			);
-			break;
-		case "shipped":
-			buttons.push(
-				<EmachButton
-					className="border-border"
-					key="rebuy"
-					onClick={comingSoon("Comprar novamente")}
-					size="md"
-					variant="ghost"
-				>
-					Comprar novamente
-				</EmachButton>
-			);
-			break;
-		case "completed":
-			buttons.push(
-				<EmachButton
-					key="rebuy"
-					onClick={comingSoon("Comprar novamente")}
-					size="md"
-					variant="outline"
-				>
-					Comprar novamente
-				</EmachButton>
-			);
-			if (!order.reviewed) {
-				buttons.push(
-					<EmachButton
-						key="review"
-						onClick={comingSoon("Avaliar")}
-						size="md"
-						variant="primary"
-					>
-						Avaliar
-					</EmachButton>
-				);
-			}
-			break;
-		case "cancelled":
-			buttons.push(
-				<EmachButton
-					key="rebuy"
-					onClick={comingSoon("Comprar novamente")}
-					size="md"
-					variant="outline"
-				>
-					Comprar novamente
-				</EmachButton>
-			);
-			break;
-		default: {
-			const _exhaustive: never = order.status;
-			return _exhaustive;
-		}
+	if (nfeUrl) {
+		buttons.push(
+			<a
+				className={emachButtonVariants({ variant: "ghost", size: "sm" })}
+				href={nfeUrl}
+				key="nfe"
+				rel="noopener noreferrer"
+				target="_blank"
+			>
+				<Download className="mr-1.5 h-3.5 w-3.5" /> Nota fiscal
+			</a>
+		);
+	}
+	if (isPending) {
+		buttons.push(<CancelOrderButton key="cancel" orderId={orderId} />);
+		buttons.push(
+			<Link
+				className={emachButtonVariants({ variant: "primary", size: "sm" })}
+				href={pagarHref}
+				key="pay"
+			>
+				Pagar agora
+			</Link>
+		);
+	} else if (canRebuy) {
+		buttons.push(
+			<RebuyButton key="rebuy" orderId={orderId} variant="primary" />
+		);
 	}
 
 	if (buttons.length === 0) {
 		return null;
 	}
-
 	return <div className="mt-6 flex flex-wrap justify-end gap-2">{buttons}</div>;
 }

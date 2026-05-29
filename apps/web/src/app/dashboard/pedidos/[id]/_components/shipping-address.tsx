@@ -1,21 +1,47 @@
-import type { ShippingAddress as ShippingAddressType } from "../../../_lib/types";
 import { SectionBlock } from "./section-block";
 
-export function ShippingAddress({ address }: { address: ShippingAddressType }) {
+interface AddressSnapshot {
+	city?: string;
+	complement?: string | null;
+	country?: string;
+	neighborhood?: string;
+	number?: string;
+	recipient?: string;
+	state?: string;
+	street?: string;
+	zipCode?: string;
+}
+
+export function ShippingAddress({ address }: { address: unknown }) {
+	const a = (address ?? {}) as AddressSnapshot;
+	const streetLine = [a.street, a.number].filter(Boolean).join(", ");
+	const localityLine = [a.neighborhood, a.city].filter(Boolean).join(", ");
+	const stateSuffix = a.state ? ` — ${a.state}` : "";
+	const zipLine = [a.zipCode ? `CEP ${a.zipCode}` : null, a.country]
+		.filter(Boolean)
+		.join(" · ");
+
 	return (
 		<SectionBlock title="Endereço de entrega">
 			<div className="text-[13px] text-near-black leading-[1.6]">
-				<div className="font-semibold">{address.recipient}</div>
-				<div>
-					{address.street}
-					{address.complement ? ` — ${address.complement}` : null}
-				</div>
-				<div>
-					{address.neighborhood}, {address.city} — {address.state}
-				</div>
-				<div className="text-[12px] text-gray-60">
-					CEP {address.zip} · {address.country}
-				</div>
+				{a.recipient ? (
+					<div className="font-semibold">{a.recipient}</div>
+				) : null}
+				{streetLine ? (
+					<div>
+						{streetLine}
+						{a.complement ? ` — ${a.complement}` : null}
+					</div>
+				) : null}
+				{localityLine || a.state ? (
+					<div>
+						{localityLine}
+						{stateSuffix}
+					</div>
+				) : null}
+				{zipLine ? (
+					<div className="text-[12px] text-gray-60">{zipLine}</div>
+				) : null}
 			</div>
 		</SectionBlock>
 	);
