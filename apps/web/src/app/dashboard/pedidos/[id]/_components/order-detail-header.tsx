@@ -34,7 +34,7 @@ export function OrderDetailHeader({
 	return (
 		<header className="mb-7">
 			<Link
-				className="mb-6 inline-flex items-center gap-1.5 font-semibold text-[12px] text-gray-60 tracking-[0.04em] hover:text-near-black"
+				className="mb-6 flex w-fit items-center gap-1.5 font-semibold text-[12px] text-gray-60 tracking-[0.04em] hover:text-near-black"
 				href="/dashboard/pedidos"
 			>
 				<ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} />
