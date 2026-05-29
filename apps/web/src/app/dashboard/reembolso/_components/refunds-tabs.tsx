@@ -6,20 +6,22 @@ import {
 	TabsList,
 	TabsTrigger,
 } from "@emach/ui/components/tabs";
-import { getRefundCounts, getRefundsByTab } from "../../_lib/mock-refunds";
+import type { RefundListItem } from "@/lib/refunds/queries";
 import {
+	countRefundsByTab,
 	REFUND_TAB_LABEL,
 	REFUND_TABS,
 	type RefundTab,
-} from "../../_lib/types";
+	statusToRefundTab,
+} from "@/lib/refunds/status";
 import { RefundCard } from "./refund-card";
 import { RefundsEmptyState } from "./refunds-empty-state";
 
-export function RefundsTabs() {
-	const counts = getRefundCounts();
+export function RefundsTabs({ refunds }: { refunds: RefundListItem[] }) {
+	const counts = countRefundsByTab(refunds.map((r) => r.status));
 
 	return (
-		<Tabs defaultValue="open">
+		<Tabs defaultValue="em_andamento">
 			<TabsList variant="line">
 				{REFUND_TABS.map((tab) => (
 					<TabsTrigger
@@ -37,21 +39,27 @@ export function RefundsTabs() {
 
 			{REFUND_TABS.map((tab) => (
 				<TabsContent className="mt-6" key={tab} value={tab}>
-					<RefundsList tab={tab} />
+					<RefundsList refunds={refunds} tab={tab} />
 				</TabsContent>
 			))}
 		</Tabs>
 	);
 }
 
-function RefundsList({ tab }: { tab: RefundTab }) {
-	const refunds = getRefundsByTab(tab);
-	if (refunds.length === 0) {
+function RefundsList({
+	refunds,
+	tab,
+}: {
+	refunds: RefundListItem[];
+	tab: RefundTab;
+}) {
+	const filtered = refunds.filter((r) => statusToRefundTab(r.status) === tab);
+	if (filtered.length === 0) {
 		return <RefundsEmptyState tabLabel={REFUND_TAB_LABEL[tab]} />;
 	}
 	return (
 		<div>
-			{refunds.map((refund) => (
+			{filtered.map((refund) => (
 				<RefundCard key={refund.id} refund={refund} />
 			))}
 		</div>
