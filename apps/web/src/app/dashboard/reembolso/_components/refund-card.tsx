@@ -8,7 +8,6 @@ import { toast } from "sonner";
 import { EmachButton, emachButtonVariants } from "@/components/emach-button";
 import { fmtBRL } from "@/lib/format";
 import type { CategorySlug, Refund } from "../../_lib/types";
-import { OrderRefundBlock } from "../../pedidos/[id]/_components/order-refund-block";
 import { RefundStatusBadge } from "./refund-status-badge";
 
 const CATEGORY_ICONS: Record<CategorySlug, React.ElementType> = {
@@ -116,7 +115,39 @@ export function RefundCard({ refund }: RefundCardProps) {
 				</span>
 			</div>
 
-			<OrderRefundBlock refund={refund} variant="card" />
+			{refund.status === "reembolsado" ? (
+				<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-border border-t bg-[#fafafa] px-[18px] py-3">
+					<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+						Reembolso
+					</span>
+					<span className="text-[13px] text-gray-60 leading-relaxed">
+						Estornado em{" "}
+						<strong className="text-near-black">
+							{refund.resolution?.refundedAt
+								? DATE_FMT.format(refund.resolution.refundedAt)
+								: "—"}
+						</strong>
+					</span>
+				</div>
+			) : refund.status === "recusado" ? (
+				<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-border border-t bg-[#FFF5F5] px-[18px] py-3">
+					<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+						Decisão
+					</span>
+					<span className="text-[13px] text-gray-60 leading-relaxed">
+						{refund.resolution?.deniedReason ?? "Solicitação recusada."}
+					</span>
+				</div>
+			) : (
+				<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-border border-t bg-white px-[18px] py-3">
+					<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+						Devolução
+					</span>
+					<span className="text-[13px] text-gray-60 leading-relaxed">
+						Em andamento
+					</span>
+				</div>
+			)}
 
 			<div className="flex items-center justify-between border-border border-t bg-[#fafafa] px-[18px] py-3.5">
 				<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">

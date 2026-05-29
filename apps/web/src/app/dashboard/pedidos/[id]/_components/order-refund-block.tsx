@@ -1,9 +1,5 @@
+import type { RefundStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
-import {
-	REFUND_METHOD_LABEL,
-	REFUND_STATUS_BY_TAB,
-	type Refund,
-} from "../../../_lib/types";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	day: "2-digit",
@@ -11,8 +7,14 @@ const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	year: "numeric",
 });
 
+interface RefundSummary {
+	rejectionReason: string | null;
+	resolvedAt: Date | null;
+	status: RefundStatus;
+}
+
 interface OrderRefundBlockProps {
-	refund: Refund;
+	refund: RefundSummary;
 	variant?: "card" | "page";
 }
 
@@ -20,35 +22,15 @@ export function OrderRefundBlock({
 	refund,
 	variant = "card",
 }: OrderRefundBlockProps) {
-	const isOpen = REFUND_STATUS_BY_TAB.open.includes(refund.status);
-	const isReembolsado = refund.status === "reembolsado";
-	const isRecusado = refund.status === "recusado";
-
-	if (isOpen) {
-		return (
-			<Row
-				bg="bg-white"
-				label="Devolução"
-				text={`Em andamento · #${refund.id}`}
-				variant={variant}
-			/>
-		);
-	}
-
-	if (isReembolsado) {
-		const r = refund.resolution;
-		const date = r?.refundedAt ? DATE_FMT.format(r.refundedAt) : "—";
-		const method = r?.method ? REFUND_METHOD_LABEL[r.method] : "—";
-		const eta = r?.etaLabel ? ` · ${r.etaLabel}` : "";
+	if (refund.status === "refunded") {
+		const date = refund.resolvedAt ? DATE_FMT.format(refund.resolvedAt) : "—";
 		return (
 			<Row
 				bg="bg-[#fafafa]"
 				label="Reembolso"
 				text={
 					<>
-						Estornado em <strong className="text-near-black">{date}</strong> ·{" "}
-						{method}
-						{eta}
+						Estornado em <strong className="text-near-black">{date}</strong>
 					</>
 				}
 				variant={variant}
@@ -56,18 +38,23 @@ export function OrderRefundBlock({
 		);
 	}
 
-	if (isRecusado) {
+	if (refund.status === "rejected") {
 		return (
 			<Row
 				bg="bg-[#FFF5F5]"
 				label="Decisão"
-				text={refund.resolution?.deniedReason ?? "Solicitação recusada."}
+				text={refund.rejectionReason ?? "Solicitação recusada."}
 				variant={variant}
 			/>
 		);
 	}
 
-	return null;
+	// requested / under_review / approved
+	const text =
+		refund.status === "approved"
+			? "Aprovada · estorno em processamento"
+			: "Em andamento";
+	return <Row bg="bg-white" label="Devolução" text={text} variant={variant} />;
 }
 
 function Row({
