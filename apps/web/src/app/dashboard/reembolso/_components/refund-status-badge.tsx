@@ -1,12 +1,9 @@
+import type { RefundStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
-import { REFUND_STATUS_LABEL, type RefundStatus } from "../../_lib/types";
-
-const VARIANT: Record<RefundStatus, string> = {
-	solicitado: "text-link-hover border-link-hover",
-	em_analise: "text-[#B45309] border-[#B45309]",
-	reembolsado: "text-success border-success",
-	recusado: "text-gray-50 border-border bg-gray-10",
-};
+import {
+	REFUND_BADGE_TONE_CLASS,
+	REFUND_STATUS_BADGE,
+} from "@/lib/refunds/status";
 
 interface RefundStatusBadgeProps {
 	className?: string;
@@ -17,15 +14,16 @@ export function RefundStatusBadge({
 	status,
 	className,
 }: RefundStatusBadgeProps) {
+	const { label, tone } = REFUND_STATUS_BADGE[status];
 	return (
 		<span
 			className={cn(
 				"inline-flex items-center border px-2.5 py-1 font-display font-semibold text-[10px] uppercase tracking-[0.14em]",
-				VARIANT[status],
+				REFUND_BADGE_TONE_CLASS[tone],
 				className
 			)}
 		>
-			{REFUND_STATUS_LABEL[status]}
+			{label}
 		</span>
 	);
 }
