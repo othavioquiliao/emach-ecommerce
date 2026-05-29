@@ -29,12 +29,12 @@ export function RebuyButton({
 				const { quantity, ...snapshot } = item;
 				add(snapshot, quantity);
 			}
-			if (res.data.skipped > 0) {
-				toast.info(
-					`${res.data.skipped} item(ns) indisponível(is) não foram adicionados`
-				);
-			}
-			toast.success("Itens adicionados ao carrinho");
+			const { items, skipped } = res.data;
+			toast.success(
+				skipped > 0
+					? `${items.length} adicionado(s); ${skipped} indisponível(is)`
+					: "Itens adicionados ao carrinho"
+			);
 			router.push("/cart");
 		});
 	}

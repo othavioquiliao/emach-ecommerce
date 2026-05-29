@@ -3,6 +3,7 @@ import { Download } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { emachButtonVariants } from "@/components/emach-button";
+import { isTerminalNegative } from "@/lib/orders/status";
 import { CancelOrderButton } from "./cancel-order-button";
 import { RebuyButton } from "./rebuy-button";
 
@@ -17,11 +18,7 @@ export function OrderActions({
 }) {
 	const pagarHref = `/dashboard/pedidos/${orderId}/pagar` as Route;
 	const isPending = status === "pending_payment" || status === "payment_failed";
-	const canRebuy =
-		status === "delivered" ||
-		status === "canceled" ||
-		status === "refunded" ||
-		status === "returned";
+	const canRebuy = status === "delivered" || isTerminalNegative(status);
 
 	const buttons: React.ReactNode[] = [];
 	if (nfeUrl) {
@@ -30,7 +27,7 @@ export function OrderActions({
 				className={emachButtonVariants({ variant: "ghost", size: "sm" })}
 				href={nfeUrl}
 				key="nfe"
-				rel="noopener"
+				rel="noopener noreferrer"
 				target="_blank"
 			>
 				<Download className="mr-1.5 h-3.5 w-3.5" /> Nota fiscal

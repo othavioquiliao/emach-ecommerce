@@ -29,7 +29,13 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
 	}
 
 	return (
-		<EmachButton disabled={pending} onClick={onClick} size="sm" variant="ghost">
+		<EmachButton
+			disabled={pending}
+			onBlur={() => setConfirming(false)}
+			onClick={onClick}
+			size="sm"
+			variant="ghost"
+		>
 			{confirming ? "Confirmar cancelamento?" : "Cancelar pedido"}
 		</EmachButton>
 	);
