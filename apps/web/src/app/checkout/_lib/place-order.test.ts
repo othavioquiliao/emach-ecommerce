@@ -6,7 +6,22 @@ import { order, orderItem } from "@emach/db/schema/orders";
 import { stockMovement } from "@emach/db/schema/stock-movements";
 import { tool, toolVariant } from "@emach/db/schema/tools";
 import { eq } from "drizzle-orm";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// quoteShipping chama o DB global e a API externa — mockar para os testes de
+// integração do place-order (a lógica de anti-fraude está coberta em
+// place-order.shipping.test.ts).
+vi.mock("@/lib/superfrete/quote", () => ({
+	quoteShipping: vi.fn().mockResolvedValue([
+		{
+			serviceId: 1,
+			name: "SEDEX",
+			company: "Correios",
+			priceCents: 2000,
+			deliveryDays: 1,
+		},
+	]),
+}));
 
 import { type CreateOrderInput, placeOrder } from "./place-order";
 

@@ -8,6 +8,7 @@ import { tool, toolVariant } from "@emach/db/schema/tools";
 import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
+import { quoteShipping } from "@/lib/superfrete/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
 import { isValidCpfCnpj } from "@/lib/validators/cpf-cnpj";
 
@@ -305,6 +306,24 @@ async function prepareLines(
 	return lines;
 }
 
+export async function assertShippingQuoted(params: {
+	shippingCents: number;
+	destinationCep: string;
+	items: Array<{ toolId: string; quantity: number }>;
+}): Promise<void> {
+	const options = await quoteShipping({
+		destinationCep: params.destinationCep,
+		items: params.items,
+	});
+	const ok = options.some(
+		(o) =>
+			Math.abs(o.priceCents - params.shippingCents) <= PRICE_TOLERANCE_CENTS
+	);
+	if (!ok) {
+		throw new OrderError("Frete inválido, refaça o checkout");
+	}
+}
+
 async function checkAggregateStock(
 	tx: typeof db,
 	lines: PreparedLine[]
@@ -341,6 +360,28 @@ export async function placeOrder(
 
 	const lines = await prepareLines(tx, input);
 	await checkAggregateStock(tx, lines);
+
+	const destinationCep = (
+		input.addressId
+			? (
+					await tx
+						.select({ zipCode: clientAddress.zipCode })
+						.from(clientAddress)
+						.where(eq(clientAddress.id, input.addressId))
+						.limit(1)
+				)[0]?.zipCode
+			: input.newAddress?.zipCode
+	)?.replace(/\D/g, "");
+	if (destinationCep && destinationCep.length === 8) {
+		await assertShippingQuoted({
+			shippingCents: centsFromString(input.shippingAmount),
+			destinationCep,
+			items: input.cartItems.map((i) => ({
+				toolId: i.toolId,
+				quantity: i.quantity,
+			})),
+		});
+	}
 
 	const subtotalCents = lines.reduce((s, l) => s + l.lineTotalCents, 0);
 	const shippingCents = centsFromString(input.shippingAmount);
