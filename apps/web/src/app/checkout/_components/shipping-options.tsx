@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@emach/ui/components/button";
+import { RadioGroup, RadioGroupItem } from "@emach/ui/components/radio-group";
 
 import { fmtBRL } from "@/lib/format";
 import type { ShippingOption } from "@/lib/superfrete/types";
@@ -57,19 +58,18 @@ export function ShippingOptions({
 		);
 	}
 	return (
-		<div className="space-y-2">
+		<RadioGroup
+			className="gap-2"
+			onValueChange={(value) => onSelect(Number(value))}
+			value={selectedId ?? undefined}
+		>
 			{options.map((opt) => (
 				<label
 					className="flex cursor-pointer items-center justify-between border border-border p-3 text-sm"
 					key={opt.serviceId}
 				>
 					<span className="flex items-center gap-3">
-						<input
-							checked={selectedId === opt.serviceId}
-							name="shipping-option"
-							onChange={() => onSelect(opt.serviceId)}
-							type="radio"
-						/>
+						<RadioGroupItem value={opt.serviceId} />
 						<span>
 							<span className="font-medium">{opt.name}</span>{" "}
 							<span className="text-muted-foreground">
@@ -80,6 +80,6 @@ export function ShippingOptions({
 					<span className="font-medium">{fmtBRL(opt.priceCents)}</span>
 				</label>
 			))}
-		</div>
+		</RadioGroup>
 	);
 }
