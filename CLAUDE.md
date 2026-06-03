@@ -73,13 +73,21 @@ Schema TS aqui é **cópia versionada** do dashboard, sincronizada via **CI PR a
 
 Detalhe completo em `DESIGN.md`. **Vermelho é verbo, não decoração** — Ferrari Red (`#DA291C`) só em CTA de alta prioridade, UMA vez por tela. **Cantos retos = precisão** (`border-radius: 0` em interativos; modais ≤8px, avatares 50%). Tipografia: **Barlow** (corpo) + **Barlow Condensed** (labels uppercase + tracking) — não misturar no mesmo bloco. Preços sempre `R$ 899,00`.
 
-## MCP — Resend é local
+## MCP — Resend vem do plugin oficial
 
-`.mcp.json` é versionado e `RESEND_API_KEY` é segredo, então Resend MCP é local (não no repo). Outros devs re-adicionam:
+O plugin oficial `resend` (em `~/.claude/plugins`) traz **as skills E o MCP** (`plugin:resend:resend`, ~80 tools). **Não** rodar `claude mcp add resend` — criaria um 2º MCP duplicando as tools.
 
-```bash
-claude mcp add -s local resend -- npx -y resend-mcp -e RESEND_API_KEY=<key>
+O `.mcp.json` do plugin usa `RESEND_API_KEY: "${RESEND_API_KEY}"`. **Gotcha (v2.1.159):** essa interpolação é resolvida contra o `process.env` do processo **principal** do Claude — que **NÃO** recebe o bloco `env` do `settings.json`/`settings.local.json` (esse env só é injetado nos subprocessos spawned, tipo Bash). Logo, pôr a key no `settings.local.json` **não** alimenta o MCP (conecta mas dá `API key is invalid`). Só o env do **OS que lança o `claude`** alimenta a interpolação.
+
+Solução adotada — `mise.toml` na raiz carrega o `apps/web/.env` no shell (mise já é `activate`-ado), então o `claude` lançado no projeto herda a key:
+
+```toml
+# mise.toml (commitado; sem segredo, só referência)
+[env]
+_.file = "apps/web/.env"
 ```
+
+`.env` continua fonte única. Após mexer: `mise trust` + relançar o `claude` (a interpolação só re-resolve no boot). As 5 skills (`resend:resend`, `react-email`, `email-best-practices`, `resend-cli`, `agent-email-inbox`) funcionam sem key.
 
 ## Onde estão os outros mistakes-logs
 
@@ -88,6 +96,6 @@ claude mcp add -s local resend -- npx -y resend-mcp -e RESEND_API_KEY=<key>
 | Schema sync, triggers, ownership detalhado, gotchas DB | `packages/db/CLAUDE.md` |
 | Sistema visual completo | `DESIGN.md` |
 | Multi-context glossário de domínio | `CONTEXT-MAP.md` |
-| Skills locais, MCPs (exceto Resend) | `.claude/skills/`, `.mcp.json` |
+| Skills locais, MCPs versionados | `.claude/skills/`, `.mcp.json` |
 
 Stack / scripts / envs → `package.json`, `packages/env/src/{server,web}.ts`. Schema fonte de verdade → repo irmão `emach-dashboard`.

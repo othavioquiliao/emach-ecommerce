@@ -1,0 +1,7 @@
+# Carrega o apps/web/.env no ambiente do shell ao entrar no projeto (mise activate).
+# Necessário para o MCP do plugin Resend: o Claude Code expande ${RESEND_API_KEY}
+# no .mcp.json contra o process.env do processo principal — que NÃO recebe o bloco
+# `env` do settings.json. Só o env do OS alimenta essa interpolação.
+# .env continua a fonte única de verdade (gitignored).
+[env]
+_.file = "apps/web/.env"
