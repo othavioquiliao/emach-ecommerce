@@ -9,6 +9,7 @@
     "ignoreUnknown": false,
     "includes": [
       "!**/.agents",
+      "!**/.claude",
       "!**/.codex",
       "!**/.next",
       "!**/dist",
