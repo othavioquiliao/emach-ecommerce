@@ -1,5 +1,5 @@
-import { ACTIVE_REFUND_STATUSES } from "@emach/db/schema/orders";
 import type { RefundReason, RefundStatus } from "@emach/db/schema/orders";
+import { ACTIVE_REFUND_STATUSES } from "@emach/db/schema/orders";
 
 export type RefundBadgeTone =
 	| "info"
