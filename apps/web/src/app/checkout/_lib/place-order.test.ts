@@ -50,7 +50,14 @@ async function seedMultiBranch(
 	});
 
 	const toolId = crypto.randomUUID();
-	await tx.insert(tool).values({ id: toolId, name: "Furadeira Teste" });
+	await tx.insert(tool).values({
+		id: toolId,
+		name: "Furadeira Teste",
+		weightKg: "1.000",
+		lengthCm: "20.00",
+		widthCm: "15.00",
+		heightCm: "10.00",
+	});
 
 	const variantId = crypto.randomUUID();
 	await tx.insert(toolVariant).values({
@@ -80,7 +87,14 @@ async function seedSecondVariant(
 	existingBranchIds: string[]
 ): Promise<{ toolId: string; variantId: string }> {
 	const toolId = crypto.randomUUID();
-	await tx.insert(tool).values({ id: toolId, name: "Serra Teste" });
+	await tx.insert(tool).values({
+		id: toolId,
+		name: "Serra Teste",
+		weightKg: "2.000",
+		lengthCm: "40.00",
+		widthCm: "25.00",
+		heightCm: "15.00",
+	});
 
 	const variantId = crypto.randomUUID();
 	await tx.insert(toolVariant).values({
