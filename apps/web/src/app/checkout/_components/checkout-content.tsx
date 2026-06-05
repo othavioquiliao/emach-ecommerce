@@ -24,6 +24,7 @@ import z from "zod";
 
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
 import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
+import { CouponField } from "@/app/checkout/_components/coupon-field";
 import {
 	ShippingOptions,
 	type ShippingStatus,
@@ -143,7 +144,12 @@ export function CheckoutContent({
 	}, [items]);
 
 	const shipping = selectedShippingCents ?? 0;
-	const total = subtotal + shipping;
+	const [coupon, setCoupon] = useState<{
+		code: string;
+		discountCents: number;
+	} | null>(null);
+	const discount = coupon?.discountCents ?? 0;
+	const total = subtotal - discount + shipping;
 
 	const form = useForm({
 		defaultValues: {
@@ -200,6 +206,7 @@ export function CheckoutContent({
 					priceAmount: i.priceAmount,
 				})),
 				shippingAmount: (selectedShippingCents / 100).toFixed(2),
+				couponCode: coupon?.code,
 			});
 
 			if (!result.ok) {
@@ -570,6 +577,22 @@ export function CheckoutContent({
 								<span className="text-muted-foreground">Subtotal</span>
 								<span>{fmtBRL(subtotal)}</span>
 							</div>
+							<CouponField
+								applied={coupon}
+								cartItems={items.map((i) => ({
+									toolId: i.toolId,
+									variantId: i.variantId,
+									quantity: i.quantity,
+								}))}
+								onApplied={setCoupon}
+								onRemoved={() => setCoupon(null)}
+							/>
+							{discount > 0 ? (
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Desconto</span>
+									<span>−{fmtBRL(discount)}</span>
+								</div>
+							) : null}
 							<div className="space-y-2">
 								<span className="text-muted-foreground text-sm">Frete</span>
 								<ShippingOptions
