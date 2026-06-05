@@ -7,7 +7,7 @@ import { getOriginBranchCep } from "@/lib/origin-branch";
 import { fetchSuperFreteQuote } from "./client";
 import type { QuoteItem, ShippingOption } from "./types";
 
-const SERVICES = "1,2,17,3"; // PAC, SEDEX, Mini, Jadlog
+const SERVICES = "1,2,3,17,31"; // PAC, SEDEX, Jadlog, Mini Envios, Loggi
 
 export interface QuoteShippingInput {
 	destinationCep: string;

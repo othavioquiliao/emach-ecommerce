@@ -54,9 +54,10 @@ Schema TS aqui é **cópia versionada** do dashboard, sincronizada via **CI PR a
 - **`proxy.ts` (Next 16) substitui `middleware.ts`** — não criar `middleware.ts`.
 - **`typedRoutes: true`** — `<Link href>` valida em tsc.
 - **Resend em sandbox** (`EMAIL_FROM=onboarding@resend.dev`): só entrega pro owner da conta. Ao comprar domínio: verificar SPF/DKIM/DMARC no Resend + trocar `EMAIL_FROM`.
-- **Filial padrão NÃO é env var** — resolvida via `lib/default-branch.ts > getDefaultBranchId()` (lookup DB).
+- **Origem do frete = `env.DEFAULT_BRANCH_ID`** → `lib/origin-branch.ts > getOriginBranchCep()` faz lookup de `branch.cep`. (Não existe `default-branch.ts`/`getDefaultBranchId()`.) Tornar admin-configurável no dashboard: emach-dashboard#117.
 - **IDs:** `crypto.randomUUID()` no caller — sem nanoid.
 - **Pós-merge de PR sync ou `bun db:push` em dev local:** rodar `bun db:apply-triggers` (triggers em `sql/triggers.sql`, owned-by-dashboard).
+- **Dev server pega `.env` stale:** editar `apps/web/.env` mid-sessão (ex.: `SUPERFRETE_BASE_URL` sandbox↔prod) e reiniciar `next dev` **não** reflete — Next dá precedência a `process.env` (que o shell/mise carregou no boot) sobre o arquivo. Relançar shell novo, ou `set -a && . apps/web/.env && set +a && next dev`. Conferir: `tr '\0' '\n' < /proc/$PID/environ | grep VAR`.
 
 ## Smoke run-time
 
