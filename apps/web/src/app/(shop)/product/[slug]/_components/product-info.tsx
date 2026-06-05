@@ -21,6 +21,7 @@ import { SectionLabel } from "@/components/section-label";
 import { useCart } from "@/lib/cart-context";
 import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtBRL, fmtNumericBRL, numericToCents } from "@/lib/format";
+import { effectiveAutoDiscountCents } from "@/lib/promotions";
 
 interface ProductInfoProps {
 	activePromotion: ToolDetail["activePromotion"];
@@ -40,12 +41,16 @@ function applyDiscount(
 	if (!promotion) {
 		return null;
 	}
-	const pct = Number(promotion.discountPct);
-	if (!Number.isFinite(pct) || pct <= 0) {
+	const baseCents = numericToCents(priceAmount);
+	const discountedCents = effectiveAutoDiscountCents(
+		baseCents,
+		promotion.discountType,
+		promotion.discountValue
+	);
+	if (discountedCents >= baseCents) {
 		return null;
 	}
-	const final = Number(priceAmount) * (1 - pct / 100);
-	return final.toFixed(2);
+	return (discountedCents / 100).toFixed(2);
 }
 
 export function ProductInfo({
