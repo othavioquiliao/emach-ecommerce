@@ -488,8 +488,11 @@ export async function placeOrder(
 					max_redemptions: number | null;
 				}>
 			)[0];
+		if (!lock) {
+			// Promoção removida concorrentemente entre validateCoupon e o FOR UPDATE.
+			throw new OrderError("Cupom não disponível");
+		}
 		if (
-			lock &&
 			lock.max_redemptions !== null &&
 			lock.redemption_count >= lock.max_redemptions
 		) {

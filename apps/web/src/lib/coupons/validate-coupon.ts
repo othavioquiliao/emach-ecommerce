@@ -1,6 +1,6 @@
 import type { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
-import { and, eq, gt, inArray, isNull, lte, or } from "drizzle-orm";
+import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 
 export interface CouponLine {
 	/** Preço ORIGINAL da variante em centavos (sem auto-promo). */
@@ -66,7 +66,12 @@ export async function validateCoupon(
 	const [promo] = await tx
 		.select()
 		.from(promotion)
-		.where(and(eq(promotion.code, code), eq(promotion.type, "promocode")))
+		.where(
+			and(
+				sql`lower(${promotion.code}) = lower(${code})`,
+				eq(promotion.type, "promocode")
+			)
+		)
 		.limit(1);
 
 	if (!(promo && promo.active)) {

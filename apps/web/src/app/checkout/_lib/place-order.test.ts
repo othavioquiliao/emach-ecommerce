@@ -468,16 +468,18 @@ describe("placeOrder (cupom)", () => {
 				redemptionCount: 0,
 				active: true,
 			});
-			const input = {
-				...buildInput([{ toolId, variantId, quantity: 1 }]),
-				couponCode: "CUPOM",
-			};
-			// O item está em auto-promo de 20% → o prepareLines recalcula o preço final
-			// (80.00) e a tolerância de preço falha ANTES do cupom; OU, se passasse, o
-			// cupom não cobriria nada. Aceitar qualquer um dos dois erros.
+			// Envia o preço JÁ auto-descontado (100 − 20% = 80) para passar a guarda de
+			// tolerância e exercitar de fato a exclusão no validateCoupon: o único item
+			// está em auto-promo → base elegível do cupom = 0 → "não cobre".
+			const base = buildInput([{ toolId, variantId, quantity: 1 }]);
+			const firstItem = base.cartItems[0];
+			if (firstItem) {
+				firstItem.priceAmount = "80.00";
+			}
+			const input = { ...base, couponCode: "CUPOM" };
 			await expect(
 				placeOrder(tx, { clientId, input, ipAddress: null, userAgent: null })
-			).rejects.toThrow(/não cobre|Preços atualizados/i);
+			).rejects.toThrow(/não cobre/i);
 		});
 	});
 });

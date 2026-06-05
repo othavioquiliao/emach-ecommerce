@@ -106,6 +106,17 @@ describe("validateCoupon", () => {
 		});
 	});
 
+	it("casa o código de forma case-insensitive", async () => {
+		await withRollback(async (tx) => {
+			const toolId = await seedTool(tx);
+			await seedPromotion(tx, "OFF10", { discountValue: "10.00" });
+			const result = await validateCoupon(tx, "off10", [line(toolId, 10_000)]);
+			expect(result).toEqual(
+				expect.objectContaining({ ok: true, discountCents: 1000 })
+			);
+		});
+	});
+
 	it("rejeita código inexistente", async () => {
 		await withRollback(async (tx) => {
 			const toolId = await seedTool(tx);
