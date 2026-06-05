@@ -7,7 +7,7 @@ import { promotion, promotionTool } from "@emach/db/schema/promotions";
 import { tool, toolVariant } from "@emach/db/schema/tools";
 import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
-
+import { validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
 import { quoteShipping } from "@/lib/superfrete/quote";
@@ -61,6 +61,7 @@ export const inputSchema = z.object({
 		)
 		.min(1, "Carrinho vazio"),
 	shippingAmount: z.string().regex(/^\d+\.\d{2}$/),
+	couponCode: z.string().trim().min(1).optional(),
 });
 
 export type CreateOrderInput = z.infer<typeof inputSchema>;
@@ -454,7 +455,56 @@ export async function placeOrder(
 
 	const subtotalCents = lines.reduce((s, l) => s + l.lineTotalCents, 0);
 	const shippingCents = centsFromString(input.shippingAmount);
-	const totalCents = subtotalCents + shippingCents;
+	let discountCents = 0;
+	let couponId: string | null = null;
+	if (input.couponCode) {
+		const couponLines = lines.map((l) => ({
+			toolId: l.tool.id,
+			quantity: l.cartItem.quantity,
+			basePriceCents: centsFromString(l.variant.priceAmount),
+		}));
+		const coupon = await validateCoupon(tx, input.couponCode, couponLines);
+		if (!coupon.ok) {
+			throw new OrderError(coupon.error);
+		}
+
+		// Trava a linha da promoção e re-checa o limite na mesma transação
+		// (mesmo padrão idempotente do débito de estoque).
+		const lockRes = await tx.execute(
+			sql`SELECT redemption_count, max_redemptions FROM promotion WHERE id = ${coupon.promotionId} FOR UPDATE`
+		);
+		const lock =
+			(
+				lockRes as unknown as {
+					rows: Array<{
+						redemption_count: number;
+						max_redemptions: number | null;
+					}>;
+				}
+			).rows?.[0] ??
+			(
+				lockRes as unknown as Array<{
+					redemption_count: number;
+					max_redemptions: number | null;
+				}>
+			)[0];
+		if (
+			lock &&
+			lock.max_redemptions !== null &&
+			lock.redemption_count >= lock.max_redemptions
+		) {
+			throw new OrderError("Cupom esgotado");
+		}
+
+		await tx
+			.update(promotion)
+			.set({ redemptionCount: sql`${promotion.redemptionCount} + 1` })
+			.where(eq(promotion.id, coupon.promotionId));
+
+		discountCents = coupon.discountCents;
+		couponId = coupon.promotionId;
+	}
+	const totalCents = subtotalCents - discountCents + shippingCents;
 
 	try {
 		await tx
@@ -521,7 +571,8 @@ export async function placeOrder(
 		branchId: null,
 		status: "pending_payment",
 		subtotalAmount,
-		discountAmount: "0",
+		discountAmount: (discountCents / 100).toFixed(2),
+		couponId,
 		shippingAmount: input.shippingAmount,
 		totalAmount,
 		shippingAddress: snapshot,

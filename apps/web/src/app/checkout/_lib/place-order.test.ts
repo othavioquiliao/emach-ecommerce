@@ -3,6 +3,7 @@ import { client } from "@emach/db/schema/client";
 import { consentLog } from "@emach/db/schema/consent-log";
 import { branch, stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
+import { promotion, promotionTool } from "@emach/db/schema/promotions";
 import { stockMovement } from "@emach/db/schema/stock-movements";
 import { tool, toolVariant } from "@emach/db/schema/tools";
 import { eq } from "drizzle-orm";
@@ -367,6 +368,116 @@ describe("placeOrder (multi-filial)", () => {
 
 			await expect(call).rejects.toThrow(RE_DOC_DUP);
 			await expect(call).rejects.not.toThrow(RE_SQL_LEAK);
+		});
+	});
+});
+
+describe("placeOrder (cupom)", () => {
+	it("aplica cupom percentual: grava discount/coupon/total e incrementa resgate", async () => {
+		await withRollback(async (tx) => {
+			const { clientId, toolId, variantId } = await seedMultiBranch(tx, [10]);
+			const couponId = crypto.randomUUID();
+			await tx.insert(promotion).values({
+				id: couponId,
+				title: "Cupom 10%",
+				type: "promocode",
+				code: "OFF10",
+				discountType: "percent",
+				discountValue: "10.00",
+				appliesToAll: true,
+				redemptionCount: 0,
+				active: true,
+			});
+
+			const input = {
+				...buildInput([{ toolId, variantId, quantity: 2 }]),
+				couponCode: "OFF10",
+			};
+			const result = await placeOrder(tx, {
+				clientId,
+				input,
+				ipAddress: null,
+				userAgent: null,
+			});
+
+			const [ord] = await tx
+				.select()
+				.from(order)
+				.where(eq(order.id, result.orderId));
+			expect(ord?.subtotalAmount).toBe("200.00");
+			expect(ord?.discountAmount).toBe("20.00");
+			expect(ord?.totalAmount).toBe("200.00");
+			expect(ord?.couponId).toBe(couponId);
+
+			const [promoAfter] = await tx
+				.select()
+				.from(promotion)
+				.where(eq(promotion.id, couponId));
+			expect(promoAfter?.redemptionCount).toBe(1);
+		});
+	});
+
+	it("rejeita cupom esgotado", async () => {
+		await withRollback(async (tx) => {
+			const { clientId, toolId, variantId } = await seedMultiBranch(tx, [10]);
+			await tx.insert(promotion).values({
+				id: crypto.randomUUID(),
+				title: "Esgotado",
+				type: "promocode",
+				code: "CHEIO",
+				discountType: "percent",
+				discountValue: "10.00",
+				appliesToAll: true,
+				maxRedemptions: 1,
+				redemptionCount: 1,
+				active: true,
+			});
+			const input = {
+				...buildInput([{ toolId, variantId, quantity: 1 }]),
+				couponCode: "CHEIO",
+			};
+			await expect(
+				placeOrder(tx, { clientId, input, ipAddress: null, userAgent: null })
+			).rejects.toThrow(/esgotado/i);
+		});
+	});
+
+	it("ignora item em auto-promo na base do cupom", async () => {
+		await withRollback(async (tx) => {
+			const { clientId, toolId, variantId } = await seedMultiBranch(tx, [10]);
+			const autoId = crypto.randomUUID();
+			await tx.insert(promotion).values({
+				id: autoId,
+				title: "Auto",
+				type: "promotion",
+				discountType: "percent",
+				discountValue: "20.00",
+				appliesToAll: false,
+				redemptionCount: 0,
+				active: true,
+			});
+			await tx.insert(promotionTool).values({ promotionId: autoId, toolId });
+			await tx.insert(promotion).values({
+				id: crypto.randomUUID(),
+				title: "Cupom",
+				type: "promocode",
+				code: "CUPOM",
+				discountType: "percent",
+				discountValue: "10.00",
+				appliesToAll: true,
+				redemptionCount: 0,
+				active: true,
+			});
+			const input = {
+				...buildInput([{ toolId, variantId, quantity: 1 }]),
+				couponCode: "CUPOM",
+			};
+			// O item está em auto-promo de 20% → o prepareLines recalcula o preço final
+			// (80.00) e a tolerância de preço falha ANTES do cupom; OU, se passasse, o
+			// cupom não cobriria nada. Aceitar qualquer um dos dois erros.
+			await expect(
+				placeOrder(tx, { clientId, input, ipAddress: null, userAgent: null })
+			).rejects.toThrow(/não cobre|Preços atualizados/i);
 		});
 	});
 });
