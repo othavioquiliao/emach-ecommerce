@@ -11,13 +11,10 @@ import { PageContainer } from "@/components/page-container";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
 
-const COUPON_DISCOUNT_RATE = 0.1;
 const INSTALLMENTS = 12;
 
 export function CartContent() {
 	const { items, setQty, remove } = useCart();
-	const [coupon, setCoupon] = useState("");
-	const [couponApplied, setCouponApplied] = useState(false);
 	const [removing, setRemoving] = useState<string | null>(null);
 
 	function handleRemove(id: string) {
@@ -32,11 +29,8 @@ export function CartContent() {
 		(s, i) => s + numericToCents(i.priceAmount) * i.quantity,
 		0
 	);
-	const discount = couponApplied
-		? Math.round(subtotal * COUPON_DISCOUNT_RATE)
-		: 0;
 	// Frete é cotado no checkout (via CEP). Aqui o total não inclui frete.
-	const total = subtotal - discount;
+	const total = subtotal;
 
 	if (items.length === 0) {
 		return (
@@ -90,41 +84,12 @@ export function CartContent() {
 							RESUMO DO PEDIDO
 						</div>
 
-						{/* Coupon */}
-						<div className="mb-5">
-							<div className="flex gap-0">
-								<input
-									className="emach-input flex-1 rounded-none border-r-0"
-									onChange={(e) => setCoupon(e.target.value)}
-									placeholder="Cupom de desconto"
-									value={coupon}
-								/>
-								<EmachButton
-									onClick={() => coupon && setCouponApplied(true)}
-									variant="dark"
-								>
-									Aplicar
-								</EmachButton>
-							</div>
-							{couponApplied && (
-								<div className="mt-2 font-semibold text-[12px] text-success">
-									✓ Cupom aplicado: 10% off
-								</div>
-							)}
-						</div>
-
 						{/* Totals */}
 						<div className="flex flex-col gap-2.5 text-[14px]">
 							<div className="flex justify-between">
 								<span>Subtotal</span>
 								<span className="tabular-nums">{fmtBRL(subtotal)}</span>
 							</div>
-							{discount > 0 && (
-								<div className="flex justify-between text-success">
-									<span>Desconto</span>
-									<span className="tabular-nums">−{fmtBRL(discount)}</span>
-								</div>
-							)}
 							<div className="flex justify-between text-gray-60">
 								<span>Frete</span>
 								<span>Calculado no checkout</span>
