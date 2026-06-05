@@ -221,7 +221,7 @@ Ferrari treats white space as a gallery wall. Each section — whether a concept
 | 1px | Subtle softening on small inline elements (spans) |
 | 2px | Default for buttons, inputs, and interactive elements — barely perceptible, razor-precision |
 | 8px | Modal dialogs and overlay containers — the "softest" structural radius |
-| 50% | Circular elements: carousel dots, avatar thumbnails, slider handles |
+| 50% | Circular elements: carousel dots, slider handles (avatar usa 2px — ver §10) |
 
 ## 6. Depth & Elevation
 
@@ -365,7 +365,7 @@ Only use these for their named intent — do not inline equivalents:
 | `.emach-bg-placeholder` / `.emach-bg-placeholder-shadow` | Radial + shadow for product icon placeholder |
 
 ### Radius philosophy (final)
-Default: **2px** on all interactive elements (buttons, inputs, cards, chips, badges). Nearly imperceptible — reinforces the "precision engineering" aesthetic. Only exception: radio/circle indicators use 50%.
+Default: **2px** on all interactive elements (buttons, inputs, cards, chips, badges). Nearly imperceptible — reinforces the "precision engineering" aesthetic. Avatars also use **2px** (square) so the user chrome matches the rest of the system — `Avatar` Root/Image/Fallback in `packages/ui/src/components/avatar.tsx`. Only exception: radio/circle indicators use 50%.
 
 ### Form controls
 All form controls use `.emach-*` CSS classes defined in globals.css. Do NOT use shadcn Input/Select for EMACH-branded pages.
