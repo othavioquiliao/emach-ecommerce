@@ -7,11 +7,14 @@ import { log } from "@/lib/evlog";
 import { requireCurrentClient } from "@/lib/session";
 
 import {
+	assertShippingQuoted,
 	type CreateOrderInput,
 	type CreateOrderResult,
+	centsFromString,
 	inputSchema,
 	OrderError,
 	placeOrder,
+	resolveDestinationCep,
 } from "../_lib/place-order";
 
 const GENERIC_ORDER_ERROR =
@@ -37,6 +40,20 @@ export async function createOrderAction(
 	const userAgent = reqHeaders.get("user-agent") ?? null;
 
 	try {
+		// Anti-fraude do frete roda FORA da transação (chamada externa não pode
+		// segurar a transação aberta). Mismatch lança OrderError; API fora não bloqueia.
+		const destinationCep = await resolveDestinationCep(db, input);
+		if (destinationCep) {
+			await assertShippingQuoted({
+				shippingCents: centsFromString(input.shippingAmount),
+				destinationCep,
+				items: input.cartItems.map((i) => ({
+					toolId: i.toolId,
+					quantity: i.quantity,
+				})),
+			});
+		}
+
 		const result = await db.transaction((tx) =>
 			placeOrder(tx as unknown as typeof db, {
 				clientId,

@@ -8,6 +8,8 @@ import { tool, toolVariant } from "@emach/db/schema/tools";
 import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
+import { log } from "@/lib/evlog";
+import { quoteShipping } from "@/lib/superfrete/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
 import { isValidCpfCnpj } from "@/lib/validators/cpf-cnpj";
 
@@ -303,6 +305,71 @@ async function prepareLines(
 	}
 
 	return lines;
+}
+
+/**
+ * Resolve o CEP de destino (8 dígitos) a partir do endereço salvo ou do novo
+ * endereço do input. Retorna `null` se não houver CEP válido.
+ */
+export async function resolveDestinationCep(
+	database: typeof db,
+	input: CreateOrderInput
+): Promise<string | null> {
+	const raw = input.addressId
+		? (
+				await database
+					.select({ zipCode: clientAddress.zipCode })
+					.from(clientAddress)
+					.where(eq(clientAddress.id, input.addressId))
+					.limit(1)
+			)[0]?.zipCode
+		: input.newAddress?.zipCode;
+	const cep = raw?.replace(/\D/g, "") ?? "";
+	return cep.length === 8 ? cep : null;
+}
+
+/**
+ * Anti-fraude: re-cota o frete no servidor e exige que o `shippingCents`
+ * enviado pelo cliente bata com alguma opção (tolerância de 1 centavo).
+ *
+ * Indisponibilidade da API de frete **não** bloqueia a venda (degrada com
+ * `log.warn`); só um valor adulterado (mismatch) lança `OrderError`.
+ *
+ * Deve rodar **fora** da transação do pedido — a chamada externa não pode
+ * segurar a transação aberta durante a latência da rede.
+ */
+export async function assertShippingQuoted(params: {
+	shippingCents: number;
+	destinationCep: string;
+	items: Array<{ toolId: string; quantity: number }>;
+}): Promise<void> {
+	let options: Awaited<ReturnType<typeof quoteShipping>>;
+	try {
+		options = await quoteShipping({
+			destinationCep: params.destinationCep,
+			items: params.items,
+		});
+	} catch (err) {
+		// Trade-off consciente (decisão de produto): indisponibilidade da API de
+		// frete NÃO bloqueia a venda. Risco: atacante força a queda da API e passa
+		// frete adulterado. Mitigação atual = log.error com contexto para detecção.
+		// Endurecimento futuro: persistir `shippingUnverified` no pedido p/ revisão
+		// manual (exige coluna nova no schema dashboard — ADR-0009).
+		log.error({
+			action: "shipping_revalidation_skipped",
+			destinationCep: params.destinationCep,
+			shippingCents: params.shippingCents,
+			error: err instanceof Error ? err.message : "erro inesperado",
+		});
+		return;
+	}
+	const ok = options.some(
+		(o) =>
+			Math.abs(o.priceCents - params.shippingCents) <= PRICE_TOLERANCE_CENTS
+	);
+	if (!ok) {
+		throw new OrderError("Frete inválido, refaça o checkout");
+	}
 }
 
 async function checkAggregateStock(

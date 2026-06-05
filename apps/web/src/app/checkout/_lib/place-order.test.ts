@@ -6,7 +6,22 @@ import { order, orderItem } from "@emach/db/schema/orders";
 import { stockMovement } from "@emach/db/schema/stock-movements";
 import { tool, toolVariant } from "@emach/db/schema/tools";
 import { eq } from "drizzle-orm";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+
+// quoteShipping chama o DB global e a API externa — mockar para os testes de
+// integração do place-order (a lógica de anti-fraude está coberta em
+// place-order.shipping.test.ts).
+vi.mock("@/lib/superfrete/quote", () => ({
+	quoteShipping: vi.fn().mockResolvedValue([
+		{
+			serviceId: 1,
+			name: "SEDEX",
+			company: "Correios",
+			priceCents: 2000,
+			deliveryDays: 1,
+		},
+	]),
+}));
 
 import { type CreateOrderInput, placeOrder } from "./place-order";
 
@@ -50,7 +65,14 @@ async function seedMultiBranch(
 	});
 
 	const toolId = crypto.randomUUID();
-	await tx.insert(tool).values({ id: toolId, name: "Furadeira Teste" });
+	await tx.insert(tool).values({
+		id: toolId,
+		name: "Furadeira Teste",
+		weightKg: "1.000",
+		lengthCm: "20.00",
+		widthCm: "15.00",
+		heightCm: "10.00",
+	});
 
 	const variantId = crypto.randomUUID();
 	await tx.insert(toolVariant).values({
@@ -80,7 +102,14 @@ async function seedSecondVariant(
 	existingBranchIds: string[]
 ): Promise<{ toolId: string; variantId: string }> {
 	const toolId = crypto.randomUUID();
-	await tx.insert(tool).values({ id: toolId, name: "Serra Teste" });
+	await tx.insert(tool).values({
+		id: toolId,
+		name: "Serra Teste",
+		weightKg: "2.000",
+		lengthCm: "40.00",
+		widthCm: "25.00",
+		heightCm: "15.00",
+	});
 
 	const variantId = crypto.randomUUID();
 	await tx.insert(toolVariant).values({

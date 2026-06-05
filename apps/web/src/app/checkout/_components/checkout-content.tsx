@@ -13,7 +13,7 @@ import {
 	SelectValue,
 } from "@emach/ui/components/select";
 import { Separator } from "@emach/ui/components/separator";
-import { revalidateLogic, useForm } from "@tanstack/react-form";
+import { revalidateLogic, useForm, useStore } from "@tanstack/react-form";
 import type { Route } from "next";
 import NextImage from "next/image";
 import Link from "next/link";
@@ -23,8 +23,14 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
+import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
+import {
+	ShippingOptions,
+	type ShippingStatus,
+} from "@/app/checkout/_components/shipping-options";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
+import type { ShippingOption } from "@/lib/superfrete/types";
 import { addressFieldsSchema } from "@/lib/validators/address";
 import {
 	isValidCpfCnpj,
@@ -38,8 +44,6 @@ const NEW_ADDRESS_ID = "__new__";
 
 const formatUf = (raw: string): string =>
 	onlyLetters(raw).toUpperCase().slice(0, 2);
-const FREE_SHIPPING_CENTS = 29_900;
-const STANDARD_SHIPPING_CENTS = 2990;
 
 const newAddressFormShape = z.object({
 	zipCode: z.string(),
@@ -107,6 +111,18 @@ export function CheckoutContent({
 	const { items, clear } = useCart();
 	const submittedRef = useRef(false);
 
+	const [shippingStatus, setShippingStatus] = useState<ShippingStatus>("idle");
+	const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
+	const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+		null
+	);
+	const [destinationCep, setDestinationCep] = useState("");
+	const [quoteNonce, setQuoteNonce] = useState(0);
+
+	const selectedShippingCents =
+		shippingOptions.find((o) => o.serviceId === selectedServiceId)
+			?.priceCents ?? null;
+
 	const defaultAddressId =
 		addresses.find((a) => a.isDefault)?.id ??
 		addresses[0]?.id ??
@@ -118,20 +134,16 @@ export function CheckoutContent({
 		}
 	}, [items.length, router]);
 
-	const { orderItems, subtotal, shipping, total } = useMemo(() => {
+	const { orderItems, subtotal } = useMemo(() => {
 		const sub = items.reduce(
 			(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
 			0
 		);
-		const ship =
-			sub >= FREE_SHIPPING_CENTS || sub === 0 ? 0 : STANDARD_SHIPPING_CENTS;
-		return {
-			orderItems: items,
-			subtotal: sub,
-			shipping: ship,
-			total: sub + ship,
-		};
+		return { orderItems: items, subtotal: sub };
 	}, [items]);
+
+	const shipping = selectedShippingCents ?? 0;
+	const total = subtotal + shipping;
 
 	const form = useForm({
 		defaultValues: {
@@ -158,6 +170,10 @@ export function CheckoutContent({
 			onDynamic: checkoutSchema,
 		},
 		onSubmit: async ({ value }) => {
+			if (selectedShippingCents === null) {
+				toast.error("Selecione uma opção de frete");
+				return;
+			}
 			const result = await createOrderAction({
 				name: value.name.trim(),
 				email: value.email.trim().toLowerCase(),
@@ -183,7 +199,7 @@ export function CheckoutContent({
 					quantity: i.quantity,
 					priceAmount: i.priceAmount,
 				})),
-				shippingAmount: (shipping / 100).toFixed(2),
+				shippingAmount: (selectedShippingCents / 100).toFixed(2),
 			});
 
 			if (!result.ok) {
@@ -197,6 +213,53 @@ export function CheckoutContent({
 			router.push(`/pedidos/${result.orderNumber}` as Route);
 		},
 	});
+
+	const watchedAddressId = useStore(form.store, (s) => s.values.addressId);
+	const watchedNewCep = useStore(
+		form.store,
+		(s) => s.values.newAddress.zipCode
+	);
+	useEffect(() => {
+		const saved = addresses.find((a) => a.id === watchedAddressId);
+		const cepRaw =
+			watchedAddressId === NEW_ADDRESS_ID
+				? watchedNewCep
+				: (saved?.zipCode ?? "");
+		setDestinationCep(onlyDigits(cepRaw).slice(0, 8));
+	}, [watchedAddressId, watchedNewCep, addresses]);
+
+	useEffect(() => {
+		if (destinationCep.length !== 8 || items.length === 0) {
+			setShippingStatus("idle");
+			setShippingOptions([]);
+			setSelectedServiceId(null);
+			return;
+		}
+		let cancelled = false;
+		setShippingStatus("loading");
+		const handle = setTimeout(async () => {
+			const result = await quoteShippingAction({
+				destinationCep,
+				items: items.map((i) => ({ toolId: i.toolId, quantity: i.quantity })),
+			});
+			if (cancelled) {
+				return;
+			}
+			if (result.ok) {
+				setShippingOptions(result.options);
+				setSelectedServiceId(result.options[0]?.serviceId ?? null);
+				setShippingStatus("ready");
+			} else {
+				setShippingOptions([]);
+				setSelectedServiceId(null);
+				setShippingStatus("error");
+			}
+		}, 600);
+		return () => {
+			cancelled = true;
+			clearTimeout(handle);
+		};
+	}, [destinationCep, items, quoteNonce]);
 
 	return (
 		<div className="mx-auto max-w-6xl px-20 py-10">
@@ -507,9 +570,15 @@ export function CheckoutContent({
 								<span className="text-muted-foreground">Subtotal</span>
 								<span>{fmtBRL(subtotal)}</span>
 							</div>
-							<div className="flex justify-between">
-								<span className="text-muted-foreground">Frete</span>
-								<span>{shipping === 0 ? "Grátis" : fmtBRL(shipping)}</span>
+							<div className="space-y-2">
+								<span className="text-muted-foreground text-sm">Frete</span>
+								<ShippingOptions
+									onRetry={() => setQuoteNonce((n) => n + 1)}
+									onSelect={setSelectedServiceId}
+									options={shippingOptions}
+									selectedId={selectedServiceId}
+									status={shippingStatus}
+								/>
 							</div>
 						</div>
 
@@ -517,7 +586,9 @@ export function CheckoutContent({
 
 						<div className="flex justify-between font-bold text-base">
 							<span>Total</span>
-							<span>{fmtBRL(total)}</span>
+							<span>
+								{selectedShippingCents === null ? "A calcular" : fmtBRL(total)}
+							</span>
 						</div>
 					</div>
 				</div>

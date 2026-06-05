@@ -7,13 +7,10 @@ import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
-import { FreeShippingProgress } from "@/components/free-shipping-progress";
 import { PageContainer } from "@/components/page-container";
 import { useCart } from "@/lib/cart-context";
-import { FREE_SHIPPING_THRESHOLD } from "@/lib/constants";
 import { fmtBRL, numericToCents } from "@/lib/format";
 
-const STANDARD_SHIPPING = 2490;
 const COUPON_DISCOUNT_RATE = 0.1;
 const INSTALLMENTS = 12;
 
@@ -38,8 +35,8 @@ export function CartContent() {
 	const discount = couponApplied
 		? Math.round(subtotal * COUPON_DISCOUNT_RATE)
 		: 0;
-	const shipping = subtotal >= FREE_SHIPPING_THRESHOLD ? 0 : STANDARD_SHIPPING;
-	const total = subtotal - discount + shipping;
+	// Frete é cotado no checkout (via CEP). Aqui o total não inclui frete.
+	const total = subtotal - discount;
 
 	if (items.length === 0) {
 		return (
@@ -75,8 +72,6 @@ export function CartContent() {
 			<div className="grid grid-cols-[1fr_400px] gap-12">
 				{/* Items */}
 				<div>
-					<FreeShippingProgress className="mb-5" subtotal={subtotal} />
-
 					{items.map((item) => (
 						<CartItemRow
 							item={item}
@@ -130,11 +125,9 @@ export function CartContent() {
 									<span className="tabular-nums">−{fmtBRL(discount)}</span>
 								</div>
 							)}
-							<div className="flex justify-between">
+							<div className="flex justify-between text-gray-60">
 								<span>Frete</span>
-								<span className="tabular-nums">
-									{shipping === 0 ? "Grátis" : fmtBRL(shipping)}
-								</span>
+								<span>Calculado no checkout</span>
 							</div>
 						</div>
 
