@@ -164,6 +164,23 @@ export default async function HomePage() {
 					</section>
 				)}
 
+				{recentTools.length > 0 && (
+					<section className="bg-gray-10 px-14 py-18">
+						<PageContainer>
+							<ProductCarousel
+								label="03 · Recém chegadas"
+								link={{
+									href: "/catalog?sort=newest",
+									label: "Ver todas",
+									variant: "arrow",
+								}}
+								title="Novidades"
+								tools={recentTools}
+							/>
+						</PageContainer>
+					</section>
+				)}
+
 				<section className="bg-black text-white">
 					<PageContainer className="grid min-h-110 grid-cols-2 px-0">
 						<div className="flex flex-col justify-center gap-5 px-20 py-20">
@@ -209,23 +226,6 @@ export default async function HomePage() {
 						</div>
 					</PageContainer>
 				</section>
-
-				{recentTools.length > 0 && (
-					<section className="bg-gray-10 px-14 py-18">
-						<PageContainer>
-							<ProductCarousel
-								label="03 · Recém chegadas"
-								link={{
-									href: "/catalog?sort=newest",
-									label: "Ver todas",
-									variant: "arrow",
-								}}
-								title="Novidades"
-								tools={recentTools}
-							/>
-						</PageContainer>
-					</section>
-				)}
 				{rootCategories.length > 0 && (
 					<section className="bg-gray-10">
 						<PageContainer className="px-14 py-18">

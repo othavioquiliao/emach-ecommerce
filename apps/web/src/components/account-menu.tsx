@@ -8,9 +8,7 @@ import {
 import {
 	DropdownMenu,
 	DropdownMenuContent,
-	DropdownMenuGroup,
 	DropdownMenuItem,
-	DropdownMenuLabel,
 	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@emach/ui/components/dropdown-menu";
@@ -37,10 +35,10 @@ export function AccountMenu() {
 		return (
 			<Link
 				aria-label="Conta"
-				className="text-white/80 hover:text-white"
+				className="flex size-8 items-center justify-center rounded-[2px] border-[1.5px] border-gray-500/50 text-white/80 transition-colors hover:border-white/70 hover:text-white"
 				href="/login"
 			>
-				<User className="size-6" />
+				<User className="size-4.5" />
 			</Link>
 		);
 	}
@@ -73,24 +71,48 @@ export function AccountMenu() {
 					</AvatarFallback>
 				</Avatar>
 			</DropdownMenuTrigger>
-			<DropdownMenuContent align="end" className="w-56">
-				<DropdownMenuGroup>
-					<DropdownMenuLabel>{session.user.name}</DropdownMenuLabel>
-				</DropdownMenuGroup>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem render={<Link href="/dashboard/pedidos" />}>
-					<Package />
-					Meus pedidos
-				</DropdownMenuItem>
-				<DropdownMenuItem render={<Link href="/dashboard/dados-pessoais" />}>
-					<UserCog />
-					Meus dados
-				</DropdownMenuItem>
-				<DropdownMenuSeparator />
-				<DropdownMenuItem onClick={handleSignOut} variant="destructive">
-					<LogOut />
-					Sair
-				</DropdownMenuItem>
+			<DropdownMenuContent align="end" className="w-60 p-0">
+				<div className="flex items-center gap-3 bg-near-black p-4 text-white">
+					<div className="flex size-9.5 shrink-0 items-center justify-center rounded-[2px] bg-white font-semibold text-[15px] text-near-black">
+						{getInitials(session.user.name ?? "")}
+					</div>
+					<div className="min-w-0">
+						<div className="font-display font-semibold text-[9.5px] text-emach-red uppercase tracking-[0.16em]">
+							Minha conta
+						</div>
+						<div className="truncate font-semibold text-[14px] leading-tight">
+							{session.user.name}
+						</div>
+						<div className="truncate text-[11.5px] text-white/65">
+							{session.user.email}
+						</div>
+					</div>
+				</div>
+				<div className="p-1">
+					<DropdownMenuItem
+						className="relative gap-3 px-3 py-2.5 text-[13.5px] focus:before:absolute focus:before:inset-y-0 focus:before:left-0 focus:before:w-[3px] focus:before:bg-emach-red"
+						render={<Link href="/dashboard/pedidos" />}
+					>
+						<Package />
+						Meus pedidos
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						className="relative gap-3 px-3 py-2.5 text-[13.5px] focus:before:absolute focus:before:inset-y-0 focus:before:left-0 focus:before:w-[3px] focus:before:bg-emach-red"
+						render={<Link href="/dashboard/dados-pessoais" />}
+					>
+						<UserCog />
+						Meus dados
+					</DropdownMenuItem>
+					<DropdownMenuSeparator />
+					<DropdownMenuItem
+						className="gap-3 px-3 py-2.5 text-[13.5px]"
+						onClick={handleSignOut}
+						variant="destructive"
+					>
+						<LogOut />
+						Sair
+					</DropdownMenuItem>
+				</div>
 			</DropdownMenuContent>
 		</DropdownMenu>
 	);
