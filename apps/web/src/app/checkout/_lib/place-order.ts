@@ -9,6 +9,7 @@ import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
 
 import { log } from "@/lib/evlog";
+import { effectiveAutoDiscountCents } from "@/lib/promotions";
 import { quoteShipping } from "@/lib/superfrete/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
 import { isValidCpfCnpj } from "@/lib/validators/cpf-cnpj";
@@ -200,38 +201,71 @@ interface PreparedLine {
 	};
 }
 
-async function fetchDiscountPctByToolId(
+/**
+ * Para cada tool, todas as promoções automáticas ativas/vigentes que a cobrem
+ * (global via `applies_to_all` OU específica via `promotion_tool`). O caller
+ * escolhe o menor preço resultante por linha (descontos nunca somam).
+ */
+async function fetchAutoPromosByToolId(
 	tx: typeof db,
 	toolIds: string[],
 	now: Date
-): Promise<Map<string, number>> {
-	const promoRows = await tx
-		.select({
-			toolId: promotionTool.toolId,
-			discountPct: promotion.discountPct,
-		})
-		.from(promotion)
-		.innerJoin(promotionTool, eq(promotionTool.promotionId, promotion.id))
-		.where(
-			and(
-				eq(promotion.active, true),
-				eq(promotion.type, "promotion"),
-				inArray(promotionTool.toolId, toolIds),
-				or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-				or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-			)
-		);
+): Promise<
+	Map<string, Array<{ discountType: string; discountValue: string }>>
+> {
+	const [globalRows, specificRows] = await Promise.all([
+		tx
+			.select({
+				discountType: promotion.discountType,
+				discountValue: promotion.discountValue,
+			})
+			.from(promotion)
+			.where(
+				and(
+					eq(promotion.active, true),
+					eq(promotion.type, "promotion"),
+					eq(promotion.appliesToAll, true),
+					or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
+					or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
+				)
+			),
+		tx
+			.select({
+				toolId: promotionTool.toolId,
+				discountType: promotion.discountType,
+				discountValue: promotion.discountValue,
+			})
+			.from(promotion)
+			.innerJoin(promotionTool, eq(promotionTool.promotionId, promotion.id))
+			.where(
+				and(
+					eq(promotion.active, true),
+					eq(promotion.type, "promotion"),
+					inArray(promotionTool.toolId, toolIds),
+					or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
+					or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
+				)
+			),
+	]);
 
-	const map = new Map<string, number>();
-	for (const row of promoRows) {
-		const pct = Number(row.discountPct);
-		if (!Number.isFinite(pct) || pct <= 0) {
-			continue;
-		}
-		const current = map.get(row.toolId) ?? 0;
-		if (pct > current) {
-			map.set(row.toolId, pct);
-		}
+	const map = new Map<
+		string,
+		Array<{ discountType: string; discountValue: string }>
+	>();
+	for (const toolId of toolIds) {
+		map.set(
+			toolId,
+			globalRows.map((r) => ({
+				discountType: r.discountType,
+				discountValue: r.discountValue,
+			}))
+		);
+	}
+	for (const row of specificRows) {
+		map.get(row.toolId)?.push({
+			discountType: row.discountType,
+			discountValue: row.discountValue,
+		});
 	}
 	return map;
 }
@@ -243,7 +277,7 @@ async function prepareLines(
 	const variantIds = input.cartItems.map((i) => i.variantId);
 	const toolIds = Array.from(new Set(input.cartItems.map((i) => i.toolId)));
 
-	const [variantRows, toolRows, discountPctByToolId] = await Promise.all([
+	const [variantRows, toolRows, autoPromosByToolId] = await Promise.all([
 		tx
 			.select({
 				id: toolVariant.id,
@@ -270,7 +304,7 @@ async function prepareLines(
 			})
 			.from(tool)
 			.where(inArray(tool.id, toolIds)),
-		fetchDiscountPctByToolId(tx, toolIds, new Date()),
+		fetchAutoPromosByToolId(tx, toolIds, new Date()),
 	]);
 
 	if (variantRows.length !== variantIds.length) {
@@ -287,10 +321,19 @@ async function prepareLines(
 		if (!(variant && toolRow) || variant.toolId !== cartItem.toolId) {
 			throw new OrderError("Inconsistência cart/DB");
 		}
-		const pct = discountPctByToolId.get(cartItem.toolId) ?? 0;
+		const promos = autoPromosByToolId.get(cartItem.toolId) ?? [];
 		const basePriceCents = centsFromString(variant.priceAmount);
-		const finalPriceCents =
-			pct > 0 ? Math.round(basePriceCents * (1 - pct / 100)) : basePriceCents;
+		let finalPriceCents = basePriceCents;
+		for (const promo of promos) {
+			const candidate = effectiveAutoDiscountCents(
+				basePriceCents,
+				promo.discountType,
+				promo.discountValue
+			);
+			if (candidate < finalPriceCents) {
+				finalPriceCents = candidate;
+			}
+		}
 		const submittedCents = centsFromString(cartItem.priceAmount);
 		if (Math.abs(submittedCents - finalPriceCents) > PRICE_TOLERANCE_CENTS) {
 			throw new OrderError("Preços atualizados, refaça o checkout");
