@@ -9,6 +9,7 @@ import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
 import { z } from "zod";
 import { validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
+import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
 import { quoteShipping } from "@/lib/superfrete/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
@@ -80,10 +81,6 @@ interface AddressSnapshot {
 	state: string;
 	street: string;
 	zipCode: string;
-}
-
-export function centsFromString(amount: string): number {
-	return Math.round(Number(amount) * 100);
 }
 
 export function formatOrderNumber(seq: number): string {
@@ -323,7 +320,7 @@ async function prepareLines(
 			throw new OrderError("Inconsistência cart/DB");
 		}
 		const promos = autoPromosByToolId.get(cartItem.toolId) ?? [];
-		const basePriceCents = centsFromString(variant.priceAmount);
+		const basePriceCents = numericToCents(variant.priceAmount);
 		let finalPriceCents = basePriceCents;
 		for (const promo of promos) {
 			const candidate = effectiveAutoDiscountCents(
@@ -335,7 +332,7 @@ async function prepareLines(
 				finalPriceCents = candidate;
 			}
 		}
-		const submittedCents = centsFromString(cartItem.priceAmount);
+		const submittedCents = numericToCents(cartItem.priceAmount);
 		if (Math.abs(submittedCents - finalPriceCents) > PRICE_TOLERANCE_CENTS) {
 			throw new OrderError("Preços atualizados, refaça o checkout");
 		}
@@ -454,14 +451,14 @@ export async function placeOrder(
 	await checkAggregateStock(tx, lines);
 
 	const subtotalCents = lines.reduce((s, l) => s + l.lineTotalCents, 0);
-	const shippingCents = centsFromString(input.shippingAmount);
+	const shippingCents = numericToCents(input.shippingAmount);
 	let discountCents = 0;
 	let couponId: string | null = null;
 	if (input.couponCode) {
 		const couponLines = lines.map((l) => ({
 			toolId: l.tool.id,
 			quantity: l.cartItem.quantity,
-			basePriceCents: centsFromString(l.variant.priceAmount),
+			basePriceCents: numericToCents(l.variant.priceAmount),
 		}));
 		const coupon = await validateCoupon(tx, input.couponCode, couponLines);
 		if (!coupon.ok) {

@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { type CouponLine, validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
+import { numericToCents } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
 
 const schema = z.object({
@@ -57,7 +58,7 @@ export async function applyCouponAction(
 			lines.push({
 				toolId: item.toolId,
 				quantity: item.quantity,
-				basePriceCents: Math.round(Number(variant.priceAmount) * 100),
+				basePriceCents: numericToCents(variant.priceAmount),
 			});
 		}
 

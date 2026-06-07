@@ -1,6 +1,7 @@
 import type { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
 import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { numericToCents } from "@/lib/format";
 
 export interface CouponLine {
 	/** Preço ORIGINAL da variante em centavos (sem auto-promo). */
@@ -122,7 +123,7 @@ export async function validateCoupon(
 	}
 
 	if (promo.minOrderAmount !== null) {
-		const minCents = Math.round(Number(promo.minOrderAmount) * 100);
+		const minCents = numericToCents(promo.minOrderAmount);
 		if (eligibleSubtotalCents < minCents) {
 			const minBRL = Number(promo.minOrderAmount).toLocaleString("pt-BR", {
 				currency: "BRL",
