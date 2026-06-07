@@ -17,12 +17,24 @@ import { createGoogleProviderConfig } from "./google";
 const db = createDb();
 const schema = { client, clientSession, clientAccount, clientVerification };
 
+const isProd = env.NODE_ENV === "production";
+
+// Em produção, a URL é fixa e determinística (segurança: sem inferência de
+// host arbitrário). Em dev, o host é derivado da request e validado contra
+// `localhost:*`, permitindo rodar em qualquer porta sem editar o .env —
+// útil quando a 3001 está ocupada por outro projeto. As portas locais ainda
+// precisam estar nas "Authorized redirect URIs" do OAuth (Google não aceita
+// wildcard de porta).
+const ecommerceBaseURL = isProd
+	? env.BETTER_AUTH_URL_ECOMMERCE
+	: { allowedHosts: ["localhost:*"], protocol: "http" as const };
+
 export const authEcommerce = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
 		schema,
 	}),
-	trustedOrigins: [env.ECOMMERCE_ORIGIN],
+	trustedOrigins: isProd ? [env.ECOMMERCE_ORIGIN] : ["http://localhost:*"],
 	emailAndPassword: {
 		enabled: true,
 		requireEmailVerification: false,
@@ -86,7 +98,7 @@ export const authEcommerce = betterAuth({
 		modelName: "clientVerification",
 	},
 	secret: env.BETTER_AUTH_SECRET,
-	baseURL: env.BETTER_AUTH_URL_ECOMMERCE,
+	baseURL: ecommerceBaseURL,
 	advanced: {
 		cookiePrefix: "ecommerce",
 	},
