@@ -3,12 +3,17 @@ import { client, clientAddress } from "@emach/db/schema/client";
 import { consentLog } from "@emach/db/schema/consent-log";
 import { stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
-import { promotion, promotionTool } from "@emach/db/schema/promotions";
+import { promotion } from "@emach/db/schema/promotions";
 import { tool, toolVariant } from "@emach/db/schema/tools";
-import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import {
+	autoPromoToolIdsFromMap,
+	fetchAutoPromosByToolId,
+} from "@/lib/auto-promo";
 import { validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
+import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
 import { quoteShipping } from "@/lib/superfrete/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
@@ -80,10 +85,6 @@ interface AddressSnapshot {
 	state: string;
 	street: string;
 	zipCode: string;
-}
-
-export function centsFromString(amount: string): number {
-	return Math.round(Number(amount) * 100);
 }
 
 export function formatOrderNumber(seq: number): string {
@@ -202,79 +203,10 @@ interface PreparedLine {
 	};
 }
 
-/**
- * Para cada tool, todas as promoções automáticas ativas/vigentes que a cobrem
- * (global via `applies_to_all` OU específica via `promotion_tool`). O caller
- * escolhe o menor preço resultante por linha (descontos nunca somam).
- */
-async function fetchAutoPromosByToolId(
-	tx: typeof db,
-	toolIds: string[],
-	now: Date
-): Promise<
-	Map<string, Array<{ discountType: string; discountValue: string }>>
-> {
-	const [globalRows, specificRows] = await Promise.all([
-		tx
-			.select({
-				discountType: promotion.discountType,
-				discountValue: promotion.discountValue,
-			})
-			.from(promotion)
-			.where(
-				and(
-					eq(promotion.active, true),
-					eq(promotion.type, "promotion"),
-					eq(promotion.appliesToAll, true),
-					or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-					or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-				)
-			),
-		tx
-			.select({
-				toolId: promotionTool.toolId,
-				discountType: promotion.discountType,
-				discountValue: promotion.discountValue,
-			})
-			.from(promotion)
-			.innerJoin(promotionTool, eq(promotionTool.promotionId, promotion.id))
-			.where(
-				and(
-					eq(promotion.active, true),
-					eq(promotion.type, "promotion"),
-					inArray(promotionTool.toolId, toolIds),
-					or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-					or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-				)
-			),
-	]);
-
-	const map = new Map<
-		string,
-		Array<{ discountType: string; discountValue: string }>
-	>();
-	for (const toolId of toolIds) {
-		map.set(
-			toolId,
-			globalRows.map((r) => ({
-				discountType: r.discountType,
-				discountValue: r.discountValue,
-			}))
-		);
-	}
-	for (const row of specificRows) {
-		map.get(row.toolId)?.push({
-			discountType: row.discountType,
-			discountValue: row.discountValue,
-		});
-	}
-	return map;
-}
-
 async function prepareLines(
 	tx: typeof db,
 	input: CreateOrderInput
-): Promise<PreparedLine[]> {
+): Promise<{ lines: PreparedLine[]; autoPromoToolIds: Set<string> }> {
 	const variantIds = input.cartItems.map((i) => i.variantId);
 	const toolIds = Array.from(new Set(input.cartItems.map((i) => i.toolId)));
 
@@ -323,7 +255,7 @@ async function prepareLines(
 			throw new OrderError("Inconsistência cart/DB");
 		}
 		const promos = autoPromosByToolId.get(cartItem.toolId) ?? [];
-		const basePriceCents = centsFromString(variant.priceAmount);
+		const basePriceCents = numericToCents(variant.priceAmount);
 		let finalPriceCents = basePriceCents;
 		for (const promo of promos) {
 			const candidate = effectiveAutoDiscountCents(
@@ -335,7 +267,7 @@ async function prepareLines(
 				finalPriceCents = candidate;
 			}
 		}
-		const submittedCents = centsFromString(cartItem.priceAmount);
+		const submittedCents = numericToCents(cartItem.priceAmount);
 		if (Math.abs(submittedCents - finalPriceCents) > PRICE_TOLERANCE_CENTS) {
 			throw new OrderError("Preços atualizados, refaça o checkout");
 		}
@@ -348,7 +280,10 @@ async function prepareLines(
 		});
 	}
 
-	return lines;
+	return {
+		lines,
+		autoPromoToolIds: autoPromoToolIdsFromMap(autoPromosByToolId),
+	};
 }
 
 /**
@@ -450,20 +385,25 @@ export async function placeOrder(
 ): Promise<{ orderId: string; orderNumber: string }> {
 	const { clientId, input, ipAddress, userAgent } = params;
 
-	const lines = await prepareLines(tx, input);
+	const { lines, autoPromoToolIds } = await prepareLines(tx, input);
 	await checkAggregateStock(tx, lines);
 
 	const subtotalCents = lines.reduce((s, l) => s + l.lineTotalCents, 0);
-	const shippingCents = centsFromString(input.shippingAmount);
+	const shippingCents = numericToCents(input.shippingAmount);
 	let discountCents = 0;
 	let couponId: string | null = null;
 	if (input.couponCode) {
 		const couponLines = lines.map((l) => ({
 			toolId: l.tool.id,
 			quantity: l.cartItem.quantity,
-			basePriceCents: centsFromString(l.variant.priceAmount),
+			basePriceCents: numericToCents(l.variant.priceAmount),
 		}));
-		const coupon = await validateCoupon(tx, input.couponCode, couponLines);
+		const coupon = await validateCoupon(
+			tx,
+			input.couponCode,
+			couponLines,
+			autoPromoToolIds
+		);
 		if (!coupon.ok) {
 			throw new OrderError(coupon.error);
 		}

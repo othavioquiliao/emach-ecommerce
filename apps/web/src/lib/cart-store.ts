@@ -80,3 +80,29 @@ export function removeFromCart(
 	saveCart(next);
 	return next;
 }
+
+/**
+ * Atualiza o `priceAmount` (snapshot) dos itens cujo `variantId` está em
+ * `priceByVariantId`. Usado pela revalidação do checkout para alinhar o display
+ * e o snapshot ao preço real atual antes do place-order. Retorna a MESMA
+ * referência se nada mudou (evita re-render desnecessário no contexto).
+ */
+export function reconcilePrices(
+	items: CartItem[],
+	priceByVariantId: Map<string, string>
+): CartItem[] {
+	let changed = false;
+	const next = items.map((i) => {
+		const fresh = priceByVariantId.get(i.variantId);
+		if (fresh != null && fresh !== i.priceAmount) {
+			changed = true;
+			return { ...i, priceAmount: fresh };
+		}
+		return i;
+	});
+	if (!changed) {
+		return items;
+	}
+	saveCart(next);
+	return next;
+}

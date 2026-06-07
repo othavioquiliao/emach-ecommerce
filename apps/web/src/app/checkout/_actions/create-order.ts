@@ -4,13 +4,13 @@ import { db } from "@emach/db";
 import { headers } from "next/headers";
 
 import { log } from "@/lib/evlog";
+import { numericToCents } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
 
 import {
 	assertShippingQuoted,
 	type CreateOrderInput,
 	type CreateOrderResult,
-	centsFromString,
 	inputSchema,
 	OrderError,
 	placeOrder,
@@ -45,7 +45,7 @@ export async function createOrderAction(
 		const destinationCep = await resolveDestinationCep(db, input);
 		if (destinationCep) {
 			await assertShippingQuoted({
-				shippingCents: centsFromString(input.shippingAmount),
+				shippingCents: numericToCents(input.shippingAmount),
 				destinationCep,
 				items: input.cartItems.map((i) => ({
 					toolId: i.toolId,

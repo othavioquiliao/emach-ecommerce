@@ -4,12 +4,7 @@ import { Loader2, X } from "lucide-react";
 import { useState } from "react";
 
 import { applyCouponAction } from "@/app/checkout/_actions/apply-coupon";
-
-interface CouponCartItem {
-	quantity: number;
-	toolId: string;
-	variantId: string;
-}
+import type { CouponCartItem } from "@/app/checkout/_lib/coupon-schema";
 
 interface CouponFieldProps {
 	applied: { code: string; discountCents: number } | null;

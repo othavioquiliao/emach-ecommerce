@@ -24,6 +24,7 @@ import z from "zod";
 
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
 import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
+import { revalidateCartAction } from "@/app/checkout/_actions/revalidate-cart";
 import { CouponField } from "@/app/checkout/_components/coupon-field";
 import {
 	ShippingOptions,
@@ -109,8 +110,9 @@ export function CheckoutContent({
 	clientPhone,
 }: CheckoutContentProps) {
 	const router = useRouter();
-	const { items, clear } = useCart();
+	const { items, clear, reconcile, hydrated } = useCart();
 	const submittedRef = useRef(false);
+	const revalidatedRef = useRef(false);
 
 	const [shippingStatus, setShippingStatus] = useState<ShippingStatus>("idle");
 	const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -130,10 +132,42 @@ export function CheckoutContent({
 		NEW_ADDRESS_ID;
 
 	useEffect(() => {
-		if (items.length === 0 && !submittedRef.current) {
+		// Só redireciona depois do carrinho hidratar do localStorage — senão o
+		// primeiro render (items=[] antes da hidratação) jogaria pro /cart mesmo
+		// com itens salvos, quebrando o acesso direto / refresh do checkout.
+		if (hydrated && items.length === 0 && !submittedRef.current) {
 			router.replace("/cart");
 		}
-	}, [items.length, router]);
+	}, [hydrated, items.length, router]);
+
+	// Revalida os preços do carrinho ao entrar no checkout: o snapshot do
+	// localStorage pode estar defasado (ex.: auto-promo expirou após adicionar ao
+	// carrinho). Reconcilia display + snapshot silenciosamente, alinhando ao que o
+	// place-order vai aceitar. Roda uma única vez (guard via ref → sem loop, mesmo
+	// com `items` na dep array após o reconcile).
+	useEffect(() => {
+		if (revalidatedRef.current || items.length === 0) {
+			return;
+		}
+		revalidatedRef.current = true;
+		(async () => {
+			const result = await revalidateCartAction({
+				cartItems: items.map((i) => ({
+					toolId: i.toolId,
+					variantId: i.variantId,
+				})),
+			});
+			if (result.ok) {
+				const fresh = new Map(
+					result.prices.map((p) => [
+						p.variantId,
+						(p.finalPriceCents / 100).toFixed(2),
+					])
+				);
+				reconcile(fresh);
+			}
+		})();
+	}, [items, reconcile]);
 
 	const { orderItems, subtotal } = useMemo(() => {
 		const sub = items.reduce(
@@ -149,7 +183,7 @@ export function CheckoutContent({
 		discountCents: number;
 	} | null>(null);
 	const discount = coupon?.discountCents ?? 0;
-	const total = subtotal - discount + shipping;
+	const total = Math.max(0, subtotal - discount + shipping);
 
 	const form = useForm({
 		defaultValues: {

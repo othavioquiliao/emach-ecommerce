@@ -5,21 +5,15 @@ import { toolVariant } from "@emach/db/schema/tools";
 import { inArray } from "drizzle-orm";
 import { z } from "zod";
 
+import { couponCartItemSchema } from "@/app/checkout/_lib/coupon-schema";
 import { type CouponLine, validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
+import { numericToCents } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
 
 const schema = z.object({
 	code: z.string().min(1),
-	cartItems: z
-		.array(
-			z.object({
-				toolId: z.string().min(1),
-				variantId: z.string().min(1),
-				quantity: z.number().int().positive(),
-			})
-		)
-		.min(1),
+	cartItems: z.array(couponCartItemSchema).min(1),
 });
 
 export type ApplyCouponResult =
@@ -57,7 +51,7 @@ export async function applyCouponAction(
 			lines.push({
 				toolId: item.toolId,
 				quantity: item.quantity,
-				basePriceCents: Math.round(Number(variant.priceAmount) * 100),
+				basePriceCents: numericToCents(variant.priceAmount),
 			});
 		}
 

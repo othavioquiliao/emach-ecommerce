@@ -193,4 +193,37 @@ describe("validateCoupon", () => {
 			);
 		});
 	});
+
+	it("usa o set injetado para excluir auto-promo sem re-consultar", async () => {
+		await withRollback(async (tx) => {
+			const toolId = await seedTool(tx);
+			await seedPromotion(tx, "CUPOM", { discountValue: "10.00" });
+			const result = await validateCoupon(
+				tx,
+				"CUPOM",
+				[line(toolId, 10_000)],
+				new Set([toolId])
+			);
+			expect(result).toEqual({
+				ok: false,
+				error: "Cupom não cobre nenhum item do carrinho",
+			});
+		});
+	});
+
+	it("set injetado vazio não exclui nada", async () => {
+		await withRollback(async (tx) => {
+			const toolId = await seedTool(tx);
+			await seedPromotion(tx, "CUPOM", { discountValue: "10.00" });
+			const result = await validateCoupon(
+				tx,
+				"CUPOM",
+				[line(toolId, 10_000)],
+				new Set()
+			);
+			expect(result).toEqual(
+				expect.objectContaining({ ok: true, discountCents: 1000 })
+			);
+		});
+	});
 });
