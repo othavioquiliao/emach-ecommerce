@@ -1,6 +1,7 @@
 "use client";
 
 import { Button } from "@emach/ui/components/button";
+import { Checkbox } from "@emach/ui/components/checkbox";
 import { Separator } from "@emach/ui/components/separator";
 import {
 	Tabs,
@@ -259,8 +260,11 @@ export default function LoginPage() {
 								</signInForm.Field>
 
 								<div className="flex items-center justify-between">
-									<label className="emach-check-label flex items-center gap-2 text-sm">
-										<input className="emach-check" type="checkbox" />
+									<label
+										className="flex cursor-pointer items-center gap-2 text-sm"
+										htmlFor="remember-me"
+									>
+										<Checkbox id="remember-me" />
 										Lembrar de mim
 									</label>
 									<Link

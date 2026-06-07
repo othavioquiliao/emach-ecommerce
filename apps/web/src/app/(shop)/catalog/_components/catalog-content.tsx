@@ -1,6 +1,7 @@
 "use client";
 
 import type { CategoryNode, ToolListItem } from "@emach/db/queries/catalog";
+import { Checkbox } from "@emach/ui/components/checkbox";
 import { cn } from "@emach/ui/lib/utils";
 import { Grid3x3, List } from "lucide-react";
 import type { Route } from "next";
@@ -226,35 +227,41 @@ export function CatalogContent({
 						FILTROS
 					</div>
 
-					<div className="mb-6 flex flex-col gap-1">
+					<nav aria-label="Categorias" className="mb-6 flex flex-col">
 						<div className="mb-2.5 font-semibold text-[13px]">Categoria</div>
-						<label className="flex items-center gap-2">
-							<input
-								checked={currentCategorySlug === null}
-								className="emach-radio"
-								name="cat"
-								onChange={() => navigate({ cat: null })}
-								type="radio"
-							/>
+						<button
+							aria-current={currentCategorySlug === null ? "page" : undefined}
+							className={cn(
+								"border-l-2 py-1.5 pl-3 text-left text-[14px] transition-colors hover:text-near-black",
+								currentCategorySlug === null
+									? "border-l-emach-red font-bold text-near-black"
+									: "border-l-transparent text-gray-60"
+							)}
+							onClick={() => navigate({ cat: null })}
+							type="button"
+						>
 							Todas
-						</label>
+						</button>
 						{flatCategories.map((c) => (
-							<label
-								className="flex items-center gap-2"
+							<button
+								aria-current={
+									currentCategorySlug === c.slug ? "page" : undefined
+								}
+								className={cn(
+									"border-l-2 py-1.5 text-left text-[14px] transition-colors hover:text-near-black",
+									currentCategorySlug === c.slug
+										? "border-l-emach-red font-bold text-near-black"
+										: "border-l-transparent text-gray-60"
+								)}
 								key={c.id}
-								style={{ paddingLeft: `${c.depth * 12}px` }}
+								onClick={() => navigate({ cat: c.slug })}
+								style={{ paddingLeft: `${12 + c.depth * 14}px` }}
+								type="button"
 							>
-								<input
-									checked={currentCategorySlug === c.slug}
-									className="emach-radio"
-									name="cat"
-									onChange={() => navigate({ cat: c.slug })}
-									type="radio"
-								/>
-								{c.name}
-							</label>
+								{c.depth > 0 ? `› ${c.name}` : c.name}
+							</button>
 						))}
-					</div>
+					</nav>
 
 					<div className="mb-6">
 						<div className="mb-2.5 font-semibold text-[13px]">
@@ -295,14 +302,16 @@ export function CatalogContent({
 					</div>
 
 					<div className="mb-6">
-						<label className="flex items-center gap-2">
-							<input
+						<label
+							className="flex cursor-pointer items-center gap-2"
+							htmlFor="filter-promo"
+						>
+							<Checkbox
 								checked={onlyPromo}
-								className="emach-check"
-								onChange={(e) =>
-									navigate({ promo: e.target.checked ? true : null })
+								id="filter-promo"
+								onCheckedChange={(v) =>
+									navigate({ promo: v === true ? true : null })
 								}
-								type="checkbox"
 							/>
 							Apenas em promoção
 						</label>
@@ -311,12 +320,15 @@ export function CatalogContent({
 					<div className="mb-6 flex flex-col gap-1">
 						<div className="mb-2.5 font-semibold text-[13px]">Voltagem</div>
 						{VOLTAGE_OPTIONS.map((v) => (
-							<label className="flex items-center gap-2" key={v}>
-								<input
+							<label
+								className="flex cursor-pointer items-center gap-2"
+								htmlFor={`filter-voltage-${v}`}
+								key={v}
+							>
+								<Checkbox
 									checked={voltages.includes(v)}
-									className="emach-check"
-									onChange={() => toggleVoltage(v)}
-									type="checkbox"
+									id={`filter-voltage-${v}`}
+									onCheckedChange={() => toggleVoltage(v)}
 								/>
 								{v}
 							</label>
