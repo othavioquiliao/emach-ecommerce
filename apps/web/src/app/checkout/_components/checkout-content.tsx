@@ -110,7 +110,7 @@ export function CheckoutContent({
 	clientPhone,
 }: CheckoutContentProps) {
 	const router = useRouter();
-	const { items, clear, reconcile } = useCart();
+	const { items, clear, reconcile, hydrated } = useCart();
 	const submittedRef = useRef(false);
 	const revalidatedRef = useRef(false);
 
@@ -132,10 +132,13 @@ export function CheckoutContent({
 		NEW_ADDRESS_ID;
 
 	useEffect(() => {
-		if (items.length === 0 && !submittedRef.current) {
+		// Só redireciona depois do carrinho hidratar do localStorage — senão o
+		// primeiro render (items=[] antes da hidratação) jogaria pro /cart mesmo
+		// com itens salvos, quebrando o acesso direto / refresh do checkout.
+		if (hydrated && items.length === 0 && !submittedRef.current) {
 			router.replace("/cart");
 		}
-	}, [items.length, router]);
+	}, [hydrated, items.length, router]);
 
 	// Revalida os preços do carrinho ao entrar no checkout: o snapshot do
 	// localStorage pode estar defasado (ex.: auto-promo expirou após adicionar ao

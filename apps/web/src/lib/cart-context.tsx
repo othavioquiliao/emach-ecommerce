@@ -22,6 +22,8 @@ import {
 interface CartCtx {
 	add: (item: CartItemSnapshot, qty?: number) => void;
 	clear: () => void;
+	/** `false` até o carrinho ser carregado do localStorage (1º render no client). */
+	hydrated: boolean;
 	items: CartItem[];
 	reconcile: (priceByVariantId: Map<string, string>) => void;
 	remove: (variantId: string) => void;
@@ -32,6 +34,7 @@ interface CartCtx {
 const CartContext = createContext<CartCtx>({
 	items: [],
 	totalCount: 0,
+	hydrated: false,
 	add: () => undefined,
 	setQty: () => undefined,
 	remove: () => undefined,
@@ -41,9 +44,11 @@ const CartContext = createContext<CartCtx>({
 
 export function CartProvider({ children }: { children: React.ReactNode }) {
 	const [items, setItems] = useState<CartItem[]>([]);
+	const [hydrated, setHydrated] = useState(false);
 
 	useEffect(() => {
 		setItems(loadCart());
+		setHydrated(true);
 	}, []);
 
 	const add = useCallback((item: CartItemSnapshot, qty = 1) => {
@@ -71,7 +76,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 
 	return (
 		<CartContext.Provider
-			value={{ items, totalCount, add, setQty, remove, clear, reconcile }}
+			value={{
+				items,
+				totalCount,
+				hydrated,
+				add,
+				setQty,
+				remove,
+				clear,
+				reconcile,
+			}}
 		>
 			{children}
 		</CartContext.Provider>
