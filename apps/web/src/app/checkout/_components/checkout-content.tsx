@@ -24,6 +24,7 @@ import z from "zod";
 
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
 import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
+import { revalidateCartAction } from "@/app/checkout/_actions/revalidate-cart";
 import { CouponField } from "@/app/checkout/_components/coupon-field";
 import {
 	ShippingOptions,
@@ -109,8 +110,9 @@ export function CheckoutContent({
 	clientPhone,
 }: CheckoutContentProps) {
 	const router = useRouter();
-	const { items, clear } = useCart();
+	const { items, clear, reconcile } = useCart();
 	const submittedRef = useRef(false);
+	const revalidatedRef = useRef(false);
 
 	const [shippingStatus, setShippingStatus] = useState<ShippingStatus>("idle");
 	const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -135,6 +137,35 @@ export function CheckoutContent({
 		}
 	}, [items.length, router]);
 
+	// Revalida os preços do carrinho ao entrar no checkout: o snapshot do
+	// localStorage pode estar defasado (ex.: auto-promo expirou após adicionar ao
+	// carrinho). Reconcilia display + snapshot silenciosamente, alinhando ao que o
+	// place-order vai aceitar. Roda uma única vez (guard via ref → sem loop, mesmo
+	// com `items` na dep array após o reconcile).
+	useEffect(() => {
+		if (revalidatedRef.current || items.length === 0) {
+			return;
+		}
+		revalidatedRef.current = true;
+		(async () => {
+			const result = await revalidateCartAction({
+				cartItems: items.map((i) => ({
+					toolId: i.toolId,
+					variantId: i.variantId,
+				})),
+			});
+			if (result.ok) {
+				const fresh = new Map(
+					result.prices.map((p) => [
+						p.variantId,
+						(p.finalPriceCents / 100).toFixed(2),
+					])
+				);
+				reconcile(fresh);
+			}
+		})();
+	}, [items, reconcile]);
+
 	const { orderItems, subtotal } = useMemo(() => {
 		const sub = items.reduce(
 			(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
@@ -149,7 +180,7 @@ export function CheckoutContent({
 		discountCents: number;
 	} | null>(null);
 	const discount = coupon?.discountCents ?? 0;
-	const total = subtotal - discount + shipping;
+	const total = Math.max(0, subtotal - discount + shipping);
 
 	const form = useForm({
 		defaultValues: {
