@@ -1,6 +1,10 @@
 import type { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
-import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
+import {
+	autoPromoToolIdsFromMap,
+	fetchAutoPromosByToolId,
+} from "@/lib/auto-promo";
 import { fmtNumericBRL, numericToCents } from "@/lib/format";
 
 export interface CouponLine {
@@ -14,49 +18,25 @@ export type CouponValidation =
 	| { ok: true; discountCents: number; promotionId: string }
 	| { ok: false; error: string };
 
-/** Tools sob promoção automática ativa (global ou específica) — não empilham com cupom. */
-async function fetchAutoPromoToolIds(
-	tx: typeof db,
-	toolIds: string[],
-	now: Date
-): Promise<Set<string>> {
-	const [globalAuto] = await tx
-		.select({ id: promotion.id })
-		.from(promotion)
-		.where(
-			and(
-				eq(promotion.active, true),
-				eq(promotion.type, "promotion"),
-				eq(promotion.appliesToAll, true),
-				or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-				or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-			)
-		)
-		.limit(1);
-	if (globalAuto) {
-		return new Set(toolIds);
-	}
-
-	const rows = await tx
-		.select({ toolId: promotionTool.toolId })
-		.from(promotion)
-		.innerJoin(promotionTool, eq(promotionTool.promotionId, promotion.id))
-		.where(
-			and(
-				eq(promotion.active, true),
-				eq(promotion.type, "promotion"),
-				inArray(promotionTool.toolId, toolIds),
-				or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-				or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-			)
-		);
-	return new Set(rows.map((r) => r.toolId));
+/** Desconto do cupom em centavos, com clamp na base elegível e em zero. */
+function couponDiscountCents(
+	discountType: string,
+	discountValue: string,
+	eligibleSubtotalCents: number
+): number {
+	const value = Number(discountValue);
+	const raw =
+		discountType === "fixed"
+			? Math.round(value * 100)
+			: Math.round((eligibleSubtotalCents * value) / 100);
+	return Math.max(0, Math.min(raw, eligibleSubtotalCents));
 }
 
 export async function validateCoupon(
 	tx: typeof db,
 	rawCode: string,
-	lines: CouponLine[]
+	lines: CouponLine[],
+	autoPromoToolIds?: Set<string>
 ): Promise<CouponValidation> {
 	const code = rawCode.trim();
 	if (!code) {
@@ -75,7 +55,7 @@ export async function validateCoupon(
 		)
 		.limit(1);
 
-	if (!(promo && promo.active)) {
+	if (!promo?.active) {
 		return { ok: false, error: "Cupom inválido" };
 	}
 	if (promo.startsAt && promo.startsAt > now) {
@@ -108,12 +88,14 @@ export async function validateCoupon(
 		scopeToolIds = new Set(scoped.map((r) => r.toolId));
 	}
 
-	const autoPromoToolIds = await fetchAutoPromoToolIds(tx, toolIds, now);
+	const autoPromoSet =
+		autoPromoToolIds ??
+		autoPromoToolIdsFromMap(await fetchAutoPromosByToolId(tx, toolIds, now));
 
 	let eligibleSubtotalCents = 0;
 	for (const line of lines) {
 		const inScope = scopeToolIds === null || scopeToolIds.has(line.toolId);
-		if (inScope && !autoPromoToolIds.has(line.toolId)) {
+		if (inScope && !autoPromoSet.has(line.toolId)) {
 			eligibleSubtotalCents += line.basePriceCents * line.quantity;
 		}
 	}
@@ -132,18 +114,13 @@ export async function validateCoupon(
 		}
 	}
 
-	const value = Number(promo.discountValue);
-	const discountCents =
-		promo.discountType === "fixed"
-			? Math.min(Math.round(value * 100), eligibleSubtotalCents)
-			: Math.min(
-					Math.round((eligibleSubtotalCents * value) / 100),
-					eligibleSubtotalCents
-				);
-
 	return {
 		ok: true,
-		discountCents: Math.max(0, discountCents),
+		discountCents: couponDiscountCents(
+			promo.discountType,
+			promo.discountValue,
+			eligibleSubtotalCents
+		),
 		promotionId: promo.id,
 	};
 }
