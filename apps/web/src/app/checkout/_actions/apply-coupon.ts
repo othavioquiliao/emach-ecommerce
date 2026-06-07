@@ -10,17 +10,16 @@ import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
 
+export const couponCartItemSchema = z.object({
+	toolId: z.string().min(1),
+	variantId: z.string().min(1),
+	quantity: z.number().int().positive(),
+});
+export type CouponCartItem = z.infer<typeof couponCartItemSchema>;
+
 const schema = z.object({
 	code: z.string().min(1),
-	cartItems: z
-		.array(
-			z.object({
-				toolId: z.string().min(1),
-				variantId: z.string().min(1),
-				quantity: z.number().int().positive(),
-			})
-		)
-		.min(1),
+	cartItems: z.array(couponCartItemSchema).min(1),
 });
 
 export type ApplyCouponResult =
