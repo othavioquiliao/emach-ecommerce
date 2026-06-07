@@ -3,10 +3,14 @@ import { client, clientAddress } from "@emach/db/schema/client";
 import { consentLog } from "@emach/db/schema/consent-log";
 import { stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
-import { promotion, promotionTool } from "@emach/db/schema/promotions";
+import { promotion } from "@emach/db/schema/promotions";
 import { tool, toolVariant } from "@emach/db/schema/tools";
-import { and, eq, gt, inArray, isNull, lte, or, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
+import {
+	autoPromoToolIdsFromMap,
+	fetchAutoPromosByToolId,
+} from "@/lib/auto-promo";
 import { validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
@@ -199,79 +203,10 @@ interface PreparedLine {
 	};
 }
 
-/**
- * Para cada tool, todas as promoções automáticas ativas/vigentes que a cobrem
- * (global via `applies_to_all` OU específica via `promotion_tool`). O caller
- * escolhe o menor preço resultante por linha (descontos nunca somam).
- */
-async function fetchAutoPromosByToolId(
-	tx: typeof db,
-	toolIds: string[],
-	now: Date
-): Promise<
-	Map<string, Array<{ discountType: string; discountValue: string }>>
-> {
-	const [globalRows, specificRows] = await Promise.all([
-		tx
-			.select({
-				discountType: promotion.discountType,
-				discountValue: promotion.discountValue,
-			})
-			.from(promotion)
-			.where(
-				and(
-					eq(promotion.active, true),
-					eq(promotion.type, "promotion"),
-					eq(promotion.appliesToAll, true),
-					or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-					or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-				)
-			),
-		tx
-			.select({
-				toolId: promotionTool.toolId,
-				discountType: promotion.discountType,
-				discountValue: promotion.discountValue,
-			})
-			.from(promotion)
-			.innerJoin(promotionTool, eq(promotionTool.promotionId, promotion.id))
-			.where(
-				and(
-					eq(promotion.active, true),
-					eq(promotion.type, "promotion"),
-					inArray(promotionTool.toolId, toolIds),
-					or(isNull(promotion.startsAt), lte(promotion.startsAt, now)),
-					or(isNull(promotion.endsAt), gt(promotion.endsAt, now))
-				)
-			),
-	]);
-
-	const map = new Map<
-		string,
-		Array<{ discountType: string; discountValue: string }>
-	>();
-	for (const toolId of toolIds) {
-		map.set(
-			toolId,
-			globalRows.map((r) => ({
-				discountType: r.discountType,
-				discountValue: r.discountValue,
-			}))
-		);
-	}
-	for (const row of specificRows) {
-		map.get(row.toolId)?.push({
-			discountType: row.discountType,
-			discountValue: row.discountValue,
-		});
-	}
-	return map;
-}
-
 async function prepareLines(
 	tx: typeof db,
 	input: CreateOrderInput
-): Promise<PreparedLine[]> {
+): Promise<{ lines: PreparedLine[]; autoPromoToolIds: Set<string> }> {
 	const variantIds = input.cartItems.map((i) => i.variantId);
 	const toolIds = Array.from(new Set(input.cartItems.map((i) => i.toolId)));
 
@@ -345,7 +280,10 @@ async function prepareLines(
 		});
 	}
 
-	return lines;
+	return {
+		lines,
+		autoPromoToolIds: autoPromoToolIdsFromMap(autoPromosByToolId),
+	};
 }
 
 /**
@@ -447,7 +385,7 @@ export async function placeOrder(
 ): Promise<{ orderId: string; orderNumber: string }> {
 	const { clientId, input, ipAddress, userAgent } = params;
 
-	const lines = await prepareLines(tx, input);
+	const { lines, autoPromoToolIds } = await prepareLines(tx, input);
 	await checkAggregateStock(tx, lines);
 
 	const subtotalCents = lines.reduce((s, l) => s + l.lineTotalCents, 0);
@@ -460,7 +398,12 @@ export async function placeOrder(
 			quantity: l.cartItem.quantity,
 			basePriceCents: numericToCents(l.variant.priceAmount),
 		}));
-		const coupon = await validateCoupon(tx, input.couponCode, couponLines);
+		const coupon = await validateCoupon(
+			tx,
+			input.couponCode,
+			couponLines,
+			autoPromoToolIds
+		);
 		if (!coupon.ok) {
 			throw new OrderError(coupon.error);
 		}
