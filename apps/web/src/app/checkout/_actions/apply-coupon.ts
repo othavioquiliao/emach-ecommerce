@@ -5,17 +5,11 @@ import { toolVariant } from "@emach/db/schema/tools";
 import { inArray } from "drizzle-orm";
 import { z } from "zod";
 
+import { couponCartItemSchema } from "@/app/checkout/_lib/coupon-schema";
 import { type CouponLine, validateCoupon } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
-
-export const couponCartItemSchema = z.object({
-	toolId: z.string().min(1),
-	variantId: z.string().min(1),
-	quantity: z.number().int().positive(),
-});
-export type CouponCartItem = z.infer<typeof couponCartItemSchema>;
 
 const schema = z.object({
 	code: z.string().min(1),
