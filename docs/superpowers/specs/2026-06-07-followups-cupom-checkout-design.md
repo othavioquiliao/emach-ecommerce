@@ -57,7 +57,10 @@ comportamento).
 Elimina a regra de elegibilidade de auto-promo reescrita em dois pontos
 ecommerce e as queries redundantes por resgate de cupom.
 
-- Novo módulo `apps/web/src/lib/promotions/auto-promo.ts` (fonte única):
+- Novo módulo **server-only** `apps/web/src/lib/auto-promo.ts` (fonte única).
+  Não estender `lib/promotions.ts`: esse arquivo exporta `effectiveAutoDiscountCents`
+  (puro) e é importado por `product-info.tsx`, que é `"use client"` — incluir a
+  query de DB lá vazaria o driver pro bundle do cliente. Conteúdo:
   - `fetchAutoPromosByToolId(tx, toolIds, now): Map<toolId, AutoPromo[]>` —
     movido de `place-order.ts` sem mudança de lógica (promoções `type='promotion'`
     ativas e vigentes, global via `applies_to_all` ou específica via
