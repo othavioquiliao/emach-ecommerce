@@ -1,17 +1,7 @@
 "use client";
 
 import type { ClientAddress } from "@emach/db/schema/client";
-import { Button } from "@emach/ui/components/button";
 import { Checkbox } from "@emach/ui/components/checkbox";
-import { Input } from "@emach/ui/components/input";
-import { Label } from "@emach/ui/components/label";
-import {
-	Select,
-	SelectContent,
-	SelectItem,
-	SelectTrigger,
-	SelectValue,
-} from "@emach/ui/components/select";
 import { Separator } from "@emach/ui/components/separator";
 import { revalidateLogic, useForm, useStore } from "@tanstack/react-form";
 import type { Route } from "next";
@@ -21,7 +11,6 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
-
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
 import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
 import { revalidateCartAction } from "@/app/checkout/_actions/revalidate-cart";
@@ -30,6 +19,7 @@ import {
 	ShippingOptions,
 	type ShippingStatus,
 } from "@/app/checkout/_components/shipping-options";
+import { EmachButton, emachButtonVariants } from "@/components/emach-button";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
 import type { ShippingOption } from "@/lib/superfrete/types";
@@ -304,11 +294,13 @@ export function CheckoutContent({
 	}, [destinationCep, items, quoteNonce]);
 
 	return (
-		<div className="mx-auto max-w-6xl px-20 py-10">
-			<div className="flex flex-row gap-15">
-				<div className="flex-1">
-					<h1 className="font-medium text-2xl">Dados Pessoais</h1>
-					<p className="mt-1 text-muted-foreground text-sm">
+		<div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
+			<div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px] lg:gap-12">
+				<div>
+					<h1 className="font-display font-medium text-[28px] tracking-[-0.01em]">
+						Dados Pessoais
+					</h1>
+					<p className="mt-1 text-gray-60 text-sm">
 						Confira seus dados e endereço de entrega
 					</p>
 
@@ -320,7 +312,7 @@ export function CheckoutContent({
 							form.handleSubmit();
 						}}
 					>
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<TextField
 								form={form}
 								label="Nome completo"
@@ -337,7 +329,7 @@ export function CheckoutContent({
 							/>
 						</div>
 
-						<div className="grid grid-cols-2 gap-4">
+						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<form.Field name="phone">
 								{(field) => (
 									<FieldShell
@@ -345,8 +337,8 @@ export function CheckoutContent({
 										htmlFor="phone"
 										label="Telefone"
 									>
-										<Input
-											className="mt-2 h-11 rounded-none"
+										<input
+											className="emach-input"
 											id="phone"
 											onBlur={field.handleBlur}
 											onChange={(e) =>
@@ -367,8 +359,8 @@ export function CheckoutContent({
 										htmlFor="document"
 										label="CPF ou CNPJ"
 									>
-										<Input
-											className="mt-2 h-11 rounded-none"
+										<input
+											className="emach-input"
 											id="document"
 											onBlur={field.handleBlur}
 											onChange={(e) =>
@@ -384,7 +376,9 @@ export function CheckoutContent({
 
 						<Separator />
 
-						<h2 className="font-medium text-lg">Endereço de Entrega</h2>
+						<h2 className="font-display font-medium text-xl tracking-[-0.01em]">
+							Endereço de Entrega
+						</h2>
 
 						<form.Field name="addressId">
 							{(field) => (
@@ -393,35 +387,20 @@ export function CheckoutContent({
 									htmlFor="addressId"
 									label="Endereço"
 								>
-									<Select
-										onValueChange={(v) => field.handleChange(v ?? "")}
+									<select
+										className="emach-select"
+										id="addressId"
+										onBlur={field.handleBlur}
+										onChange={(e) => field.handleChange(e.target.value)}
 										value={field.state.value}
 									>
-										<SelectTrigger
-											className="mt-2 h-11 w-full rounded-none"
-											id="addressId"
-										>
-											<SelectValue placeholder="Selecione um endereço">
-												{(value) => {
-													if (value === NEW_ADDRESS_ID) {
-														return "+ Novo endereço";
-													}
-													const addr = addresses.find((a) => a.id === value);
-													return addr ? formatAddressLabel(addr) : "";
-												}}
-											</SelectValue>
-										</SelectTrigger>
-										<SelectContent>
-											{addresses.map((addr) => (
-												<SelectItem key={addr.id} value={addr.id}>
-													{formatAddressLabel(addr)}
-												</SelectItem>
-											))}
-											<SelectItem value={NEW_ADDRESS_ID}>
-												+ Novo endereço
-											</SelectItem>
-										</SelectContent>
-									</Select>
+										{addresses.map((addr) => (
+											<option key={addr.id} value={addr.id}>
+												{formatAddressLabel(addr)}
+											</option>
+										))}
+										<option value={NEW_ADDRESS_ID}>+ Novo endereço</option>
+									</select>
 								</FieldShell>
 							)}
 						</form.Field>
@@ -431,8 +410,8 @@ export function CheckoutContent({
 						>
 							{(showNew) =>
 								showNew ? (
-									<div className="space-y-4 border border-border p-5">
-										<div className="grid grid-cols-[140px_1fr] gap-4">
+									<div className="space-y-4 border border-gray-20 p-5">
+										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[140px_1fr]">
 											<form.Field name="newAddress.zipCode">
 												{(field) => (
 													<FieldShell
@@ -440,8 +419,8 @@ export function CheckoutContent({
 														htmlFor="zipCode"
 														label="CEP"
 													>
-														<Input
-															className="mt-2 h-11 rounded-none"
+														<input
+															className="emach-input"
 															id="zipCode"
 															onBlur={field.handleBlur}
 															onChange={(e) =>
@@ -462,7 +441,7 @@ export function CheckoutContent({
 												placeholder="Rua 21 de Abril"
 											/>
 										</div>
-										<div className="grid grid-cols-[160px_1fr] gap-4">
+										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[160px_1fr]">
 											<TextField
 												form={form}
 												label="Número"
@@ -483,7 +462,7 @@ export function CheckoutContent({
 											name="newAddress.neighborhood"
 											placeholder="Centro"
 										/>
-										<div className="grid grid-cols-[1fr_120px] gap-4">
+										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
 											<TextField
 												form={form}
 												label="Cidade"
@@ -544,15 +523,16 @@ export function CheckoutContent({
 							</form.Field>
 						</div>
 
-						<div className="flex items-center justify-between pt-4">
-							<Button
-								className="h-12 rounded-none"
-								nativeButton={false}
-								render={<Link href="/cart" />}
-								variant="outline"
+						<div className="flex flex-col-reverse items-stretch gap-3 pt-4 sm:flex-row sm:items-center sm:justify-between">
+							<Link
+								className={emachButtonVariants({
+									size: "lg",
+									variant: "outline",
+								})}
+								href="/cart"
 							>
 								Voltar ao Carrinho
-							</Button>
+							</Link>
 							<form.Subscribe
 								selector={(state) => ({
 									canSubmit: state.canSubmit,
@@ -560,22 +540,23 @@ export function CheckoutContent({
 								})}
 							>
 								{({ canSubmit, isSubmitting }) => (
-									<Button
-										className="h-12 rounded-none"
+									<EmachButton
 										disabled={!canSubmit || isSubmitting}
+										size="lg"
 										type="submit"
+										variant="primary"
 									>
 										{isSubmitting ? "Processando..." : "Confirmar pedido"}
-									</Button>
+									</EmachButton>
 								)}
 							</form.Subscribe>
 						</div>
 					</form>
 				</div>
 
-				<div className="w-[380px]">
-					<div className="sticky top-10 space-y-4 border border-border p-6">
-						<h2 className="font-display font-semibold text-xs uppercase tracking-wider">
+				<div>
+					<div className="space-y-4 border border-gray-20 p-6 lg:sticky lg:top-10">
+						<h2 className="font-display font-semibold text-xs uppercase tracking-[0.14em]">
 							Resumo do Pedido
 						</h2>
 						<Separator />
@@ -597,7 +578,7 @@ export function CheckoutContent({
 								</div>
 								<div className="flex-1 text-sm">
 									<p className="font-medium">{item.name}</p>
-									<p className="text-muted-foreground">Qtd: {item.quantity}</p>
+									<p className="text-gray-60">Qtd: {item.quantity}</p>
 								</div>
 								<span className="font-medium text-sm">
 									{fmtBRL(numericToCents(item.priceAmount) * item.quantity)}
@@ -609,7 +590,7 @@ export function CheckoutContent({
 
 						<div className="space-y-2 text-sm">
 							<div className="flex justify-between">
-								<span className="text-muted-foreground">Subtotal</span>
+								<span className="text-gray-60">Subtotal</span>
 								<span>{fmtBRL(subtotal)}</span>
 							</div>
 							<CouponField
@@ -624,12 +605,12 @@ export function CheckoutContent({
 							/>
 							{discount > 0 ? (
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Desconto</span>
+									<span className="text-gray-60">Desconto</span>
 									<span>−{fmtBRL(discount)}</span>
 								</div>
 							) : null}
 							<div className="space-y-2">
-								<span className="text-muted-foreground text-sm">Frete</span>
+								<span className="text-gray-60 text-sm">Frete</span>
 								<ShippingOptions
 									onRetry={() => setQuoteNonce((n) => n + 1)}
 									onSelect={setSelectedServiceId}
@@ -675,22 +656,16 @@ interface FieldShellProps {
 
 function FieldShell({ children, errors, htmlFor, label }: FieldShellProps) {
 	return (
-		<div>
-			<Label
-				className="font-display text-xs uppercase tracking-wider"
-				htmlFor={htmlFor}
-			>
+		<div className="emach-field">
+			<label className="emach-field__label" htmlFor={htmlFor}>
 				{label}
-			</Label>
+			</label>
 			{children}
 			{errors.map((error, idx) =>
 				error?.message ? (
-					<p
-						className="mt-1 text-destructive text-xs"
-						key={`${error.message}-${idx}`}
-					>
+					<span className="emach-field__error" key={`${error.message}-${idx}`}>
 						{error.message}
-					</p>
+					</span>
 				) : null
 			)}
 		</div>
@@ -733,8 +708,8 @@ function TextField({
 					htmlFor={name}
 					label={label}
 				>
-					<Input
-						className="mt-2 h-11 rounded-none"
+					<input
+						className="emach-input"
 						id={name}
 						onBlur={field.handleBlur}
 						onChange={(e) =>
@@ -786,14 +761,14 @@ function ConsentField({
 				/>
 				<span>
 					{label}
-					{required && <span className="ml-1 text-destructive">*</span>}
+					{required && <span className="ml-1 text-warning">*</span>}
 				</span>
 			</label>
 			{touched &&
 				errors.map((error, idx) =>
 					error?.message ? (
 						<p
-							className="mt-1 text-destructive text-xs"
+							className="mt-1 text-warning text-xs"
 							key={`${error.message}-${idx}`}
 						>
 							{error.message}
