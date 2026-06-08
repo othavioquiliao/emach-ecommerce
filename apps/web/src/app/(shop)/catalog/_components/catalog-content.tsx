@@ -321,7 +321,7 @@ export function CatalogContent({
 							<div className="flex flex-col">
 								{tools.map((t) => (
 									<Link
-										className="grid cursor-pointer grid-cols-[140px_1fr_auto] items-center gap-6 border-gray-10 border-b py-5"
+										className="-mx-3 grid cursor-pointer grid-cols-[140px_1fr_auto] items-center gap-6 border-gray-20 border-b px-3 py-5 transition-colors duration-200 hover:bg-image-bg motion-reduce:transition-none"
 										href={`/product/${t.slug}`}
 										key={t.id}
 									>

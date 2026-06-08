@@ -60,6 +60,11 @@
 	--space-12: 48px;
 	--space-16: 64px;
 	--space-20: 80px;
+
+	/* Motion — card interactions (shared easing/durations) */
+	--card-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+	--card-dur: 240ms;
+	--card-dur-image: 400ms;
 }
 
 /* ============================================================

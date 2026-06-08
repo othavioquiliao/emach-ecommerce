@@ -37,7 +37,7 @@ export function ProductCard({ tool }: ProductCardProps) {
 			className="group block h-full cursor-pointer"
 			href={`/product/${tool.slug}`}
 		>
-			<div className="flex h-full flex-col overflow-hidden rounded-[2px] bg-gray-10 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-240 ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
+			<div className="flex h-full flex-col overflow-hidden rounded-[2px] bg-gray-10 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
 				<div className="relative aspect-square shrink-0 overflow-hidden rounded-[2px] bg-image-bg">
 					<ProductImage
 						alt={tool.name}
@@ -62,12 +62,12 @@ export function ProductCard({ tool }: ProductCardProps) {
 
 					<div
 						aria-hidden="true"
-						className="emach-bg-card-hover pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-240 group-hover:opacity-100"
+						className="emach-bg-card-hover pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:opacity-100"
 					/>
 
 					<div
 						aria-hidden="true"
-						className="absolute right-[14px] bottom-[14px] left-[14px] translate-y-2 font-display font-semibold text-[11px] text-white uppercase tracking-wide opacity-0 transition-all duration-240 group-hover:translate-y-0 group-hover:opacity-100"
+						className="absolute right-[14px] bottom-[14px] left-[14px] translate-y-2 font-display font-semibold text-[11px] text-white uppercase tracking-wide opacity-0 transition-all duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none"
 					>
 						SKU {tool.defaultVariant.sku}
 					</div>
