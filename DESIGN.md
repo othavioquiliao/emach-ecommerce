@@ -352,6 +352,8 @@ Brand tokens live in `:root` **and** are registered in `@theme inline` so Tailwi
 
 **Spacing scale**: `--space-1` 4px → `--space-20` 80px (8px base).
 
+**Motion (interações de card)**: `--card-ease` (`cubic-bezier(0.2,0.6,0.2,1)`), `--card-dur` (240ms — movimento/cor/hover) e `--card-dur-image` (400ms — zoom de imagem). Compartilhados por `ProductCard`, `ProductImage` e `CategoryTile` para uma linguagem de movimento única (consumidos via `duration-[var(--card-dur)] ease-[var(--card-ease)]`).
+
 ### Design-system utility classes (backgrounds that would be ugly as arbitrary values)
 
 Only use these for their named intent — do not inline equivalents:
@@ -366,6 +368,8 @@ Only use these for their named intent — do not inline equivalents:
 | `.emach-bg-category-overlay` | Slight darken used on category tile with image |
 | `.emach-bg-category-fallback` | Dark fallback for category tile without image |
 | `.emach-bg-card-hover` | Bottom gradient that fades in on product card hover |
+| `.emach-bg-tile-spot` | Spotlight radial de estúdio do CategoryTile (centro claro, bordas escuras) |
+| `.emach-bg-tile-foot` | Degradê escuro na base do CategoryTile (legibilidade do nome) |
 | `.emach-bg-placeholder` / `.emach-bg-placeholder-shadow` | Radial + shadow for product icon placeholder |
 
 ### Radius philosophy (final)
@@ -385,16 +389,20 @@ All form controls use `.emach-*` CSS classes defined in globals.css. Do NOT use 
 ### Ticker marquee
 Red banner at top of page (above header) in layout.tsx. Classes `.emach-ticker` / `.emach-marquee` with `@keyframes marquee` 48s loop. Component: `src/components/ticker.tsx`.
 
-### ProductCard quick-add
-Red button (`var(--emach-red)`) appears top-right corner on hover. Slides in from top (`translateY(-8px)` → `0`). Icon: lucide `Plus`. Text "+" buttons system-wide follow same rule.
+### ProductCard (dark) + quick-add
+Card de produto **escuro** e flat (sem box-shadow). Borda hairline branca (`border-white/14`, acende para `white/30` no hover); o card sobe levemente (`-translate-y-1`). **Surface contextual** via prop `surface`: `dark` (`bg-near-black`, #181818 — default) sobre fundo claro (home/novidades, catálogo); `elevated` (#242424) sobre fundo escuro — `PromoHighlight` passa `surface="elevated"` via `ProductGrid`. A área de imagem mantém o tile claro (`bg-image-bg`): a foto recortada é a âncora de luz e dá zoom `1.04` no hover. Texto branco — categoria via `SectionLabel tone="light"`, nome/preço brancos, riscado `white/40`. Badge `-15%` vermelho no topo-direito. O card é um **stretched link** (`<Link>` absoluto `inset-0`, nome em `sr-only`) — permite ter o quick-add como irmão clicável. Componente: `src/components/product-card.tsx`.
 
-### CategoryTile hover
-- Red accent bar animates from `width: 0` to `width: 100%` at bottom of tile
-- Arrow icon (`ArrowRight`) turns red on hover; text "Explorar" stays white (not red)
-- Tile background subtly scales up `1.05` on hover
+**Selos de voltagem** (prop `voltages`): no canto inferior-esquerdo da imagem (`bg-near-black/85`, Barlow Condensed bold, cantos 2px) listam **todas** as voltagens das variantes (ex.: `127V · 220V · Bivolt`). Produtos sem variante (manuais, discos) **não exibem selo**, e o corpo do card (categoria · nome · preço) permanece idêntico → **mesma altura em todos**, sem espaço vazio. Substituem o antigo "Mais opções de voltagem". No hover, o quick-add desliza por cima dos selos (estado normal mostra os selos; hover mostra a ação).
+
+**Variantes hoje = voltagem.** `tool_variant` tem uma única dimensão (`voltage`); não há variação por cor/tamanho (cor existe só como *atributo descritivo*, não variante vendável). O `ToolListItem` (catalog.ts, owned-by-dashboard) só traz a voltagem da variante default + `hasOtherVariants`, então as voltagens dos selos são agregadas por um helper **storefront-owned** — `src/lib/variant-voltages.ts > getVoltagesByTool`, lido nas pages `(shop)/page.tsx` e `catalog/page.tsx` e passado como `voltagesByTool` por `ProductGrid`/`ProductCarousel`/`CatalogContent`/`PromoHighlight`. **Não editar `catalog.ts` pra isso** (dashboard-owned). Suportar variantes genéricas (cor/tamanho) seria um épico de schema no dashboard — fora de escopo.
+
+**Quick-add** (`src/components/quick-add-button.tsx`, client): botão vermelho full-width que desliza de baixo da imagem no hover (`translateY(100%)→0`), ícone lucide `Plus`. Fica acima do stretched link (`z-[3]`) e dá `preventDefault`+`stopPropagation` — adiciona o `defaultVariant` ao carrinho (`useCart`) com toast, sem navegar. Só renderiza quando `inStock`. Hoje desktop-only (revela no `:hover`); no touch o card navega ao PDP.
+
+### CategoryTile (dark, home)
+Tile **escuro cinematográfico** (`.emach-bg-tile-spot` — spotlight radial de estúdio), aspect `4/5`, borda hairline branca. A ferramenta (PNG recortado, fundo transparente) flutua centralizada com **cor plena** (`object-contain`), **sem overlay** por cima — o degradê escuro (`.emach-bg-tile-foot`) fica só na base, pra legibilidade do nome. Número-índice **marca d'água** monumental (`text-[220px]`, outline branco → vermelho no destaque) sangrando o canto inferior direito. Régua vermelha (fade-in) + seta `ArrowRight` (desloca) reagem no destaque; "Explorar" fica branco. **Auto-cycle** (`category-grid.tsx`): o destaque percorre os tiles automaticamente (~2,6s) pra revelar a interação — pausa quando o mouse entra no grid (aí o `:hover` real assume) e desliga em `prefers-reduced-motion`. O estado de destaque (`data-active`) espelha o `:hover` via `group-data-[active=true]:`.
 
 ### ProductImage
-Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrench`, `medicao→Ruler`, `seguranca→Shield`, `acessorios→Disc3`. Radial gradient background. Component: `src/components/product-image.tsx`.
+Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrench`, `medicao→Ruler`, `seguranca→Shield`, `acessorios→Disc3`. Radial gradient background. Zoom `group-hover:scale-[1.04]` (zoom-**in**) quando `zoom` ativo. Component: `src/components/product-image.tsx`.
 
 ### Cart state
 Client-side cart via React Context + localStorage (`emach:cart`). Provider in `src/lib/cart-context.tsx`. Store helpers in `src/lib/cart-store.ts`. Cart count badge in SiteHeader updates reactively.

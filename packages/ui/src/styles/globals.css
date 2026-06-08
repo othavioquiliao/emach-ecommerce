@@ -60,6 +60,11 @@
 	--space-12: 48px;
 	--space-16: 64px;
 	--space-20: 80px;
+
+	/* Motion — card interactions (shared easing/durations) */
+	--card-ease: cubic-bezier(0.2, 0.6, 0.2, 1);
+	--card-dur: 240ms;
+	--card-dur-image: 400ms;
 }
 
 /* ============================================================
@@ -456,6 +461,25 @@
 }
 .emach-bg-card-hover {
 	background: linear-gradient(to top, rgba(0, 0, 0, 0.4), transparent 52%);
+}
+/* Spotlight de estúdio do category tile: centro iluminado, bordas escuras.
+   A ferramenta (PNG recortado) recebe a "luz" sem ser escurecida por overlay. */
+.emach-bg-tile-spot {
+	background: radial-gradient(
+		ellipse 72% 58% at 50% 36%,
+		#343434 0%,
+		#1d1d1d 55%,
+		#121212 100%
+	);
+}
+/* Degradê escuro ancorado na base do tile — só pro texto, não cobre a ferramenta. */
+.emach-bg-tile-foot {
+	background: linear-gradient(
+		to top,
+		rgba(0, 0, 0, 0.92),
+		rgba(0, 0, 0, 0.45) 55%,
+		transparent
+	);
 }
 .emach-bg-stats {
 	background: linear-gradient(135deg, var(--cinema-2), var(--black));

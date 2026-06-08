@@ -1,4 +1,5 @@
 import type { PromotionWithTools } from "@emach/db/queries/catalog";
+import type { Voltage } from "@emach/db/schema/tools";
 import Link from "next/link";
 import { emachButtonVariants } from "@/components/emach-button";
 import { PageContainer } from "@/components/page-container";
@@ -8,9 +9,13 @@ import { SectionLabel } from "@/components/section-label";
 
 interface PromoHighlightProps {
 	promotion: PromotionWithTools;
+	voltagesByTool?: Map<string, Voltage[]>;
 }
 
-export function PromoHighlight({ promotion }: PromoHighlightProps) {
+export function PromoHighlight({
+	promotion,
+	voltagesByTool,
+}: PromoHighlightProps) {
 	return (
 		<section className="bg-black text-white">
 			<PageContainer className="px-14 py-18">
@@ -27,7 +32,11 @@ export function PromoHighlight({ promotion }: PromoHighlightProps) {
 				</div>
 
 				<div className="pt-10">
-					<ProductGrid tools={promotion.tools} />
+					<ProductGrid
+						surface="elevated"
+						tools={promotion.tools}
+						voltagesByTool={voltagesByTool}
+					/>
 				</div>
 
 				<div className="mt-10 flex justify-center">

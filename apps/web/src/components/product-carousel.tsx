@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolListItem } from "@emach/db/queries/catalog";
+import type { Voltage } from "@emach/db/schema/tools";
 import {
 	Carousel,
 	CarouselContent,
@@ -22,20 +23,25 @@ interface ProductCarouselProps {
 	};
 	title: string;
 	tools: ToolListItem[];
+	voltagesByTool?: Map<string, Voltage[]>;
 }
 
 // Acima deste limite vira carrossel; até ele, grid estático com stagger.
 const CAROUSEL_THRESHOLD = 4;
 
 // Setas pretas de cantos retos (DESIGN.md: border-radius 0 em interativos).
+// No hover o fundo continua preto e o ícone acende em vermelho (vermelho
+// sobre preto = assinatura Ferrari). hover:bg-foreground e hover:text-emach-red
+// neutralizam o hover:bg-muted/hover:text-foreground do variant outline.
 const ARROW_CLASS =
-	"static size-10 translate-y-0 rounded-none border-0 bg-foreground text-background hover:bg-foreground/85 disabled:opacity-30";
+	"static size-10 translate-y-0 rounded-none border-0 bg-foreground text-background transition-colors hover:bg-foreground hover:text-emach-red disabled:opacity-30";
 
 export function ProductCarousel({
 	tools,
 	label,
 	title,
 	link,
+	voltagesByTool,
 }: ProductCarouselProps) {
 	const isCarousel = tools.length > CAROUSEL_THRESHOLD;
 
@@ -43,7 +49,7 @@ export function ProductCarousel({
 		return (
 			<>
 				<SectionHeader label={label} link={link} title={title} />
-				<ProductGrid tools={tools} />
+				<ProductGrid tools={tools} voltagesByTool={voltagesByTool} />
 			</>
 		);
 	}
@@ -61,13 +67,14 @@ export function ProductCarousel({
 				link={link}
 				title={title}
 			/>
-			<CarouselContent className="-ml-5">
+			{/* pt-2: folga pro hover-lift do card não ser cortado pelo overflow-hidden do track */}
+			<CarouselContent className="-ml-5 pt-2">
 				{tools.map((tool) => (
 					<CarouselItem
 						className="pl-5 sm:basis-1/2 lg:basis-1/4"
 						key={tool.id}
 					>
-						<ProductCard tool={tool} />
+						<ProductCard tool={tool} voltages={voltagesByTool?.get(tool.id)} />
 					</CarouselItem>
 				))}
 			</CarouselContent>

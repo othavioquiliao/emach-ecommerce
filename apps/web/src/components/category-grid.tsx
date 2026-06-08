@@ -1,6 +1,7 @@
 "use client";
 
 import { motion, useReducedMotion, type Variants } from "framer-motion";
+import { useEffect, useState } from "react";
 import { CategoryTile } from "@/components/category-tile";
 
 interface CategoryGridCategory {
@@ -16,9 +17,24 @@ interface CategoryGridProps {
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
+// Intervalo do auto-cycle do destaque (revela a interação sem o usuário agir).
+const CYCLE_MS = 2600;
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
 	const reduceMotion = useReducedMotion() ?? false;
+	const [activeIndex, setActiveIndex] = useState(0);
+	const [paused, setPaused] = useState(false);
+
+	// Auto-cycle: avança o destaque enquanto não pausado nem reduced-motion.
+	useEffect(() => {
+		if (reduceMotion || paused || categories.length < 2) {
+			return;
+		}
+		const id = setInterval(() => {
+			setActiveIndex((i) => (i + 1) % categories.length);
+		}, CYCLE_MS);
+		return () => clearInterval(id);
+	}, [reduceMotion, paused, categories.length]);
 
 	const containerVariants: Variants = {
 		hidden: {},
@@ -45,13 +61,19 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
 		<motion.div
 			className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
 			initial="hidden"
+			onMouseEnter={() => setPaused(true)}
+			onMouseLeave={() => setPaused(false)}
 			variants={containerVariants}
 			viewport={{ once: true, amount: 0.2 }}
 			whileInView="visible"
 		>
 			{categories.map((cat, idx) => (
 				<motion.div key={cat.id} variants={itemVariants}>
-					<CategoryTile category={cat} index={idx} />
+					<CategoryTile
+						active={!(reduceMotion || paused) && idx === activeIndex}
+						category={cat}
+						index={idx}
+					/>
 				</motion.div>
 			))}
 		</motion.div>
