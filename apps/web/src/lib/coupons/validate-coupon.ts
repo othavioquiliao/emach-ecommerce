@@ -104,6 +104,9 @@ export async function validateCoupon(
 		return { ok: false, error: "Cupom não cobre nenhum item do carrinho" };
 	}
 
+	// Decisão de produto: o pedido mínimo é avaliado contra o subtotal ELEGÍVEL
+	// (itens no escopo e sem auto-promo), não o total do carrinho — mesma base do
+	// desconto. O cliente precisa atingir o mínimo nos itens que o cupom cobre.
 	if (promo.minOrderAmount !== null) {
 		const minCents = numericToCents(promo.minOrderAmount);
 		if (eligibleSubtotalCents < minCents) {

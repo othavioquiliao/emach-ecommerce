@@ -156,6 +156,28 @@ describe("validateCoupon", () => {
 		});
 	});
 
+	it("pedido mínimo usa o subtotal elegível, não o total do carrinho", async () => {
+		await withRollback(async (tx) => {
+			const inTool = await seedTool(tx);
+			const outTool = await seedTool(tx);
+			const couponId = await seedPromotion(tx, "MINESCOPO", {
+				appliesToAll: false,
+				minOrderAmount: "200.00",
+			});
+			await tx
+				.insert(promotionTool)
+				.values({ promotionId: couponId, toolId: inTool });
+			// Carrinho R$ 450 (in R$ 150 + out R$ 300), mas só R$ 150 elegível < R$ 200.
+			// Se o mínimo olhasse o carrinho todo (450 ≥ 200), passaria — não deve.
+			const result = await validateCoupon(tx, "MINESCOPO", [
+				line(inTool, 15_000),
+				line(outTool, 30_000),
+			]);
+			expect(result.ok).toBe(false);
+			expect((result as { error: string }).error).toMatch(/Pedido mínimo/);
+		});
+	});
+
 	it("exclui itens com auto-promo ativa da base", async () => {
 		await withRollback(async (tx) => {
 			const toolId = await seedTool(tx);
