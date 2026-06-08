@@ -26,7 +26,7 @@ export function OrderRefundBlock({
 		const date = refund.resolvedAt ? DATE_FMT.format(refund.resolvedAt) : "—";
 		return (
 			<Row
-				bg="bg-[#fafafa]"
+				bg="bg-gray-10"
 				label="Reembolso"
 				text={
 					<>
@@ -54,7 +54,9 @@ export function OrderRefundBlock({
 		refund.status === "approved"
 			? "Aprovada · estorno em processamento"
 			: "Em andamento";
-	return <Row bg="bg-white" label="Devolução" text={text} variant={variant} />;
+	return (
+		<Row bg="bg-gray-10" label="Devolução" text={text} variant={variant} />
+	);
 }
 
 function Row({

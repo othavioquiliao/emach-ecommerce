@@ -32,7 +32,7 @@ export function VerifyEmailContent() {
 	}, [token, router]);
 
 	return (
-		<main className="flex min-h-svh items-center justify-center bg-white px-6 py-20">
+		<main className="flex min-h-svh items-center justify-center bg-gray-10 px-6 py-20">
 			<div className="w-full max-w-[400px] text-center">
 				{status === "loading" && (
 					<>

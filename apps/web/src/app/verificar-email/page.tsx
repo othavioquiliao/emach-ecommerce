@@ -3,7 +3,7 @@ import { VerifyEmailContent } from "./_components/verify-email-content";
 
 function VerifyEmailFallback() {
 	return (
-		<main className="flex min-h-svh items-center justify-center bg-white px-6 py-20">
+		<main className="flex min-h-svh items-center justify-center bg-gray-10 px-6 py-20">
 			<div className="w-full max-w-[400px] text-center">
 				<h1 className="font-display font-medium text-[28px] text-near-black">
 					Verificando…

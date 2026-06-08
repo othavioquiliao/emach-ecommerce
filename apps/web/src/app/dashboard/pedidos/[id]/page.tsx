@@ -71,7 +71,7 @@ export default async function OrderDetailPage({ params }: PageProps) {
 			/>
 			<OrderTracking history={history} order={order} />
 			{refund ? (
-				<div className="mt-6 border border-border bg-white">
+				<div className="mt-6 border border-border bg-gray-10">
 					<div className="flex items-center gap-x-3.5 bg-gray-10 px-[18px] py-3">
 						<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
 							Devolução

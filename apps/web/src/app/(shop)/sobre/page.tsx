@@ -216,7 +216,7 @@ export default async function AboutPage() {
 		<>
 			<SiteHeader />
 
-			<main className="bg-white">
+			<main className="bg-gray-10">
 				<section className="relative min-h-[calc(100svh-56px)] overflow-hidden bg-black text-white">
 					<div
 						aria-hidden="true"
@@ -246,7 +246,7 @@ export default async function AboutPage() {
 									<article
 										className={
 											pillar.tone === "light"
-												? "bg-white p-5 text-near-black"
+												? "bg-gray-10 p-5 text-near-black"
 												: "border border-white/20 bg-white/[0.035] p-5 text-white"
 										}
 										key={pillar.id}
@@ -358,7 +358,7 @@ function BranchCard({ branch }: { branch: BranchCardData }) {
 	const isRed = branch.accent === "red";
 
 	return (
-		<article className="grid overflow-hidden border border-gray-20 bg-white lg:grid-rows-[minmax(210px,240px)_auto]">
+		<article className="grid overflow-hidden border border-gray-20 bg-gray-10 lg:grid-rows-[minmax(210px,240px)_auto]">
 			<div className="relative min-h-55 overflow-hidden bg-gray-20">
 				{branch.mapEmbedUrl ? (
 					<iframe

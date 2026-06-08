@@ -183,8 +183,8 @@ export default function LoginPage() {
 				</div>
 			</div>
 
-			{/* Right — white form panel */}
-			<div className="flex items-center justify-center bg-white px-[60px] py-20">
+			{/* Right — form panel (gray-10, padrão de superfície do sistema) */}
+			<div className="flex items-center justify-center bg-gray-10 px-[60px] py-20">
 				<div className="w-full max-w-[400px]">
 					<Tabs
 						className="mb-8 gap-0"

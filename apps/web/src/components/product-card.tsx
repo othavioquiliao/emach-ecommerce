@@ -37,7 +37,7 @@ export function ProductCard({ tool }: ProductCardProps) {
 			className="group block h-full cursor-pointer"
 			href={`/product/${tool.slug}`}
 		>
-			<div className="flex h-full flex-col overflow-hidden rounded-[2px] bg-white shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-240 ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
+			<div className="flex h-full flex-col overflow-hidden rounded-[2px] bg-gray-10 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-240 ease-[cubic-bezier(.2,.6,.2,1)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)]">
 				<div className="relative aspect-square shrink-0 overflow-hidden rounded-[2px] bg-image-bg">
 					<ProductImage
 						alt={tool.name}

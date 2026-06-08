@@ -66,7 +66,7 @@ export function RefundCard({ refund }: { refund: RefundListItem }) {
 	return (
 		<article
 			className={cn(
-				"mb-3.5 border border-border bg-white",
+				"mb-3.5 border border-border bg-gray-10",
 				isRejected && "opacity-85"
 			)}
 		>
@@ -109,7 +109,7 @@ export function RefundCard({ refund }: { refund: RefundListItem }) {
 				))}
 			</div>
 
-			<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-border border-t bg-white px-[18px] py-3">
+			<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-border border-t bg-gray-10 px-[18px] py-3">
 				<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
 					Motivo
 				</span>
@@ -127,14 +127,14 @@ export function RefundCard({ refund }: { refund: RefundListItem }) {
 				variant="card"
 			/>
 
-			<div className="flex items-center justify-between border-border border-t bg-[#fafafa] px-[18px] py-3.5">
+			<div className="flex items-center justify-between border-border border-t bg-gray-10 px-[18px] py-3.5">
 				<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
 					{totalLabel}
 				</span>
 				<span className={totalClass}>{fmtNumericBRL(refund.amount)}</span>
 			</div>
 
-			<footer className="flex justify-end gap-2 border-border border-t bg-white px-[18px] py-2.5">
+			<footer className="flex justify-end gap-2 border-border border-t bg-gray-10 px-[18px] py-2.5">
 				<Link
 					className={emachButtonVariants({ variant: "outline", size: "sm" })}
 					href={detailsHref}
