@@ -1,6 +1,8 @@
 import { db } from "@emach/db";
-import type { ToolListItem } from "@emach/db/queries/catalog";
-import { getActivePromotions, getRecentTools } from "@emach/db/queries/catalog";
+import {
+	getFeaturedPromotion,
+	getRecentTools,
+} from "@emach/db/queries/catalog";
 import { category } from "@emach/db/schema/categories";
 import { cn } from "@emach/ui/lib/utils";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
@@ -9,6 +11,7 @@ import { EmachButton } from "@/components/emach-button";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { PageContainer } from "@/components/page-container";
 import { ProductCarousel } from "@/components/product-carousel";
+import { PromoHighlight } from "@/components/promo-highlight";
 import { SectionHeader } from "@/components/section-header";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
@@ -102,31 +105,10 @@ async function getCategoryImages(
 	return map;
 }
 
-function flattenPromoTools(
-	promotions: Awaited<ReturnType<typeof getActivePromotions>>,
-	limit: number
-): ToolListItem[] {
-	const seen = new Map<string, ToolListItem>();
-	for (const promo of promotions) {
-		for (const tool of promo.tools) {
-			if (!seen.has(tool.id)) {
-				seen.set(tool.id, tool);
-			}
-			if (seen.size >= limit) {
-				break;
-			}
-		}
-		if (seen.size >= limit) {
-			break;
-		}
-	}
-	return Array.from(seen.values());
-}
-
 export default async function HomePage() {
-	const [rootCategories, activePromotions, recentTools] = await Promise.all([
+	const [rootCategories, featuredPromotion, recentTools] = await Promise.all([
 		getRootCategories(),
-		getActivePromotions(db, 8),
+		getFeaturedPromotion(db),
 		getRecentTools(db, 8),
 	]);
 
@@ -138,8 +120,6 @@ export default async function HomePage() {
 		imageUrl: categoryImages.get(c.slug) ?? null,
 	}));
 
-	const promoTools = flattenPromoTools(activePromotions, 8);
-
 	return (
 		<>
 			<SiteHeader overlay />
@@ -147,34 +127,36 @@ export default async function HomePage() {
 			<main>
 				<HeroCarousel />
 
-				{promoTools.length > 0 && (
+				{rootCategories.length > 0 && (
 					<section className="bg-gray-10">
 						<PageContainer className="px-14 py-18">
-							<ProductCarousel
-								label="02 · Ofertas"
+							<SectionHeader
+								label="Categorias"
 								link={{
-									href: "/catalog?promo=1",
+									href: "/catalog",
 									label: "Ver todas",
 									variant: "arrow",
 								}}
-								title="Promoções"
-								tools={promoTools}
+								title="Explorar por categoria"
 							/>
+							<CategoryGrid categories={rootCategoriesWithImages} />
 						</PageContainer>
 					</section>
 				)}
+
+				{featuredPromotion && <PromoHighlight promotion={featuredPromotion} />}
 
 				{recentTools.length > 0 && (
 					<section className="bg-gray-10 px-14 py-18">
 						<PageContainer>
 							<ProductCarousel
-								label="03 · Recém chegadas"
+								label="Novidades"
 								link={{
 									href: "/catalog?sort=newest",
 									label: "Ver todas",
 									variant: "arrow",
 								}}
-								title="Novidades"
+								title="Recém-chegadas"
 								tools={recentTools}
 							/>
 						</PageContainer>
@@ -226,22 +208,6 @@ export default async function HomePage() {
 						</div>
 					</PageContainer>
 				</section>
-				{rootCategories.length > 0 && (
-					<section className="bg-gray-10">
-						<PageContainer className="px-14 py-18">
-							<SectionHeader
-								label="01 · Categorias"
-								link={{
-									href: "/catalog",
-									label: "Ver todas",
-									variant: "arrow",
-								}}
-								title="Explorar por categoria"
-							/>
-							<CategoryGrid categories={rootCategoriesWithImages} />
-						</PageContainer>
-					</section>
-				)}
 			</main>
 		</>
 	);
