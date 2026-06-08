@@ -67,7 +67,8 @@ export function ProductCarousel({
 				link={link}
 				title={title}
 			/>
-			<CarouselContent className="-ml-5">
+			{/* pt-2: folga pro hover-lift do card não ser cortado pelo overflow-hidden do track */}
+			<CarouselContent className="-ml-5 pt-2">
 				{tools.map((tool) => (
 					<CarouselItem
 						className="pl-5 sm:basis-1/2 lg:basis-1/4"
