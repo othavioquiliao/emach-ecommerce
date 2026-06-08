@@ -28,8 +28,11 @@ interface ProductCarouselProps {
 const CAROUSEL_THRESHOLD = 4;
 
 // Setas pretas de cantos retos (DESIGN.md: border-radius 0 em interativos).
+// No hover o fundo continua preto e o ícone acende em vermelho (vermelho
+// sobre preto = assinatura Ferrari). hover:bg-foreground e hover:text-emach-red
+// neutralizam o hover:bg-muted/hover:text-foreground do variant outline.
 const ARROW_CLASS =
-	"static size-10 translate-y-0 rounded-none border-0 bg-foreground text-background hover:bg-foreground/85 disabled:opacity-30";
+	"static size-10 translate-y-0 rounded-none border-0 bg-foreground text-background transition-colors hover:bg-foreground hover:text-emach-red disabled:opacity-30";
 
 export function ProductCarousel({
 	tools,

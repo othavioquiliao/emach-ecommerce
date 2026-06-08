@@ -151,11 +151,6 @@ export default async function HomePage() {
 						<PageContainer>
 							<ProductCarousel
 								label="Novidades"
-								link={{
-									href: "/catalog?sort=newest",
-									label: "Ver todas",
-									variant: "arrow",
-								}}
 								title="Recém-chegadas"
 								tools={recentTools}
 							/>
