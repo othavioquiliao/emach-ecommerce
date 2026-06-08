@@ -7,33 +7,33 @@ export type SortKey =
 export type VoltageKey = "127V" | "220V" | "Bivolt" | "380V";
 
 export interface FilterState {
-	currentCategorySlug: string | null;
 	currentCategoryName: string | null;
+	currentCategorySlug: string | null;
+	onlyPromo: boolean;
+	priceMax: number | null;
+	priceMin: number | null;
 	query: string;
 	sort: SortKey;
 	voltages: VoltageKey[];
-	priceMin: number | null;
-	priceMax: number | null;
-	onlyPromo: boolean;
 }
 
 export interface FilterUpdate {
 	cat?: string | null;
+	page?: number | null;
+	pmax?: number | null;
+	pmin?: number | null;
+	promo?: boolean | null;
 	q?: string | null;
 	sort?: SortKey | null;
 	voltage?: VoltageKey[] | null;
-	pmin?: number | null;
-	pmax?: number | null;
-	promo?: boolean | null;
-	page?: number | null;
 }
 
 export interface ActiveFilter {
 	id: string;
 	/** Rótulo do tipo do filtro (vazio quando o valor já é autoexplicativo). */
 	kind: string;
-	value: string;
 	remove: FilterUpdate;
+	value: string;
 }
 
 export function buildHref(current: FilterState, updates: FilterUpdate): string {
@@ -108,8 +108,8 @@ export function deriveActiveFilters(state: FilterState): ActiveFilter[] {
 	}
 
 	if (state.priceMin != null || state.priceMax != null) {
-		const min = state.priceMin != null ? `R$ ${state.priceMin}` : "—";
-		const max = state.priceMax != null ? `R$ ${state.priceMax}` : "—";
+		const min = state.priceMin == null ? "—" : `R$ ${state.priceMin}`;
+		const max = state.priceMax == null ? "—" : `R$ ${state.priceMax}`;
 		out.push({
 			id: "price",
 			kind: "Preço",
