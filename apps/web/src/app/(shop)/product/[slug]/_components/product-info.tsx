@@ -279,14 +279,20 @@ export function ProductInfo({
 				)}
 			</button>
 
-			<FreightCalculator subtotal={numericToCents(finalAmount) * qty} />
+			<FreightCalculator
+				quantity={qty}
+				subtotal={numericToCents(finalAmount) * qty}
+				toolId={tool.id}
+			/>
 
 			<div className="flex h-16 justify-between rounded-sm bg-gray-10 px-5">
 				<div className="flex items-center gap-2">
 					<Truck size={16} />
 					<div>
-						<div className="font-semibold text-sm">Frete grátis</div>
-						<div className="text-gray-60 text-xs">acima de R$ 299</div>
+						<div className="font-semibold text-sm">
+							Frete para todo o Brasil
+						</div>
+						<div className="text-gray-60 text-xs">calculado pelo seu CEP</div>
 					</div>
 				</div>
 				<div className="flex items-center gap-2">

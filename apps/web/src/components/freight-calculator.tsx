@@ -3,20 +3,19 @@
 import { cn } from "@emach/ui/lib/utils";
 import { Truck } from "lucide-react";
 import { useState } from "react";
+import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
 import { EmachButton } from "@/components/emach-button";
 import { fmtBRL } from "@/lib/format";
-
-const FREE_SHIPPING_MIN = 29_900;
+import type { ShippingOption } from "@/lib/superfrete/types";
 
 interface FreightCalculatorProps {
 	className?: string;
+	/** Quantidade selecionada na página de produto. */
+	quantity: number;
+	/** Subtotal (centavos) — valor declarado p/ a política de seguro. */
 	subtotal: number;
-}
-
-interface FreightOption {
-	eta: string;
-	label: string;
-	price: number;
+	/** Tool-pai cujo frete será cotado. */
+	toolId: string;
 }
 
 function maskCep(raw: string): string {
@@ -27,51 +26,54 @@ function maskCep(raw: string): string {
 	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
-function calculate(cep: string, subtotal: number): FreightOption[] {
-	const firstDigit = Number(cep[0]);
-	const isNearby = firstDigit <= 4;
-	const standardPrice = isNearby ? 2990 : 4990;
-	const expressPrice = isNearby ? 4990 : 7990;
-	const qualifiesForFree = subtotal >= FREE_SHIPPING_MIN;
-
-	return [
-		{
-			label: "Padrão",
-			eta: isNearby ? "5–8 dias úteis" : "8–12 dias úteis",
-			price: qualifiesForFree ? 0 : standardPrice,
-		},
-		{
-			label: "Expresso",
-			eta: isNearby ? "2–3 dias úteis" : "4–5 dias úteis",
-			price: expressPrice,
-		},
-	];
-}
+type FreightState =
+	| { status: "idle" }
+	| { status: "loading" }
+	| { status: "error"; message: string }
+	| { status: "negotiate" }
+	| { status: "ready"; options: ShippingOption[] };
 
 export function FreightCalculator({
+	toolId,
+	quantity,
 	subtotal,
 	className,
 }: FreightCalculatorProps) {
 	const [cep, setCep] = useState("");
-	const [options, setOptions] = useState<FreightOption[] | null>(null);
-	const [error, setError] = useState<string | null>(null);
-	const [loading, setLoading] = useState(false);
+	const [state, setState] = useState<FreightState>({ status: "idle" });
 
 	const isValidCep = cep.replace(/\D/g, "").length === 8;
 
-	function handleCalculate() {
+	async function handleCalculate() {
 		if (!isValidCep) {
-			setError("Informe um CEP válido");
-			setOptions(null);
+			setState({ status: "error", message: "Informe um CEP válido" });
 			return;
 		}
-		setError(null);
-		setLoading(true);
-		setOptions(null);
-		window.setTimeout(() => {
-			setOptions(calculate(cep, subtotal));
-			setLoading(false);
-		}, 450);
+		setState({ status: "loading" });
+		const result = await quoteShippingAction({
+			destinationCep: cep.replace(/\D/g, ""),
+			items: [{ toolId, quantity }],
+			declaredValueCents: subtotal,
+		});
+		if (!result.ok) {
+			setState({
+				status: "error",
+				message: "Não foi possível calcular o frete",
+			});
+			return;
+		}
+		if (result.negotiate) {
+			setState({ status: "negotiate" });
+			return;
+		}
+		if (result.options.length === 0) {
+			setState({
+				status: "error",
+				message: "Nenhuma opção de frete para este CEP",
+			});
+			return;
+		}
+		setState({ status: "ready", options: result.options });
 	}
 
 	function handleKeyDown(event: React.KeyboardEvent<HTMLInputElement>) {
@@ -96,7 +98,9 @@ export function FreightCalculator({
 					maxLength={9}
 					onChange={(event) => {
 						setCep(maskCep(event.target.value));
-						setError(null);
+						if (state.status === "error") {
+							setState({ status: "idle" });
+						}
 					}}
 					onKeyDown={handleKeyDown}
 					placeholder="00000-000"
@@ -104,38 +108,50 @@ export function FreightCalculator({
 					value={cep}
 				/>
 				<EmachButton
-					disabled={loading || !isValidCep}
+					disabled={state.status === "loading" || !isValidCep}
 					onClick={handleCalculate}
 					size="md"
 					variant="outline"
 				>
-					{loading ? "Calculando…" : "Calcular"}
+					{state.status === "loading" ? "Calculando…" : "Calcular"}
 				</EmachButton>
 			</div>
 
-			{error && (
+			{state.status === "error" && (
 				<div className="text-[12px] text-destructive" role="alert">
-					{error}
+					{state.message}
 				</div>
 			)}
 
-			{options && (
+			{state.status === "negotiate" && (
+				<div className="text-[12px] text-gray-60">
+					Item de transporte especial — o frete será combinado diretamente.
+					Finalize a compra para entrarmos em contato.
+				</div>
+			)}
+
+			{state.status === "ready" && (
 				<ul className="divide-y divide-border border-border border-y">
-					{options.map((option) => (
+					{state.options.map((option) => (
 						<li
 							className="flex items-center justify-between py-2.5"
-							key={option.label}
+							key={option.serviceId}
 						>
 							<div>
-								<div className="font-semibold text-[13px]">{option.label}</div>
-								<div className="text-[12px] text-gray-60">{option.eta}</div>
+								<div className="font-semibold text-[13px]">
+									{option.name}
+									{option.company ? (
+										<span className="text-gray-60"> · {option.company}</span>
+									) : null}
+								</div>
+								<div className="text-[12px] text-gray-60">
+									{option.deliveryDays > 0
+										? `${option.deliveryDays} dia(s) úteis`
+										: "Prazo a confirmar"}
+								</div>
 							</div>
 							<div className="font-semibold text-[14px] tabular-nums">
-								{option.price === 0 ? (
-									<span className="text-success">Grátis</span>
-								) : (
-									fmtBRL(option.price)
-								)}
+								{fmtBRL(option.priceCents)}
 							</div>
 						</li>
 					))}

@@ -12,7 +12,6 @@ import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
-import { FreeShippingProgress } from "@/components/free-shipping-progress";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
 
@@ -81,8 +80,6 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 					</div>
 				) : (
 					<>
-						<FreeShippingProgress className="px-5 py-3.5" subtotal={subtotal} />
-
 						<div className="flex-1 overflow-y-auto px-5">
 							{items.map((item) => (
 								<CartItemRow
