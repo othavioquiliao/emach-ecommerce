@@ -19,10 +19,11 @@ const inputSchema = z.object({
 			})
 		)
 		.min(1, "Carrinho vazio"),
+	declaredValueCents: z.number().int().nonnegative().optional(),
 });
 
 export type QuoteShippingResult =
-	| { ok: true; options: ShippingOption[] }
+	| { ok: true; options: ShippingOption[]; negotiate: boolean }
 	| { ok: false; error: string };
 
 export async function quoteShippingAction(
@@ -33,8 +34,8 @@ export async function quoteShippingAction(
 		return { ok: false, error: "Dados inválidos para cotação" };
 	}
 	try {
-		const options = await quoteShipping(parsed.data);
-		return { ok: true, options };
+		const { options, negotiate } = await quoteShipping(parsed.data);
+		return { ok: true, options, negotiate };
 	} catch (err) {
 		log.error({
 			action: "quote_shipping_failed",

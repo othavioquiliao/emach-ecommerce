@@ -321,12 +321,14 @@ export async function assertShippingQuoted(params: {
 	shippingCents: number;
 	destinationCep: string;
 	items: Array<{ toolId: string; quantity: number }>;
+	declaredValueCents?: number;
 }): Promise<void> {
-	let options: Awaited<ReturnType<typeof quoteShipping>>;
+	let quote: Awaited<ReturnType<typeof quoteShipping>>;
 	try {
-		options = await quoteShipping({
+		quote = await quoteShipping({
 			destinationCep: params.destinationCep,
 			items: params.items,
+			declaredValueCents: params.declaredValueCents,
 		});
 	} catch (err) {
 		// Trade-off consciente (decisão de produto): indisponibilidade da API de
@@ -342,7 +344,11 @@ export async function assertShippingQuoted(params: {
 		});
 		return;
 	}
-	const ok = options.some(
+	// Item pesado sem valor fixo → frete a combinar; não há opção válida a casar.
+	if (quote.negotiate) {
+		throw new OrderError("Frete a combinar — entre em contato para concluir");
+	}
+	const ok = quote.options.some(
 		(o) =>
 			Math.abs(o.priceCents - params.shippingCents) <= PRICE_TOLERANCE_CENTS
 	);

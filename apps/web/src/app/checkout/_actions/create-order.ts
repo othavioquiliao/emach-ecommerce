@@ -44,6 +44,13 @@ export async function createOrderAction(
 		// segurar a transação aberta). Mismatch lança OrderError; API fora não bloqueia.
 		const destinationCep = await resolveDestinationCep(db, input);
 		if (destinationCep) {
+			// Valor declarado p/ o seguro de frete = subtotal dos itens submetidos
+			// (consistente com a cotação do cliente). O preço em si é revalidado
+			// contra o DB dentro do placeOrder.
+			const declaredValueCents = input.cartItems.reduce(
+				(sum, i) => sum + numericToCents(i.priceAmount) * i.quantity,
+				0
+			);
 			await assertShippingQuoted({
 				shippingCents: numericToCents(input.shippingAmount),
 				destinationCep,
@@ -51,6 +58,7 @@ export async function createOrderAction(
 					toolId: i.toolId,
 					quantity: i.quantity,
 				})),
+				declaredValueCents,
 			});
 		}
 

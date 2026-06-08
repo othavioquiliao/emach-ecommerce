@@ -282,6 +282,7 @@ export function CheckoutContent({
 			const result = await quoteShippingAction({
 				destinationCep,
 				items: items.map((i) => ({ toolId: i.toolId, quantity: i.quantity })),
+				declaredValueCents: subtotal,
 			});
 			if (cancelled) {
 				return;
@@ -289,7 +290,7 @@ export function CheckoutContent({
 			if (result.ok) {
 				setShippingOptions(result.options);
 				setSelectedServiceId(result.options[0]?.serviceId ?? null);
-				setShippingStatus("ready");
+				setShippingStatus(result.negotiate ? "negotiate" : "ready");
 			} else {
 				setShippingOptions([]);
 				setSelectedServiceId(null);

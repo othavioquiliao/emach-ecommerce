@@ -6,7 +6,12 @@ import { RadioGroup, RadioGroupItem } from "@emach/ui/components/radio-group";
 import { fmtBRL } from "@/lib/format";
 import type { ShippingOption } from "@/lib/superfrete/types";
 
-export type ShippingStatus = "idle" | "loading" | "error" | "ready";
+export type ShippingStatus =
+	| "idle"
+	| "loading"
+	| "error"
+	| "ready"
+	| "negotiate";
 
 interface ShippingOptionsProps {
 	onRetry: () => void;
@@ -32,6 +37,14 @@ export function ShippingOptions({
 	}
 	if (status === "loading") {
 		return <p className="text-muted-foreground text-sm">Calculando frete…</p>;
+	}
+	if (status === "negotiate") {
+		return (
+			<p className="text-muted-foreground text-sm">
+				Este pedido contém item de transporte especial. O frete será combinado
+				diretamente — entre em contato para concluir a compra.
+			</p>
+		);
 	}
 	if (status === "error") {
 		return (
