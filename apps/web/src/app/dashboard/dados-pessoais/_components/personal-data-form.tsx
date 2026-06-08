@@ -83,7 +83,7 @@ function CardShell({ accent = "default", children }: CardShellProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-start justify-between gap-4 border bg-white p-6",
+				"flex items-start justify-between gap-4 border bg-gray-10 p-6",
 				accent === "danger"
 					? "border-emach-red bg-emach-red/5"
 					: "border-border"

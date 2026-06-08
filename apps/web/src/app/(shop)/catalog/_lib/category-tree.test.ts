@@ -16,6 +16,7 @@ function node(
 		depth: 0,
 		sortOrder: 0,
 		isActive: true,
+		productCount: 0,
 		children,
 	};
 }

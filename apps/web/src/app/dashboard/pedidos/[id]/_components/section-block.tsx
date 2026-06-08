@@ -15,7 +15,7 @@ export function SectionBlock({
 }: SectionBlockProps) {
 	return (
 		<section
-			className="mb-3.5 scroll-mt-20 border border-border bg-white"
+			className="mb-3.5 scroll-mt-20 border border-border bg-gray-10"
 			id={id}
 		>
 			<div className="flex items-center justify-between border-border border-b bg-gray-10 px-[18px] py-3.5">

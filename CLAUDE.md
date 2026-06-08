@@ -79,6 +79,8 @@ Schema TS aqui é **cópia versionada** do dashboard, sincronizada via **CI PR a
 
 Detalhe completo em `DESIGN.md`. **Vermelho é verbo, não decoração** — Ferrari Red (`#DA291C`) só em CTA de alta prioridade, UMA vez por tela. **Cantos retos = precisão** (`border-radius: 0` em interativos; modais ≤8px, avatares 50%). Tipografia: **Barlow** (corpo) + **Barlow Condensed** (labels uppercase + tracking) — não misturar no mesmo bloco. Preços sempre `R$ 899,00`.
 
+**Superfície clara = UM tom só: `--gray-10` (#f4f4f4).** É `--background` e `--card`; vale pra body, páginas e cards de conteúdo. **Nunca** usar `bg-white`/`#fff`/`#fafafa` como fundo de página ou card — card se separa do fundo por **borda hairline**, não por cor. `#fff` só em controles/realces que flutuam (inputs, popovers/overlay, toast, badges, avatar, botões com fill branco). Fundo de imagem = `--image-bg` (#ececec), mantido. Cores de status (ex. `#FFF5F5` rejeição) não contam como branco. Definido em `packages/ui/src/styles/globals.css`.
+
 ## MCP — Resend vem do plugin oficial
 
 O plugin oficial `resend` (em `~/.claude/plugins`) traz **as skills E o MCP** (`plugin:resend:resend`, ~80 tools). **Não** rodar `claude mcp add resend` — criaria um 2º MCP duplicando as tools.

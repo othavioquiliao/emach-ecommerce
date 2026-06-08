@@ -61,7 +61,7 @@ export function OrderCard({ order }: { order: OrderListItem }) {
 	return (
 		<article
 			className={cn(
-				"mb-3.5 border border-border bg-white",
+				"mb-3.5 border border-border bg-gray-10",
 				isTerminalNegative(order.status) && "opacity-80"
 			)}
 		>
@@ -117,7 +117,7 @@ export function OrderCard({ order }: { order: OrderListItem }) {
 				</div>
 			</div>
 
-			<footer className="flex flex-wrap justify-end gap-2 border-border border-t bg-white px-[18px] py-2.5">
+			<footer className="flex flex-wrap justify-end gap-2 border-border border-t bg-gray-10 px-[18px] py-2.5">
 				{isPending ? <CancelOrderButton orderId={order.id} /> : null}
 				<Link
 					className={emachButtonVariants({ variant: "outline", size: "sm" })}

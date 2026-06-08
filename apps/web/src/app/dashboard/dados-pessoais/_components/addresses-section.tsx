@@ -173,7 +173,7 @@ function AddressCard({
 	return (
 		<div
 			className={cn(
-				"flex items-start justify-between gap-4 border bg-white p-6",
+				"flex items-start justify-between gap-4 border bg-gray-10 p-6",
 				highlighted ? "border-near-black" : "border-border"
 			)}
 		>

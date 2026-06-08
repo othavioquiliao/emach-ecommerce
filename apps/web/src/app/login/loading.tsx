@@ -6,7 +6,7 @@ export default function Loading() {
 			<SiteHeader />
 			<div className="grid min-h-[calc(100vh-56px)] animate-pulse grid-cols-2">
 				<div className="bg-[color:var(--near-black)]" />
-				<div className="flex items-center justify-center bg-white px-16 py-20">
+				<div className="flex items-center justify-center bg-gray-10 px-16 py-20">
 					<div className="w-full max-w-[400px] space-y-4">
 						<div className="flex border-[color:var(--border)] border-b">
 							<div className="h-10 flex-1 bg-[color:var(--gray-10)]" />

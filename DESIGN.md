@@ -23,7 +23,7 @@ Typography relies on FerrariSans — a proprietary sans-serif family with medium
 
 ### Primary
 - **Ferrari Red** (`#DA291C`): The iconic Rosso Corsa — primary accent and CTA color. Used for the Subscribe button, key action triggers, and brand moments where maximum visual authority is needed. The single most important color in the system (--f-color-accent-100)
-- **Pure White** (`#FFFFFF`): Primary surface for editorial content panels, navigation text on dark backgrounds, and button fills. The canvas that provides breathing room between dark cinematic sections (--f-color-ui-0)
+- **Pure White** (`#FFFFFF`): Navigation text on dark backgrounds and button fills (e.g. outline buttons that invert). **Not** the page/card surface — that role belongs to Light Surface `#F4F4F4` (see Surface Standard below). Pure white is reserved for form controls/overlays that must read as raised above the surface (--f-color-ui-0)
 
 ### Secondary & Accent
 - **Dark Red** (`#B01E0A`): Deeper variant of Ferrari Red for hover/pressed states and high-contrast contexts — adds dimensionality to the brand color without introducing a new hue (--f-color-accent-90)
@@ -31,7 +31,11 @@ Typography relies on FerrariSans — a proprietary sans-serif family with medium
 - **Racing Yellow** (`#FFF200`): Heritage accent from Ferrari's racing livery — reserved for special highlights and motorsport-related contexts (--f-color-yellow-hypersail)
 - **Modena Yellow** (`#F6E500`): Slightly warmer and more golden than Racing Yellow — used for secondary heritage accents and category markers (--f-color-yellow)
 
-### Surface & Background
+### Surface Standard (P1 — único padrão de superfície clara)
+- **Light Surface** (`#F4F4F4`, token `--gray-10`): **A única cor de fundo clara do sistema.** É o valor de `--background` e `--card` — vale para `<body>`, páginas (catálogo, conta, checkout, auth, sobre) e cards de conteúdo. Cards de conteúdo (pedido, endereço, reembolso, product-card, section-block, empty states) usam `bg-gray-10` e se separam do fundo **só por borda hairline** (`border-border`) e divisórias internas — **nunca** por uma cor de fundo diferente. Foi a decisão de unificar o "branco do sistema": antes havia `#fff` (body/cards) misturado com `#f4f4f4` (seções), criando dois brancos perceptíveis.
+  - **Exceções que permanecem `#fff` (não são superfície de fundo, e sim controles/realces que devem "flutuar"):** inputs (`.emach-input`), search overlay e popovers, toast, badges, avatar, botões com fill branco (outline/toggle grid-lista, chips de filtro).
+  - **Image background** (`#ECECEC`, token `--image-bg`): fundo de área de imagem/thumbnail — **mantido intacto**, intencionalmente um tom abaixo do surface para emoldurar o produto.
+  - **Status colors não são branco:** `#FFF5F5` (linha de rejeição de reembolso) é cor semântica e permanece.
 - **Absolute Black** (`#000000`): Hero sections, cinematic backgrounds, and the dominant dark surface — the void that makes imagery and the Prancing Horse emblem float
 - **Dark Surface** (`#303030`): Secondary dark surface for footer regions, newsletter sections, and layered dark panels — slightly lifted from pure black for depth differentiation (--f-color-ui-90)
 - **Light Gray Surface** (`#D2D2D2`): Subtle alternate surface for dividers and border treatments on white panels (--f-color-ui-20)
