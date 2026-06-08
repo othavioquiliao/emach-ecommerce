@@ -12,10 +12,6 @@ import {
 	uniqueIndex,
 } from "drizzle-orm/pg-core";
 
-// NOTA (ADR-0009): a coluna `featured` é cópia antecipada de uma mudança
-// owned-by-dashboard. O PR de sync (sync-db-schema.yml) concilia este arquivo
-// quando rodar. Não rodar db:push aqui — o dashboard já aplicou no banco compartilhado.
-
 import { user } from "./auth";
 import { tool } from "./tools";
 
