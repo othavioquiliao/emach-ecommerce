@@ -1,10 +1,14 @@
 import type { ToolListItem } from "@emach/db/queries/catalog";
 import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
+import { QuickAddButton } from "@/components/quick-add-button";
 import { SectionLabel } from "@/components/section-label";
+import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtNumericBRL } from "@/lib/format";
 
 interface ProductCardProps {
+	/** "dark" sobre fundo claro (default); "elevated" (#242424) sobre fundo escuro (promoções). */
+	surface?: "dark" | "elevated";
 	tool: ToolListItem;
 }
 
@@ -23,7 +27,7 @@ function discountPercent(
 	return Math.round((1 - d / p) * 100);
 }
 
-export function ProductCard({ tool }: ProductCardProps) {
+export function ProductCard({ surface = "dark", tool }: ProductCardProps) {
 	const categorySlug = tool.primaryCategory?.slug ?? "";
 	const categoryName = tool.primaryCategory?.name ?? "";
 	const hasDiscount = tool.defaultVariant.discountedAmount != null;
@@ -31,76 +35,86 @@ export function ProductCard({ tool }: ProductCardProps) {
 		tool.defaultVariant.priceAmount,
 		tool.defaultVariant.discountedAmount
 	);
+	const surfaceBg = surface === "elevated" ? "bg-[#242424]" : "bg-near-black";
+
+	const snapshot: CartItemSnapshot = {
+		categoryName: tool.primaryCategory?.name ?? null,
+		categorySlug: tool.primaryCategory?.slug ?? null,
+		imageUrl: tool.primaryImage?.url ?? null,
+		name: tool.name,
+		priceAmount:
+			tool.defaultVariant.discountedAmount ?? tool.defaultVariant.priceAmount,
+		sku: tool.defaultVariant.sku,
+		slug: tool.slug,
+		toolId: tool.id,
+		variantId: tool.defaultVariant.id,
+		voltage: tool.defaultVariant.voltage,
+	};
 
 	return (
-		<Link
-			className="group block h-full cursor-pointer"
-			href={`/product/${tool.slug}`}
+		<div
+			className={`group relative flex h-full flex-col overflow-hidden rounded-[2px] border border-white/14 ${surfaceBg} transition-[transform,border-color] duration-[var(--card-dur)] ease-[var(--card-ease)] hover:-translate-y-1 hover:border-white/30 motion-reduce:transition-none motion-reduce:hover:translate-y-0`}
 		>
-			<div className="flex h-full flex-col overflow-hidden rounded-[2px] bg-gray-10 shadow-[0_1px_2px_rgba(0,0,0,0.04)] transition-all duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:-translate-y-1 group-hover:shadow-[0_14px_40px_rgba(0,0,0,0.1)] motion-reduce:transition-none motion-reduce:group-hover:translate-y-0">
-				<div className="relative aspect-square shrink-0 overflow-hidden rounded-[2px] bg-image-bg">
-					<ProductImage
-						alt={tool.name}
-						categorySlug={categorySlug}
-						src={tool.primaryImage?.url}
-						zoom
-					/>
+			<div className="relative aspect-square shrink-0 overflow-hidden bg-image-bg">
+				<ProductImage
+					alt={tool.name}
+					categorySlug={categorySlug}
+					src={tool.primaryImage?.url}
+					zoom
+				/>
 
-					{discount != null && (
-						<span className="absolute top-0 right-0 z-10 inline-flex items-center bg-emach-red px-2.5 py-1 font-bold font-display text-lg text-white uppercase tracking-[0.06em]">
-							-{discount}%
+				{discount != null && (
+					<span className="absolute top-0 right-0 z-10 inline-flex items-center bg-emach-red px-2.5 py-1 font-bold font-display text-lg text-white uppercase tracking-[0.06em]">
+						-{discount}%
+					</span>
+				)}
+
+				{tool.inStock ? (
+					<QuickAddButton
+						className="absolute inset-x-0 bottom-0 z-[3] flex translate-y-full items-center justify-center gap-2 bg-emach-red py-2.5 font-bold font-display text-[13px] text-white uppercase tracking-[0.1em] transition-transform duration-[var(--card-dur)] ease-[var(--card-ease)] hover:bg-emach-red-hover group-hover:translate-y-0 motion-reduce:transition-none"
+						item={snapshot}
+					/>
+				) : (
+					<div className="absolute inset-0 z-10 flex items-center justify-center bg-near-black/60">
+						<span className="font-display font-semibold text-[12px] text-white uppercase tracking-[0.14em]">
+							Esgotado
 						</span>
-					)}
-
-					{!tool.inStock && (
-						<div className="absolute inset-0 z-10 flex items-center justify-center bg-near-black/60">
-							<span className="font-display font-semibold text-[12px] text-white uppercase tracking-[0.14em]">
-								Esgotado
-							</span>
-						</div>
-					)}
-
-					<div
-						aria-hidden="true"
-						className="emach-bg-card-hover pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:opacity-100"
-					/>
-
-					<div
-						aria-hidden="true"
-						className="absolute right-[14px] bottom-[14px] left-[14px] translate-y-2 font-display font-semibold text-[11px] text-white uppercase tracking-wide opacity-0 transition-all duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:translate-y-0 group-hover:opacity-100 motion-reduce:translate-y-0 motion-reduce:transition-none"
-					>
-						SKU {tool.defaultVariant.sku}
 					</div>
-				</div>
+				)}
+			</div>
 
-				<div className="flex flex-1 flex-col gap-1 bg-gray-10 px-3 py-3.5">
-					<SectionLabel>{categoryName}</SectionLabel>
-					<p className="mt-1 font-medium text-[14px] text-near-black leading-tight">
-						{tool.name}
-					</p>
-					<div className="mt-auto pt-2">
-						<div className="flex items-baseline gap-2">
-							<span className="font-bold text-[15px] text-near-black tabular-nums">
-								{fmtNumericBRL(
-									hasDiscount
-										? tool.defaultVariant.discountedAmount
-										: tool.defaultVariant.priceAmount
-								)}
-							</span>
-							{hasDiscount && (
-								<span className="text-[11px] text-gray-50 tabular-nums line-through">
-									{fmtNumericBRL(tool.defaultVariant.priceAmount)}
-								</span>
+			<div className="flex flex-1 flex-col gap-1 px-3 py-3.5">
+				<SectionLabel tone="light">{categoryName}</SectionLabel>
+				<p className="mt-1 font-medium text-[14px] text-white leading-tight">
+					{tool.name}
+				</p>
+				<div className="mt-auto pt-2">
+					<div className="flex items-baseline gap-2">
+						<span className="font-bold text-[15px] text-white tabular-nums">
+							{fmtNumericBRL(
+								hasDiscount
+									? tool.defaultVariant.discountedAmount
+									: tool.defaultVariant.priceAmount
 							)}
-						</div>
-						{tool.hasOtherVariants && (
-							<div className="mt-1 font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
-								Mais opções de voltagem
-							</div>
+						</span>
+						{hasDiscount && (
+							<span className="text-[11px] text-white/40 tabular-nums line-through">
+								{fmtNumericBRL(tool.defaultVariant.priceAmount)}
+							</span>
 						)}
 					</div>
+					{tool.hasOtherVariants && (
+						<div className="mt-1 font-display text-[10px] text-white/50 uppercase tracking-[0.14em]">
+							Mais opções de voltagem
+						</div>
+					)}
 				</div>
 			</div>
-		</Link>
+
+			{/* Stretched link: cobre o card pra navegação, fica abaixo do quick-add (z-[3]). */}
+			<Link className="absolute inset-0 z-[1]" href={`/product/${tool.slug}`}>
+				<span className="sr-only">{tool.name}</span>
+			</Link>
+		</div>
 	);
 }

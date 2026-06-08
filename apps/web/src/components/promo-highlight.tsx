@@ -27,7 +27,7 @@ export function PromoHighlight({ promotion }: PromoHighlightProps) {
 				</div>
 
 				<div className="pt-10">
-					<ProductGrid tools={promotion.tools} />
+					<ProductGrid surface="elevated" tools={promotion.tools} />
 				</div>
 
 				<div className="mt-10 flex justify-center">
