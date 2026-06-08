@@ -9,7 +9,6 @@ import {
 	DropdownMenu,
 	DropdownMenuContent,
 	DropdownMenuItem,
-	DropdownMenuSeparator,
 	DropdownMenuTrigger,
 } from "@emach/ui/components/dropdown-menu";
 import { LogOut, Package, User, UserCog } from "lucide-react";
@@ -73,9 +72,17 @@ export function AccountMenu() {
 			</DropdownMenuTrigger>
 			<DropdownMenuContent align="end" className="w-60 p-0">
 				<div className="flex items-center gap-3 bg-near-black p-4 text-white">
-					<div className="flex size-9.5 shrink-0 items-center justify-center rounded-[2px] bg-white font-semibold text-[15px] text-near-black">
-						{getInitials(session.user.name ?? "")}
-					</div>
+					<Avatar className="size-9.5 shrink-0" size="default">
+						{session.user.image && (
+							<AvatarImage
+								alt={session.user.name ?? "Conta"}
+								src={session.user.image}
+							/>
+						)}
+						<AvatarFallback className="bg-white font-semibold text-[15px] text-near-black">
+							{getInitials(session.user.name ?? "")}
+						</AvatarFallback>
+					</Avatar>
 					<div className="min-w-0">
 						<div className="font-display font-semibold text-[9.5px] text-emach-red uppercase tracking-[0.16em]">
 							Minha conta
@@ -88,7 +95,7 @@ export function AccountMenu() {
 						</div>
 					</div>
 				</div>
-				<div className="p-1">
+				<div>
 					<DropdownMenuItem
 						className="relative gap-3 px-3 py-2.5 text-[13.5px] focus:before:absolute focus:before:inset-y-0 focus:before:left-0 focus:before:w-[3px] focus:before:bg-emach-red"
 						render={<Link href="/dashboard/pedidos" />}
@@ -103,7 +110,6 @@ export function AccountMenu() {
 						<UserCog />
 						Meus dados
 					</DropdownMenuItem>
-					<DropdownMenuSeparator />
 					<DropdownMenuItem
 						className="gap-3 px-3 py-2.5 text-[13.5px]"
 						onClick={handleSignOut}
