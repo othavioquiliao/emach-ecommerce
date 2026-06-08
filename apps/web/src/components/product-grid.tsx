@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolListItem } from "@emach/db/queries/catalog";
+import type { Voltage } from "@emach/db/schema/tools";
 import { motion, useReducedMotion, type Variants } from "framer-motion";
 import { ProductCard } from "@/components/product-card";
 
@@ -8,11 +9,17 @@ interface ProductGridProps {
 	/** Repassado ao ProductCard: "elevated" sobre fundo escuro (promoções). */
 	surface?: "dark" | "elevated";
 	tools: ToolListItem[];
+	/** Voltagens por toolId, para os selos do card. */
+	voltagesByTool?: Map<string, Voltage[]>;
 }
 
 const EASE = [0.16, 1, 0.3, 1] as const;
 
-export function ProductGrid({ surface, tools }: ProductGridProps) {
+export function ProductGrid({
+	surface,
+	tools,
+	voltagesByTool,
+}: ProductGridProps) {
 	const reduceMotion = useReducedMotion() ?? false;
 
 	const containerVariants: Variants = {
@@ -46,7 +53,11 @@ export function ProductGrid({ surface, tools }: ProductGridProps) {
 		>
 			{tools.map((tool) => (
 				<motion.div key={tool.id} variants={itemVariants}>
-					<ProductCard surface={surface} tool={tool} />
+					<ProductCard
+						surface={surface}
+						tool={tool}
+						voltages={voltagesByTool?.get(tool.id)}
+					/>
 				</motion.div>
 			))}
 		</motion.div>

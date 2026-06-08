@@ -6,6 +6,7 @@ import {
 } from "@emach/db/queries/catalog";
 import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
+import { getVoltagesByTool } from "@/lib/variant-voltages";
 import { CatalogContent } from "./_components/catalog-content";
 
 const PAGE_SIZE = 24;
@@ -123,6 +124,8 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 		categoryTreePromise,
 	]);
 
+	const voltagesByTool = await getVoltagesByTool(tools.map((t) => t.id));
+
 	return (
 		<>
 			<SiteHeader />
@@ -141,6 +144,7 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 				tools={tools}
 				total={total}
 				voltages={voltages}
+				voltagesByTool={voltagesByTool}
 			/>
 		</>
 	);

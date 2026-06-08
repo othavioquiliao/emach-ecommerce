@@ -1,6 +1,7 @@
 "use client";
 
 import type { CategoryNode, ToolListItem } from "@emach/db/queries/catalog";
+import type { Voltage } from "@emach/db/schema/tools";
 import { Checkbox } from "@emach/ui/components/checkbox";
 import { cn } from "@emach/ui/lib/utils";
 import { Grid3x3, List } from "lucide-react";
@@ -41,6 +42,7 @@ interface CatalogContentProps {
 	tools: ToolListItem[];
 	total: number;
 	voltages: VoltageKey[];
+	voltagesByTool?: Map<string, Voltage[]>;
 }
 
 export function CatalogContent({
@@ -58,6 +60,7 @@ export function CatalogContent({
 	onlyPromo,
 	page,
 	pageSize,
+	voltagesByTool,
 }: CatalogContentProps) {
 	const router = useRouter();
 	const pathname = usePathname();
@@ -314,7 +317,11 @@ export function CatalogContent({
 						{view === "grid" ? (
 							<div className="grid grid-cols-3 gap-6">
 								{tools.map((t) => (
-									<ProductCard key={t.id} tool={t} />
+									<ProductCard
+										key={t.id}
+										tool={t}
+										voltages={voltagesByTool?.get(t.id)}
+									/>
 								))}
 							</div>
 						) : (

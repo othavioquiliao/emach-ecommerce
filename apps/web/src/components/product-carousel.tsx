@@ -1,6 +1,7 @@
 "use client";
 
 import type { ToolListItem } from "@emach/db/queries/catalog";
+import type { Voltage } from "@emach/db/schema/tools";
 import {
 	Carousel,
 	CarouselContent,
@@ -22,6 +23,7 @@ interface ProductCarouselProps {
 	};
 	title: string;
 	tools: ToolListItem[];
+	voltagesByTool?: Map<string, Voltage[]>;
 }
 
 // Acima deste limite vira carrossel; até ele, grid estático com stagger.
@@ -39,6 +41,7 @@ export function ProductCarousel({
 	label,
 	title,
 	link,
+	voltagesByTool,
 }: ProductCarouselProps) {
 	const isCarousel = tools.length > CAROUSEL_THRESHOLD;
 
@@ -46,7 +49,7 @@ export function ProductCarousel({
 		return (
 			<>
 				<SectionHeader label={label} link={link} title={title} />
-				<ProductGrid tools={tools} />
+				<ProductGrid tools={tools} voltagesByTool={voltagesByTool} />
 			</>
 		);
 	}
@@ -70,7 +73,7 @@ export function ProductCarousel({
 						className="pl-5 sm:basis-1/2 lg:basis-1/4"
 						key={tool.id}
 					>
-						<ProductCard tool={tool} />
+						<ProductCard tool={tool} voltages={voltagesByTool?.get(tool.id)} />
 					</CarouselItem>
 				))}
 			</CarouselContent>

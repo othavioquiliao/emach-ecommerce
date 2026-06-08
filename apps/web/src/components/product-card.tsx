@@ -1,4 +1,5 @@
 import type { ToolListItem } from "@emach/db/queries/catalog";
+import type { Voltage } from "@emach/db/schema/tools";
 import Link from "next/link";
 import { ProductImage } from "@/components/product-image";
 import { QuickAddButton } from "@/components/quick-add-button";
@@ -10,6 +11,8 @@ interface ProductCardProps {
 	/** "dark" sobre fundo claro (default); "elevated" (#242424) sobre fundo escuro (promoções). */
 	surface?: "dark" | "elevated";
 	tool: ToolListItem;
+	/** Voltagens das variantes (selos na imagem). Vazio/ausente = sem variação. */
+	voltages?: Voltage[];
 }
 
 function discountPercent(
@@ -27,7 +30,11 @@ function discountPercent(
 	return Math.round((1 - d / p) * 100);
 }
 
-export function ProductCard({ surface = "dark", tool }: ProductCardProps) {
+export function ProductCard({
+	surface = "dark",
+	tool,
+	voltages,
+}: ProductCardProps) {
 	const categorySlug = tool.primaryCategory?.slug ?? "";
 	const categoryName = tool.primaryCategory?.name ?? "";
 	const hasDiscount = tool.defaultVariant.discountedAmount != null;
@@ -69,6 +76,19 @@ export function ProductCard({ surface = "dark", tool }: ProductCardProps) {
 					</span>
 				)}
 
+				{voltages && voltages.length > 0 && (
+					<div className="absolute bottom-2 left-2 z-[2] flex flex-wrap gap-1.5">
+						{voltages.map((v) => (
+							<span
+								className="rounded-[2px] bg-near-black/85 px-2 py-0.5 font-bold font-display text-[11px] text-white uppercase tracking-[0.06em]"
+								key={v}
+							>
+								{v}
+							</span>
+						))}
+					</div>
+				)}
+
 				{tool.inStock ? (
 					<QuickAddButton
 						className="absolute inset-x-0 bottom-0 z-[3] flex translate-y-full items-center justify-center gap-2 bg-emach-red py-2.5 font-bold font-display text-[13px] text-white uppercase tracking-[0.1em] transition-transform duration-[var(--card-dur)] ease-[var(--card-ease)] hover:bg-emach-red-hover group-hover:translate-y-0 motion-reduce:transition-none"
@@ -103,11 +123,6 @@ export function ProductCard({ surface = "dark", tool }: ProductCardProps) {
 							</span>
 						)}
 					</div>
-					{tool.hasOtherVariants && (
-						<div className="mt-1 font-display text-[10px] text-white/50 uppercase tracking-[0.14em]">
-							Mais opções de voltagem
-						</div>
-					)}
 				</div>
 			</div>
 

@@ -15,6 +15,7 @@ import { PromoHighlight } from "@/components/promo-highlight";
 import { SectionHeader } from "@/components/section-header";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
+import { getVoltagesByTool } from "@/lib/variant-voltages";
 
 export const revalidate = 600;
 
@@ -120,6 +121,11 @@ export default async function HomePage() {
 		imageUrl: categoryImages.get(c.slug) ?? null,
 	}));
 
+	const voltagesByTool = await getVoltagesByTool([
+		...recentTools.map((t) => t.id),
+		...(featuredPromotion?.tools.map((t) => t.id) ?? []),
+	]);
+
 	return (
 		<>
 			<SiteHeader overlay />
@@ -144,7 +150,12 @@ export default async function HomePage() {
 					</section>
 				)}
 
-				{featuredPromotion && <PromoHighlight promotion={featuredPromotion} />}
+				{featuredPromotion && (
+					<PromoHighlight
+						promotion={featuredPromotion}
+						voltagesByTool={voltagesByTool}
+					/>
+				)}
 
 				{recentTools.length > 0 && (
 					<section className="bg-gray-10 px-14 py-18">
@@ -153,6 +164,7 @@ export default async function HomePage() {
 								label="Novidades"
 								title="Recém-chegadas"
 								tools={recentTools}
+								voltagesByTool={voltagesByTool}
 							/>
 						</PageContainer>
 					</section>
