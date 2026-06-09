@@ -21,6 +21,8 @@
 	--warning: #f13a2c;
 	--success: #16a34a;
 	--info: #4c98b9;
+	--amber: #d97706;
+	--amber-text: #b45309;
 	--link-hover: #3860be;
 
 	/* Surfaces */
@@ -608,6 +610,8 @@
 	--color-success: var(--success);
 	--color-warning: var(--warning);
 	--color-info: var(--info);
+	--color-amber: var(--amber);
+	--color-amber-text: var(--amber-text);
 	--color-link-hover: var(--link-hover);
 	--color-emach-red: var(--emach-red);
 	--color-emach-red-hover: var(--emach-red-hover);
