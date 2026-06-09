@@ -84,3 +84,39 @@ export { ACTIVE_REFUND_STATUSES };
 export function isActiveRefund(status: RefundStatus): boolean {
 	return (ACTIVE_REFUND_STATUSES as readonly RefundStatus[]).includes(status);
 }
+
+// Fases do stepper de reembolso (espelham os 4 status não-recusados, em ordem).
+export const REFUND_STEPPER_PHASES = [
+	"requested",
+	"under_review",
+	"approved",
+	"refunded",
+] as const;
+export type RefundStepperPhase = (typeof REFUND_STEPPER_PHASES)[number];
+
+export type RefundStepState = "done" | "current" | "upcoming" | "ok";
+
+function refundRank(status: RefundStatus): number {
+	if (status === "rejected") {
+		return -1; // terminal-negativo: o card pula o stepper e mostra a recusa
+	}
+	return (REFUND_STEPPER_PHASES as readonly RefundStatus[]).indexOf(status) + 1;
+}
+
+export function refundStepDisplayState(
+	status: RefundStatus,
+	phase: RefundStepperPhase
+): RefundStepState {
+	const rank = refundRank(status);
+	const phaseRank = REFUND_STEPPER_PHASES.indexOf(phase) + 1;
+	if (rank < 0) {
+		return "upcoming";
+	}
+	if (rank > phaseRank) {
+		return "done";
+	}
+	if (rank === phaseRank) {
+		return phase === "refunded" ? "ok" : "current";
+	}
+	return "upcoming";
+}
