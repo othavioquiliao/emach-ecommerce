@@ -48,6 +48,16 @@
 
 Este task NÃO é TDD (gera assets determinísticos). Verificação = assets válidos + sanity check.
 
+> **STATUS: já executado e corrigido.** O script final está commitado em
+> `scripts/gen-brazil-map.mjs`. **Correção crítica aplicada:** a versão original usava
+> `geoMercator().fitSize([W,H], geo)`, mas o GeoJSON tem winding-order invertido →
+> `geoBounds` retorna o mundo inteiro → o Brasil colapsava numa bolha de ~60px. A versão
+> final fixa a projeção pelo **bbox planar do Brasil** (`LNG0=-74,LAT0=6,LNG1=-34.6,LAT1=-34`,
+> Mercator unitário → scale/translate manuais) e usa o **centro do bbox projetado** como
+> fallback de UF (não `geoCentroid`, também esférico). Validação real: pins espalham por
+> X∈[40,562] Y∈[36,557]; Recife(leste) x≈530, RioBranco(oeste) x≈106, BoaVista(norte) y≈59,
+> PortoAlegre(sul) y≈502. O bloco de código abaixo é histórico; consulte o arquivo real.
+
 - [ ] **Step 1: Instalar d3-geo como devDependency e baixar dados-fonte**
 
 ```bash
@@ -471,6 +481,7 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 										: "fill-white/[0.05]"
 							)}
 							d={s.path}
+							fillRule="evenodd"
 							key={s.uf}
 							strokeWidth={0.8}
 						/>
