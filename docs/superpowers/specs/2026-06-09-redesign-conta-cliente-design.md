@@ -117,12 +117,33 @@ Substitui o `redirect()` atual por uma página real.
     - Verificado → badge verde "Verificado", só leitura.
     - Não verificado → badge âmbar "Não verificado" + botão **"Verificar e-mail"** que
       **dispara o envio do link de verificação** (`authClient.sendVerificationEmail`).
-      Esta é uma **feature funcional nova**.
+      Esta é uma **feature funcional nova** — ver §4.1 (ativação real da verificação).
   - **Card de CPF/CNPJ pendente**: apenas o card em vermelho (borda + label + "+
     Adicionar"), com nota *"Você também informa na finalização da compra, ao emitir a
     nota fiscal"*. Sem drama — porque o **checkout já capta o CPF** (ver §5).
 - **Seção de endereços** (`AddressesSection`) mantém comportamento (padrão, outros,
   adicionar, sheet); re-estilizada para a nova escala/hierarquia.
+
+## 4.1 Ativação real da verificação de e-mail (auth P0 — decidido)
+
+Hoje `packages/auth/src/ecommerce.ts` força **todo cliente como verificado** na
+criação (`databaseHooks.user.create.before → emailVerified: true`), com
+`sendOnSignUp: false` e `requireEmailVerification: false`. Logo, ninguém fica "não
+verificado" e o card de e-mail seria inerte.
+
+Decisão (verificação **leve**, sem bloquear venda):
+- **Remover** o hook `databaseHooks.user.create.before` que força `emailVerified: true`.
+- `emailVerification.sendOnSignUp: true` — novo cadastro recebe o e-mail (template
+  `VerifyEmailEmail` já existe e está ligado a `sendVerificationEmail`).
+- `requireEmailVerification` permanece **false** — login/`autoSignIn` seguem funcionando;
+  e-mail pendente é incentivo, não porteiro.
+- **Clientes existentes** já estão `emailVerified: true` no banco → não afetados, sem
+  migration, ninguém deslogado.
+- No dashboard, o card de e-mail reflete o estado real e o botão "Verificar e-mail"
+  dispara `authClient.sendVerificationEmail({ email, callbackURL: "/dashboard/dados-pessoais" })`.
+
+> Mudança de **config** de auth (não de schema) — `ecommerce.ts` é do app, editável aqui;
+> isolamento das instâncias preservado. Tratada como fase própria, com smoke de signup.
 
 ## 4. Componentes — criar / editar
 
@@ -170,8 +191,8 @@ demais (`--info`, `--success`, `--emach-red`, `--gray-*`) já existem.
   `checkoutSchema`, pré-preenchido com `clientDocument`, validado por `isValidCpfCnpj`).
   Nada a implementar lá — o CPF da conta é só conveniência.
 - **Schema `dashboard-owned`** (`order`, `orderItem`, `refundRequest`, etc.): não
-  editar em isolamento (ADR-0009). O redesign é 100% de apresentação no storefront +
-  uma server action de verificação de e-mail (auth ecommerce, não schema).
+  editar em isolamento (ADR-0009). O redesign é apresentação no storefront + a
+  ativação da verificação de e-mail (config de auth ecommerce, não schema — ver §4.1).
 - **Tela de detalhe do pedido** (`pedidos/[id]`) e `/pagar`: fora deste ciclo (podem
   herdar o `account-hero`/badge depois).
 - Pagamento real, débito de estoque, hardening — itens de roadmap não relacionados.
