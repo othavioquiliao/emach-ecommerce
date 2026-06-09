@@ -432,3 +432,22 @@ New DRY helpers. Prefer composing these over raw markup when the pattern applies
 ### Typography utilities
 
 Use the size scale from §3 "Hierarchy (EMACH — actual implementation)" via Tailwind arbitrary values (`text-[14px]`, etc.) combined with `font-sans` (Barlow) or `font-display` (Barlow Condensed). The legacy `.h1/.h2/.h3/.subheading/.body/.label/.micro-label/.price` utility classes have been removed from `globals.css` — never reintroduce them.
+
+### Conta do cliente (`/dashboard/**`) — sistema visual
+
+Redesign que trouxe o chiaroscuro da home às telas da conta (Overview, Pedidos, Reembolso, Dados Pessoais). **Ao refatorar o detalhe do pedido (`pedidos/[id]`) ou qualquer tela nova da conta, reusar estes componentes e padrões — não reinventar.**
+
+**Componentes compartilhados** (`apps/web/src/app/dashboard/_components/`):
+- `AccountHero` — header escuro full-bleed por tela (`bg-near-black` + régua vermelha inferior). Props `{kicker?, title, subtitle?, children?}`. `ProfileHeader` (dados-pessoais) é a variante com avatar de iniciais.
+- `AccountBadge` — badge de status fill-suave + dot, por **família semântica** `{family, tone?: "light"|"dark", children, className?}`. Famílias: **âmbar**=precisa de atenção · **azul**=em processamento · **verde**=concluído/ok · **vermelho**=problema · **cinza**=encerrado. Mapeamento status→família vive em `order-status-badge.tsx`/`refund-status-badge.tsx` (`TONE_TO_FAMILY`). Order `warning` (refunded/returned) → cinza (terminal, não atenção); `muted` (canceled) ganha `line-through` via className.
+- `StatusStepper` — stepper com ícones lucide. Estados `done|current|upcoming|ok`. **Trilha vermelha**: `done`=outline vermelho (ícone vermelho), `current`=vermelho cheio + glow, `ok`=verde cheio (estado final entregue/reembolsado), `upcoming`=outline cinza; **linhas percorridas vermelhas**, futuras cinza. Dados das fases: `pedidos/_components/order-steps.ts` (💳→📦→🚚→🏠) e `reembolso/_components/refund-steps.ts` (📄→🔍→✅→💵). Lógica de estado em `lib/orders/status.ts > orderStepDisplayState` e `lib/refunds/status.ts > refundStepDisplayState` (testados).
+
+**Cards** (`order-card.tsx`, `refund-card.tsx`): **todos escuros** (`bg-near-black text-white`), formando uma lista cinematográfica. O "precisa de atenção" se distingue por badge âmbar + CTA vermelho, não por cor de card. Exceção: refund `rejected` fica claro (por causa do `OrderRefundBlock` de recusa em fundo claro). Terminais negativos (order canceled/refunded/returned) escuros com `opacity-80` e **sem stepper**.
+
+**Gotchas (custaram retrabalho — não repetir):**
+- **Não combinar `.emach-bg-diagonal` (nem `.emach-bg-*` que usam `background:` shorthand) com `bg-near-black`** — o shorthand reseta `background-color` para transparent e a superfície "escura" vira clara com texto branco invisível. Usar `bg-near-black` puro.
+- **Em superfície escura, botão = `EmachButton variant="outline-light"`** (ou `primary`). `outline`/`ghost` têm texto/borda `near-black` → invisíveis no escuro. `RebuyButton`/`CancelOrderButton` aceitam prop `variant` justamente por serem usados no card escuro (lista) e no detalhe claro.
+- **`StatusStepper`: nodes têm largura fixa (`w-[88px]`), nunca `w-[25%]`** — com 4 nodes a 25% somam 100% e espremem as linhas conectoras (`flex-1`) a 0px (somem).
+- Token **`--amber`** (`#d97706`) + `--amber-text` (`#b45309`) foram adicionados em globals.css (`:root` + `@theme inline`) — é o único token de marca novo do redesign.
+
+**Pendente (próximo ciclo):** refatorar `pedidos/[id]` (detalhe + `/pagar`) com estes padrões; eles ainda usam o estilo claro antigo (`order-detail-header`, `section-block`, etc.).
