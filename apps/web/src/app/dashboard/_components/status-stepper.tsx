@@ -64,17 +64,13 @@ function nodeClass(state: StepState, dark: boolean): string {
 		return "border-success bg-success text-white";
 	}
 	if (state === "current") {
-		return dark
-			? "border-2 border-emach-red bg-near-black text-white shadow-[0_0_0_5px_rgba(218,41,28,0.28)]"
-			: "border-2 border-emach-red bg-white text-emach-red shadow-[0_0_0_5px_rgba(218,41,28,0.16)]";
+		return "border-emach-red bg-emach-red text-white shadow-[0_0_0_5px_rgba(218,41,28,0.30)]";
 	}
 	if (state === "done") {
-		return dark
-			? "border-white bg-white text-near-black"
-			: "border-near-black bg-near-black text-white";
+		return "border-emach-red bg-transparent text-emach-red";
 	}
 	return dark
-		? "border-white/20 bg-white/[0.06] text-[#888]"
+		? "border-white/25 bg-transparent text-[#888]"
 		: "border-border bg-white text-gray-50";
 }
 
@@ -83,10 +79,10 @@ function labelClass(state: StepState, dark: boolean): string {
 		return "text-success";
 	}
 	if (state === "current") {
-		return dark ? "text-white" : "text-emach-red";
+		return dark ? "text-white" : "text-near-black";
 	}
 	if (state === "done") {
-		return dark ? "text-white" : "text-near-black";
+		return dark ? "text-white/70" : "text-near-black/70";
 	}
 	return dark ? "text-[#888]" : "text-gray-50";
 }
@@ -94,7 +90,7 @@ function labelClass(state: StepState, dark: boolean): string {
 function segClass(prevState: StepState, dark: boolean): string {
 	const filled = prevState === "done" || prevState === "ok";
 	if (filled) {
-		return dark ? "bg-white" : "bg-near-black";
+		return "bg-emach-red";
 	}
 	return dark ? "bg-white/20" : "bg-border";
 }
