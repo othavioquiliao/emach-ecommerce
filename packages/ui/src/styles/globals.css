@@ -465,9 +465,6 @@
 		transparent
 	);
 }
-.emach-bg-stats {
-	background: linear-gradient(135deg, var(--cinema-2), var(--black));
-}
 .emach-bg-placeholder {
 	background: radial-gradient(
 		ellipse at 50% 55%,

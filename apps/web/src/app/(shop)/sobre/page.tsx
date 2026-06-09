@@ -1,12 +1,15 @@
-import { db } from "@emach/db";
-import type { BranchBusinessHours } from "@emach/db/schema/inventory";
-import { branch as branchTable } from "@emach/db/schema/inventory";
-import { asc, eq } from "drizzle-orm";
 import type { Metadata } from "next";
 
 import { PageContainer } from "@/components/page-container";
 import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
+import {
+	branchMapsUrl,
+	formatBranchAddress,
+	formatBusinessHours,
+	formatPhone,
+	getActiveBranches,
+} from "@/lib/branches";
 
 export const metadata: Metadata = {
 	title: "Sobre a EMACH — Ferramentas Profissionais",
@@ -64,80 +67,6 @@ interface BranchCardData {
 	phone: string | null;
 }
 
-function formatCep(cep: string | null) {
-	if (!cep) {
-		return null;
-	}
-
-	const digits = cep.replace(/\D/g, "");
-	if (digits.length !== 8) {
-		return cep;
-	}
-
-	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
-}
-
-function formatPhone(phone: string | null) {
-	if (!phone) {
-		return null;
-	}
-
-	const digits = phone.replace(/\D/g, "");
-	if (digits.length === 11) {
-		return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-	}
-
-	if (digits.length === 10) {
-		return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
-	}
-
-	return phone;
-}
-
-function formatBusinessHours(hours: BranchBusinessHours | null) {
-	if (!hours) {
-		return null;
-	}
-
-	const formatPeriod = (
-		label: string,
-		period: BranchBusinessHours[keyof BranchBusinessHours]
-	) => {
-		if (!period?.isOpen) {
-			return `${label}: fechado`;
-		}
-
-		if (!(period.opensAt && period.closesAt)) {
-			return `${label}: aberto`;
-		}
-
-		return `${label}: ${period.opensAt}-${period.closesAt}`;
-	};
-
-	return [
-		formatPeriod("Seg-sex", hours.weekdays),
-		formatPeriod("Sáb", hours.saturday),
-		formatPeriod("Feriados", hours.holidays),
-	].join(" | ");
-}
-
-function formatBranchAddress(row: {
-	cep: string | null;
-	city: string | null;
-	neighborhood: string | null;
-	state: string | null;
-	street: string | null;
-	streetNumber: string | null;
-}) {
-	const streetLine = [row.street, row.streetNumber].filter(Boolean).join(", ");
-	const cityLine = [row.city, row.state].filter(Boolean).join("/");
-	const cep = formatCep(row.cep);
-
-	return [streetLine, row.neighborhood, cityLine, cep ? `CEP ${cep}` : null]
-		.filter(Boolean)
-		.join(" - ");
-}
-
 function buildMapsEmbedUrl(query: string) {
 	const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_EMBED_API_KEY;
 
@@ -162,22 +91,7 @@ function buildMapsEmbedUrl(query: string) {
 }
 
 async function getBranches(): Promise<BranchCardData[]> {
-	const rows = await db
-		.select({
-			id: branchTable.id,
-			name: branchTable.name,
-			phone: branchTable.phone,
-			businessHours: branchTable.businessHours,
-			cep: branchTable.cep,
-			street: branchTable.street,
-			streetNumber: branchTable.streetNumber,
-			neighborhood: branchTable.neighborhood,
-			city: branchTable.city,
-			state: branchTable.state,
-		})
-		.from(branchTable)
-		.where(eq(branchTable.status, "active"))
-		.orderBy(asc(branchTable.createdAt), asc(branchTable.id));
+	const rows = await getActiveBranches();
 
 	return rows.map((row, index) => {
 		const address = formatBranchAddress(row);
@@ -195,9 +109,7 @@ async function getBranches(): Promise<BranchCardData[]> {
 			phone: formatPhone(row.phone),
 			hours: formatBusinessHours(row.businessHours),
 			mapEmbedUrl: mapsQuery ? buildMapsEmbedUrl(mapsQuery) : null,
-			mapsUrl: mapsQuery
-				? `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(mapsQuery)}`
-				: null,
+			mapsUrl: mapsQuery ? branchMapsUrl(row) : null,
 			accent: index % 2 === 0 ? "red" : "dark",
 		};
 	});
