@@ -40,18 +40,9 @@ export function AddressesSection({ addresses }: AddressesSectionProps) {
 
 	return (
 		<section>
-			<header className="mb-10 border-near-black border-b-2 pb-6">
-				<div className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
-					Minha conta
-				</div>
-				<h2 className="mt-2 font-semibold text-[32px] text-near-black leading-tight tracking-tight">
-					Endereço de Entrega
-				</h2>
-				<p className="mt-3 max-w-[560px] text-[14px] text-gray-50">
-					Cadastre o endereço onde quer receber seus pedidos. Você pode salvar
-					mais de um e escolher na hora da compra.
-				</p>
-			</header>
+			<div className="mb-6 font-display font-semibold text-[12px] text-gray-50 uppercase tracking-[0.16em]">
+				Endereço de entrega
+			</div>
 
 			{primary === null ? (
 				<EmptyState
