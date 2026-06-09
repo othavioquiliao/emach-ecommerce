@@ -5,6 +5,10 @@ import { PageContainer } from "@/components/page-container";
 import { SectionLabel } from "@/components/section-label";
 import { BRAZIL_STATES, BRAZIL_VIEWBOX } from "@/lib/branch-map/brazil-states";
 import { cityToXY } from "@/lib/branch-map/geocode";
+import {
+	buildMapMaskDataUri,
+	buildMapSvgDataUri,
+} from "@/lib/branch-map/map-svg";
 import type { BranchPin, StateShape } from "@/lib/branch-map/types";
 import {
 	branchMapsUrl,
@@ -53,9 +57,12 @@ export async function BranchMapSection() {
 		...s,
 		highlighted: ufsWithBranch.has(s.uf),
 	}));
+	const mapUri = buildMapSvgDataUri(states, BRAZIL_VIEWBOX);
+	const mapMaskUri = buildMapMaskDataUri(states, BRAZIL_VIEWBOX);
+	const [, , mapWidth, mapHeight] = BRAZIL_VIEWBOX.split(" ").map(Number);
 
 	return (
-		<section className="bg-black text-white">
+		<section className="overflow-hidden border-emach-red border-y-2 bg-cinema-3 text-white [color-scheme:dark]">
 			<PageContainer className="grid min-h-110 grid-cols-1 px-0 md:grid-cols-[36%_1fr]">
 				<div className="flex flex-col justify-center gap-4 px-10 py-16 md:px-16">
 					<SectionLabel tone="accent">Onde estamos</SectionLabel>
@@ -80,7 +87,13 @@ export async function BranchMapSection() {
 					</div>
 				</div>
 
-				<BranchMap pins={pins} states={states} viewBox={BRAZIL_VIEWBOX} />
+				<BranchMap
+					mapHeight={mapHeight}
+					mapMaskUri={mapMaskUri}
+					mapUri={mapUri}
+					mapWidth={mapWidth}
+					pins={pins}
+				/>
 			</PageContainer>
 		</section>
 	);

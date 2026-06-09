@@ -1,6 +1,6 @@
 import { execSync } from "node:child_process";
 import fs from "node:fs";
-import { geoMercator, geoPath } from "d3-geo";
+import { geoMercator } from "d3-geo";
 
 // Gera os assets estáticos do mapa de filiais:
 //   - apps/web/src/lib/branch-map/brazil-states.ts  (paths SVG dos 27 estados + viewBox)
@@ -77,8 +77,29 @@ const usedH = bh * scale;
 const tx = PAD + (W - 2 * PAD - usedW) / 2 - tl2[0];
 const ty = PAD + (H - 2 * PAD - usedH) / 2 - tl2[1];
 const proj = geoMercator().scale(scale).translate([tx, ty]);
-const pathGen = geoPath(proj);
-const r1 = (d) => (d || "").replace(/-?\d+\.?\d*/g, (n) => (+n).toFixed(1));
+
+// Monta o path SVG projetando cada vértice manualmente (M/L/Z por anel). NÃO usa
+// geoPath(): o clip de esfera do d3-geo, com o winding-order invertido deste GeoJSON,
+// emite o COMPLEMENTO do estado (estado + retângulo gigante da esfera projetada), o
+// que faz o fill cobrir o exterior. Projeção ponto-a-ponto é imune a isso.
+function featureToPath(feature) {
+	const g = feature.geometry;
+	const polys = g.type === "MultiPolygon" ? g.coordinates : [g.coordinates];
+	let d = "";
+	for (const poly of polys) {
+		for (const ring of poly) {
+			for (let i = 0; i < ring.length; i++) {
+				const p = proj(ring[i]);
+				if (!p) {
+					continue;
+				}
+				d += `${i === 0 ? "M" : "L"}${p[0].toFixed(1)},${p[1].toFixed(1)}`;
+			}
+			d += "Z";
+		}
+	}
+	return d;
+}
 
 // centro do bbox PROJETADO de cada feature (fallback robusto; geoCentroid é esférico e
 // também sofreria com o winding invertido)
@@ -107,7 +128,7 @@ function projectedCenter(feature) {
 const states = geo.features
 	.map((f) => ({
 		uf: (f.properties.sigla || f.properties.SIGLA || "").toUpperCase(),
-		path: r1(pathGen(f)),
+		path: featureToPath(f),
 	}))
 	.filter((s) => s.uf);
 

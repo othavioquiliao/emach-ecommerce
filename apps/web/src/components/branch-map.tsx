@@ -1,89 +1,136 @@
 "use client";
 
 import { cn } from "@emach/ui/lib/utils";
-import { useState } from "react";
-import type { BranchPin, StateShape } from "@/lib/branch-map/types";
+import { useEffect, useState } from "react";
+import type { BranchPin } from "@/lib/branch-map/types";
 
-type Props = {
+const CYCLE_MS = 2200;
+
+interface Props {
+	mapHeight: number;
+	mapMaskUri: string;
+	mapUri: string;
+	mapWidth: number;
 	pins: BranchPin[];
-	states: StateShape[];
-	viewBox: string;
-};
+}
 
 const REDUCE_MOTION =
 	typeof window !== "undefined" &&
 	window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-export function BranchMap({ pins, states, viewBox }: Props) {
+export function BranchMap({
+	pins,
+	mapUri,
+	mapMaskUri,
+	mapWidth,
+	mapHeight,
+}: Props) {
 	const [hovered, setHovered] = useState<string | null>(null);
-	const hoveredUf = pins.find((p) => p.id === hovered)?.uf ?? null;
+	const [paused, setPaused] = useState(false);
 
-	function activate(id: string | null, scroll: boolean) {
-		setHovered(id);
-		if (id && scroll) {
-			document.getElementById(`branch-row-${id}`)?.scrollIntoView({
-				block: "nearest",
-				behavior: REDUCE_MOTION ? "auto" : "smooth",
-			});
+	// Auto-cycle: destaca cada filial em rotação (efeito hover automático),
+	// pausando enquanto o usuário interage. Respeita prefers-reduced-motion.
+	useEffect(() => {
+		if (REDUCE_MOTION || paused || pins.length < 2) {
+			return;
 		}
+		const timer = setInterval(() => {
+			setHovered((cur) => {
+				const idx = pins.findIndex((p) => p.id === cur);
+				return pins[(idx + 1) % pins.length].id;
+			});
+		}, CYCLE_MS);
+		return () => clearInterval(timer);
+	}, [paused, pins]);
+
+	// Scroll a filial ativa pra dentro do carrossel da lista (sem mover a página).
+	useEffect(() => {
+		if (!hovered) {
+			return;
+		}
+		const row = document.getElementById(`branch-row-${hovered}`);
+		const list = row?.parentElement;
+		if (!(row && list) || list.scrollHeight <= list.clientHeight) {
+			return;
+		}
+		list.scrollTo({
+			top:
+				row.offsetTop -
+				list.offsetTop -
+				(list.clientHeight - row.clientHeight) / 2,
+			behavior: REDUCE_MOTION ? "auto" : "smooth",
+		});
+	}, [hovered]);
+
+	function activate(id: string) {
+		setPaused(true);
+		setHovered(id);
+	}
+	function resume() {
+		setPaused(false);
 	}
 
 	return (
 		<div className="flex flex-1 flex-col gap-0 border-white/10 border-l max-md:border-t max-md:border-l-0 md:flex-row">
-			{/* MAPA */}
+			{/* MAPA — base como <img> (imune ao force-dark), pins como overlay HTML */}
 			<div className="flex flex-[0_0_50%] items-center justify-center p-6">
-				<svg
-					aria-label="Mapa do Brasil com as filiais EMACH"
-					className="h-auto max-h-[420px] w-full overflow-visible"
-					viewBox={viewBox}
+				<div
+					className="relative w-full max-w-[420px]"
+					style={{ aspectRatio: `${mapWidth} / ${mapHeight}` }}
 				>
-					{states.map((s) => (
-						<path
-							className={cn(
-								"stroke-black transition-[fill] duration-200 ease-out",
-								hoveredUf === s.uf
-									? "fill-emach-red/55"
-									: s.highlighted
-										? "fill-white/[0.13]"
-										: "fill-white/[0.05]"
-							)}
-							d={s.path}
-							fillRule="evenodd"
-							key={s.uf}
-							strokeWidth={0.8}
-						/>
-					))}
+					{/* biome-ignore lint/performance/noImgElement: data-URI inline, sem otimização de CDN */}
+					<img
+						alt="Mapa do Brasil com as filiais EMACH no Sul e Sudeste"
+						className="block h-full w-full select-none"
+						draggable={false}
+						height={mapHeight}
+						src={mapUri}
+						style={{
+							maskImage: `url("${mapMaskUri}")`,
+							WebkitMaskImage: `url("${mapMaskUri}")`,
+							maskSize: "contain",
+							WebkitMaskSize: "contain",
+							maskRepeat: "no-repeat",
+							WebkitMaskRepeat: "no-repeat",
+							maskPosition: "center",
+							WebkitMaskPosition: "center",
+						}}
+						width={mapWidth}
+					/>
 					{pins.map((p) => (
 						<a
 							aria-label={`EMACH ${p.name} — ${p.address}`}
+							className="absolute flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
 							href={p.mapsUrl}
 							key={p.id}
-							onBlur={() => activate(null, false)}
-							onFocus={() => activate(p.id, true)}
-							onMouseEnter={() => activate(p.id, true)}
-							onMouseLeave={() => activate(null, false)}
+							onBlur={resume}
+							onFocus={() => activate(p.id)}
+							onMouseEnter={() => activate(p.id)}
+							onMouseLeave={resume}
 							rel="noopener"
+							style={{
+								left: `${(p.x / mapWidth) * 100}%`,
+								top: `${(p.y / mapHeight) * 100}%`,
+							}}
 							target="_blank"
 						>
-							<circle
+							<span
 								className={cn(
-									"fill-emach-red transition-opacity duration-200",
-									hovered === p.id ? "opacity-40" : "opacity-20"
+									"absolute rounded-full bg-emach-red transition-all duration-200",
+									hovered === p.id
+										? "h-5 w-5 opacity-40"
+										: "h-3.5 w-3.5 opacity-20"
 								)}
-								cx={p.x}
-								cy={p.y}
-								r={14}
 							/>
-							<circle
-								className="fill-emach-red stroke-black transition-[r] duration-200"
-								cx={p.x}
-								cy={p.y}
-								r={hovered === p.id ? 9 : 6}
-								strokeWidth={1.2}
+							<span
+								className={cn(
+									"relative block rounded-full bg-emach-red ring-2 ring-cinema-3 transition-all duration-200",
+									hovered === p.id ? "h-3.5 w-3.5" : "h-2.5 w-2.5"
+								)}
 							/>
 						</a>
 					))}
-				</svg>
+				</div>
 			</div>
 
 			{/* LISTA */}
@@ -96,14 +143,13 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 						<a
 							className={cn(
 								"block border border-transparent border-white/10 border-b px-3 py-3.5 no-underline transition-colors duration-200",
-								hovered === p.id &&
-									"border-emach-red/45 bg-emach-red/10"
+								hovered === p.id && "border-emach-red/45 bg-emach-red/10"
 							)}
 							href={p.mapsUrl}
 							id={`branch-row-${p.id}`}
 							key={p.id}
-							onMouseEnter={() => activate(p.id, false)}
-							onMouseLeave={() => activate(null, false)}
+							onMouseEnter={() => activate(p.id)}
+							onMouseLeave={resume}
 							rel="noopener"
 							target="_blank"
 						>

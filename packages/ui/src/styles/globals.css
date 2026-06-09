@@ -673,6 +673,10 @@
 		@apply bg-background font-sans text-foreground;
 	}
 	html {
+		/* Storefront é light por design. Declarar `light` evita que o "Auto Dark
+		   Mode for Web Contents" (Chromium/Brave) force-inverta o site; seções
+		   intencionalmente escuras declaram `color-scheme: dark` localmente. */
+		color-scheme: light;
 		@apply font-sans;
 	}
 }
