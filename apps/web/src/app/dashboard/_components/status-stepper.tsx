@@ -35,7 +35,7 @@ export function StatusStepper({
 							)}
 						/>
 					)}
-					<div className="flex w-[25%] flex-col items-center">
+					<div className="flex w-[88px] shrink-0 flex-col items-center">
 						<span
 							className={cn(
 								"flex h-[38px] w-[38px] items-center justify-center rounded-full border",
