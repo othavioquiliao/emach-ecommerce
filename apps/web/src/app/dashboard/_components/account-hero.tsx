@@ -10,7 +10,7 @@ export function AccountHero({
 	title: string;
 }) {
 	return (
-		<header className="emach-bg-diagonal border-emach-red border-b-[3px] bg-near-black px-6 py-8 text-white md:px-10">
+		<header className="border-emach-red border-b-[3px] bg-near-black px-6 py-8 text-white md:px-10">
 			<div className="font-display font-semibold text-[13px] text-gray-50 uppercase tracking-[0.18em]">
 				{kicker}
 			</div>

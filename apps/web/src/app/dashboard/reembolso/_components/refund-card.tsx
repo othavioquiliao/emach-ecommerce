@@ -33,7 +33,7 @@ export function RefundCard({ refund }: { refund: RefundListItem }) {
 			className={cn(
 				"mb-3.5 border",
 				dark
-					? "emach-bg-diagonal border-black bg-near-black text-white"
+					? "border-black bg-near-black text-white"
 					: "border-border bg-gray-10",
 				isRejected && "opacity-85"
 			)}

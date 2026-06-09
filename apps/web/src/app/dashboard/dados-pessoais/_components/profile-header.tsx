@@ -7,7 +7,7 @@ function initials(name: string): string {
 
 export function ProfileHeader({ name }: { name: string }) {
 	return (
-		<header className="emach-bg-diagonal flex items-center gap-[18px] border-emach-red border-b-[3px] bg-near-black px-6 py-8 text-white md:px-10">
+		<header className="flex items-center gap-[18px] border-emach-red border-b-[3px] bg-near-black px-6 py-8 text-white md:px-10">
 			<div className="flex h-[58px] w-[58px] items-center justify-center bg-emach-red font-display font-semibold text-[25px] text-white">
 				{initials(name)}
 			</div>
