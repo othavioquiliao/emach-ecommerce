@@ -36,30 +36,44 @@ export async function getActiveBranches(): Promise<BranchRow[]> {
 }
 
 export function formatCep(cep: string | null) {
-	if (!cep) return null;
+	if (!cep) {
+		return null;
+	}
 	const digits = cep.replace(/\D/g, "");
-	if (digits.length !== 8) return cep;
+	if (digits.length !== 8) {
+		return cep;
+	}
 	return `${digits.slice(0, 5)}-${digits.slice(5)}`;
 }
 
 export function formatPhone(phone: string | null) {
-	if (!phone) return null;
+	if (!phone) {
+		return null;
+	}
 	const digits = phone.replace(/\D/g, "");
-	if (digits.length === 11)
+	if (digits.length === 11) {
 		return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`;
-	if (digits.length === 10)
+	}
+	if (digits.length === 10) {
 		return `(${digits.slice(0, 2)}) ${digits.slice(2, 6)}-${digits.slice(6)}`;
+	}
 	return phone;
 }
 
 export function formatBusinessHours(hours: BranchBusinessHours | null) {
-	if (!hours) return null;
+	if (!hours) {
+		return null;
+	}
 	const formatPeriod = (
 		label: string,
 		period: BranchBusinessHours[keyof BranchBusinessHours]
 	) => {
-		if (!period?.isOpen) return `${label}: fechado`;
-		if (!(period.opensAt && period.closesAt)) return `${label}: aberto`;
+		if (!period?.isOpen) {
+			return `${label}: fechado`;
+		}
+		if (!(period.opensAt && period.closesAt)) {
+			return `${label}: aberto`;
+		}
 		return `${label}: ${period.opensAt}-${period.closesAt}`;
 	};
 	return [

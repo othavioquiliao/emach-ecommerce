@@ -29,7 +29,7 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 	}
 
 	return (
-		<div className="flex flex-1 flex-col gap-0 border-white/10 border-l max-md:border-l-0 max-md:border-t md:flex-row">
+		<div className="flex flex-1 flex-col gap-0 border-white/10 border-l max-md:border-t max-md:border-l-0 md:flex-row">
 			{/* MAPA */}
 			<div className="flex flex-[0_0_50%] items-center justify-center p-6">
 				<svg
@@ -42,7 +42,7 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 							className={cn(
 								"stroke-black transition-[fill] duration-200 ease-out",
 								hoveredUf === s.uf
-									? "fill-[var(--emach-red)]/55"
+									? "fill-emach-red/55"
 									: s.highlighted
 										? "fill-white/[0.13]"
 										: "fill-white/[0.05]"
@@ -67,7 +67,7 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 						>
 							<circle
 								className={cn(
-									"fill-[var(--emach-red)] transition-opacity duration-200",
+									"fill-emach-red transition-opacity duration-200",
 									hovered === p.id ? "opacity-40" : "opacity-20"
 								)}
 								cx={p.x}
@@ -75,7 +75,7 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 								r={14}
 							/>
 							<circle
-								className="fill-[var(--emach-red)] stroke-black transition-[r] duration-200"
+								className="fill-emach-red stroke-black transition-[r] duration-200"
 								cx={p.x}
 								cy={p.y}
 								r={hovered === p.id ? 9 : 6}
@@ -97,7 +97,7 @@ export function BranchMap({ pins, states, viewBox }: Props) {
 							className={cn(
 								"block border border-transparent border-white/10 border-b px-3 py-3.5 no-underline transition-colors duration-200",
 								hovered === p.id &&
-									"border-[var(--emach-red)]/45 bg-[var(--emach-red)]/10"
+									"border-emach-red/45 bg-emach-red/10"
 							)}
 							href={p.mapsUrl}
 							id={`branch-row-${p.id}`}

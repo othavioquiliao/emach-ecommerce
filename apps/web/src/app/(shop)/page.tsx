@@ -4,29 +4,18 @@ import {
 	getRecentTools,
 } from "@emach/db/queries/catalog";
 import { category } from "@emach/db/schema/categories";
-import { cn } from "@emach/ui/lib/utils";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
+import { BranchMapSection } from "@/components/branch-map-section";
 import { CategoryGrid } from "@/components/category-grid";
-import { EmachButton } from "@/components/emach-button";
 import { HeroCarousel } from "@/components/hero-carousel";
 import { PageContainer } from "@/components/page-container";
 import { ProductCarousel } from "@/components/product-carousel";
 import { PromoHighlight } from "@/components/promo-highlight";
 import { SectionHeader } from "@/components/section-header";
-import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
 import { getVoltagesByTool } from "@/lib/variant-voltages";
 
 export const revalidate = 600;
-
-const STATS = [
-	{ n: "200+", l: "Horas de teste" },
-	{ n: "2 anos", l: "Garantia total" },
-	{ n: "98%", l: "Aprovação" },
-	{ n: "50+", l: "Cidades" },
-	{ n: "24/7", l: "Suporte" },
-	{ n: "12×", l: "Sem juros" },
-];
 
 async function getRootCategories() {
 	return db
@@ -170,51 +159,7 @@ export default async function HomePage() {
 					</section>
 				)}
 
-				<section className="bg-black text-white">
-					<PageContainer className="grid min-h-110 grid-cols-2 px-0">
-						<div className="flex flex-col justify-center gap-5 px-20 py-20">
-							<SectionLabel tone="accent">Feito para durar</SectionLabel>
-							<h2 className="font-display font-medium text-[48px] leading-[1.02] tracking-[-0.01em]">
-								Engenharia que
-								<br />
-								não abandona você
-								<br />
-								no meio da obra.
-							</h2>
-							<p className="max-w-110 text-[16px] text-white/70 leading-relaxed">
-								Cada ferramenta EMACH passa por 200+ horas de testes em campo
-								antes de chegar ao catálogo.
-							</p>
-							<div>
-								<EmachButton size="lg" variant="outline-light">
-									Conheça a marca
-								</EmachButton>
-							</div>
-						</div>
-
-						<div className="emach-bg-stats relative border-emach-red border-l-[3px]">
-							<div className="absolute inset-0 grid grid-cols-3 content-center p-10">
-								{STATS.map((s, i) => (
-									<div
-										className={cn(
-											"p-5",
-											i > 2 && "border-white/10 border-t",
-											i % 3 < 2 && "border-white/10 border-r"
-										)}
-										key={s.n}
-									>
-										<div className="font-display font-medium text-[32px] text-white">
-											{s.n}
-										</div>
-										<div className="mt-1 text-[11px] text-white/55 uppercase tracking-[0.14em]">
-											{s.l}
-										</div>
-									</div>
-								))}
-							</div>
-						</div>
-					</PageContainer>
-				</section>
+				<BranchMapSection />
 			</main>
 		</>
 	);

@@ -3,8 +3,8 @@ import { BranchMap } from "@/components/branch-map";
 import { EmachButton } from "@/components/emach-button";
 import { PageContainer } from "@/components/page-container";
 import { SectionLabel } from "@/components/section-label";
-import { cityToXY } from "@/lib/branch-map/geocode";
 import { BRAZIL_STATES, BRAZIL_VIEWBOX } from "@/lib/branch-map/brazil-states";
+import { cityToXY } from "@/lib/branch-map/geocode";
 import type { BranchPin, StateShape } from "@/lib/branch-map/types";
 import {
 	branchMapsUrl,
@@ -44,7 +44,9 @@ export async function BranchMapSection() {
 		});
 	}
 
-	if (pins.length === 0) return null;
+	if (pins.length === 0) {
+		return null;
+	}
 
 	const ufsWithBranch = new Set(pins.map((p) => p.uf));
 	const states: StateShape[] = BRAZIL_STATES.map((s) => ({
@@ -65,9 +67,9 @@ export async function BranchMapSection() {
 						na massa.
 					</h2>
 					<p className="max-w-[42ch] text-[15px] text-white/70 leading-relaxed">
-						{pins.length === 1 ? "Loja física" : `${pins.length} lojas físicas`} no
-						Sul e Sudeste. Você passa, vê a ferramenta na bancada, tira dúvida com
-						quem usa e leva com nota fiscal.
+						{pins.length === 1 ? "Loja física" : `${pins.length} lojas físicas`}{" "}
+						no Sul e Sudeste. Você passa, vê a ferramenta na bancada, tira
+						dúvida com quem usa e leva com nota fiscal.
 					</p>
 					<div className="mt-1">
 						<Link href="/sobre">
