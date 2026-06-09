@@ -2,29 +2,11 @@
 
 import { cn } from "@emach/ui/lib/utils";
 import { LogOut } from "lucide-react";
-import type { Route } from "next";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { signOut } from "@/lib/auth-client";
-
-type NavItem =
-	| {
-			kind: "link";
-			label: string;
-			href: Route;
-	  }
-	| { kind: "soon"; label: string };
-
-const NAV_ITEMS: NavItem[] = [
-	{ kind: "link", label: "Pedidos", href: "/dashboard/pedidos" },
-	{
-		kind: "link",
-		label: "Reembolso e devoluções",
-		href: "/dashboard/reembolso",
-	},
-	{ kind: "link", label: "Meus dados", href: "/dashboard/dados-pessoais" },
-];
+import { NAV_ITEMS } from "./nav-items";
 
 interface DashboardSidebarProps {
 	userName: string;
@@ -40,7 +22,7 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 	};
 
 	return (
-		<aside className="flex h-full flex-col bg-near-black pt-8 text-white">
+		<aside className="hidden h-full flex-col bg-near-black pt-8 text-white md:flex">
 			<div className="border-white/10 border-b px-[22px] pb-[22px]">
 				<div className="mb-1.5 font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
 					Olá,
