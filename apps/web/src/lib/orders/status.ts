@@ -124,15 +124,35 @@ export function isTerminalNegative(status: OrderStatus): boolean {
 	);
 }
 
-// `text-info` e `border-info` são válidos: --color-info mapeado em @theme inline
-// via --info: #4c98b9 em globals.css — token confirmado antes de escrever.
+// Estado de exibição do stepper na conta. Difere de `stepStateFor` apenas em
+// pending_payment/payment_failed: a fase "Pagamento" (paid) é mostrada como
+// `current` (aguardando), não `upcoming`. Não altera `statusRank` — outros
+// consumidores dependem dele. A conversão "delivered → ok (verde)" fica na
+// camada de apresentação (buildOrderSteps), não aqui.
+export function orderStepDisplayState(
+	status: OrderStatus,
+	phase: StepperPhase
+): StepState {
+	if (
+		(status === "pending_payment" || status === "payment_failed") &&
+		phase === "paid"
+	) {
+		return "current";
+	}
+	return stepStateFor(status, phase);
+}
+
+// Paleta de status por família semântica (fill suave + cor). `bg-*/N` e
+// `text-amber-text` exigem os tokens registrados em globals.css (--amber/--info/
+// --success/--emach-red). Famílias: âmbar=atenção, azul=processamento,
+// verde=concluído, vermelho=problema, cinza=encerrado.
 export const BADGE_TONE_CLASS: Record<BadgeTone, string> = {
-	neutral: "text-gray-60 border-border",
-	danger: "text-emach-red border-emach-red",
-	info: "text-info border-info",
-	progress: "text-near-black border-near-black",
-	transit: "text-near-black border-near-black",
-	success: "text-success border-success",
-	muted: "text-gray-50 border-border bg-gray-10",
-	warning: "text-warning border-warning",
+	neutral: "text-amber-text border-amber/45 bg-amber/10",
+	danger: "text-emach-red border-emach-red/50 bg-emach-red/8",
+	info: "text-info border-info/45 bg-info/10",
+	progress: "text-info border-info/45 bg-info/10",
+	transit: "text-info border-info/45 bg-info/10",
+	success: "text-success border-success/45 bg-success/10",
+	muted: "text-gray-60 border-border bg-white",
+	warning: "text-amber-text border-amber/45 bg-amber/10",
 };
