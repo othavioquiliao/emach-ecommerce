@@ -1,5 +1,4 @@
 import type { OrderStatus } from "@emach/db/schema/orders";
-import { Download } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { emachButtonVariants } from "@/components/emach-button";
@@ -10,9 +9,7 @@ import { RebuyButton } from "./rebuy-button";
 export function OrderActions({
 	orderId,
 	status,
-	nfeUrl,
 }: {
-	nfeUrl: string | null;
 	orderId: string;
 	status: OrderStatus;
 }) {
@@ -21,19 +18,6 @@ export function OrderActions({
 	const canRebuy = status === "delivered" || isTerminalNegative(status);
 
 	const buttons: React.ReactNode[] = [];
-	if (nfeUrl) {
-		buttons.push(
-			<a
-				className={emachButtonVariants({ variant: "ghost", size: "sm" })}
-				href={nfeUrl}
-				key="nfe"
-				rel="noopener noreferrer"
-				target="_blank"
-			>
-				<Download className="mr-1.5 h-3.5 w-3.5" /> Nota fiscal
-			</a>
-		);
-	}
 	if (isPending) {
 		buttons.push(<CancelOrderButton key="cancel" orderId={orderId} />);
 		buttons.push(

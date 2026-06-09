@@ -24,10 +24,10 @@ interface Buyer {
 function Field({ label, value }: { label: string; value: string }) {
 	return (
 		<div>
-			<div className="mb-1 font-display font-semibold text-[10px] text-gray-50 uppercase tracking-[0.14em]">
+			<div className="mb-1 font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
 				{label}
 			</div>
-			<div className="break-words font-medium text-[13px] text-near-black">
+			<div className="break-words font-medium text-[14px] text-near-black">
 				{value}
 			</div>
 		</div>

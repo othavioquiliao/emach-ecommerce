@@ -23,7 +23,7 @@ export function ShippingAddress({ address }: { address: unknown }) {
 
 	return (
 		<SectionBlock title="Endereço de entrega">
-			<div className="text-[13px] text-near-black leading-[1.6]">
+			<div className="text-[14px] text-near-black leading-[1.6]">
 				{a.recipient ? (
 					<div className="font-semibold">{a.recipient}</div>
 				) : null}

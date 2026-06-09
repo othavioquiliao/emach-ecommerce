@@ -9,6 +9,7 @@ import { requireCurrentClient } from "@/lib/session";
 import { BuyerInfo } from "./_components/buyer-info";
 import { OrderActions } from "./_components/order-actions";
 import { OrderDetailHeader } from "./_components/order-detail-header";
+import { OrderDocuments } from "./_components/order-documents";
 import { OrderItems } from "./_components/order-items";
 import { OrderRefundBlock } from "./_components/order-refund-block";
 import { OrderTotals } from "./_components/order-totals";
@@ -34,6 +35,8 @@ export default async function OrderDetailPage({ params }: PageProps) {
 	const refund = await getRefundForOrder(session.user.id, order.id);
 	const canRequestRefund =
 		isRefundEligibleStatus(order.status) && !hasActiveRefund(refund);
+	const negativeAt =
+		order.canceledAt ?? order.refundedAt ?? order.returnedAt ?? null;
 
 	// phone/document são additionalFields do Better Auth, não inferidos no tipo
 	// da sessão — cast necessário (mesmo padrão de dashboard/dados-pessoais).
@@ -46,64 +49,73 @@ export default async function OrderDetailPage({ params }: PageProps) {
 	};
 
 	return (
-		<div className="mx-auto max-w-[920px]">
+		<>
 			<OrderDetailHeader
 				createdAt={order.createdAt}
+				negativeAt={negativeAt}
 				number={order.number}
 				status={order.status}
 			/>
-			<BuyerInfo buyer={buyer} />
-			<ShippingAddress address={order.shippingAddress} />
-			<OrderTotals
-				discountAmount={order.discountAmount}
-				itemCount={itemCount}
-				paymentMethod={order.paymentMethod}
-				shippingAmount={order.shippingAmount}
-				shippingMethod={order.shippingMethod}
-				subtotalAmount={order.subtotalAmount}
-				totalAmount={order.totalAmount}
-			/>
-			<OrderItems
-				items={items}
-				orderId={order.id}
-				reviewedToolIds={reviewedToolIds}
-				status={order.status}
-			/>
-			<OrderTracking history={history} order={order} />
-			{refund ? (
-				<div className="mt-6 border border-border bg-gray-10">
-					<div className="flex items-center gap-x-3.5 bg-gray-10 px-[18px] py-3">
-						<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
-							Devolução
-						</span>
-						<span className="font-semibold text-[12px] text-near-black">
-							#{refund.id.slice(0, 8)}
-						</span>
-					</div>
-					<OrderRefundBlock
-						refund={{
-							status: refund.status,
-							rejectionReason: refund.rejectionReason,
-							resolvedAt: refund.resolvedAt,
-						}}
-						variant="page"
-					/>
-				</div>
-			) : null}
-			{canRequestRefund ? (
-				<div className="mt-6 flex justify-end">
-					<RequestRefundButton
+			<div className="px-6 py-8 md:px-10">
+				<div className="mx-auto max-w-[920px]">
+					<OrderItems
+						items={items}
 						orderId={order.id}
-						orderNumber={order.number}
+						reviewedToolIds={reviewedToolIds}
+						status={order.status}
+					/>
+					<OrderTotals
+						couponApplied={Boolean(order.couponId)}
+						discountAmount={order.discountAmount}
+						itemCount={itemCount}
+						paymentMethod={order.paymentMethod}
+						shippingAmount={order.shippingAmount}
+						shippingMethod={order.shippingMethod}
+						subtotalAmount={order.subtotalAmount}
 						totalAmount={order.totalAmount}
 					/>
+					<OrderTracking history={history} order={order} />
+					<BuyerInfo buyer={buyer} />
+					<ShippingAddress address={order.shippingAddress} />
+					<OrderDocuments
+						nfeNumber={order.nfeNumber}
+						nfeStatus={order.nfeStatus}
+						nfeUrl={order.nfeUrl}
+						nfeXmlUrl={order.nfeXmlUrl}
+						paymentReceiptUrl={order.paymentReceiptUrl}
+					/>
+					{refund ? (
+						<div className="mt-6 border border-border bg-gray-10">
+							<div className="flex items-center gap-x-3.5 bg-gray-10 px-[18px] py-3">
+								<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+									Devolução
+								</span>
+								<span className="font-semibold text-[13px] text-near-black">
+									#{refund.id.slice(0, 8)}
+								</span>
+							</div>
+							<OrderRefundBlock
+								refund={{
+									status: refund.status,
+									rejectionReason: refund.rejectionReason,
+									resolvedAt: refund.resolvedAt,
+								}}
+								variant="page"
+							/>
+						</div>
+					) : null}
+					{canRequestRefund ? (
+						<div className="mt-6 flex justify-end">
+							<RequestRefundButton
+								orderId={order.id}
+								orderNumber={order.number}
+								totalAmount={order.totalAmount}
+							/>
+						</div>
+					) : null}
+					<OrderActions orderId={order.id} status={order.status} />
 				</div>
-			) : null}
-			<OrderActions
-				nfeUrl={order.nfeUrl}
-				orderId={order.id}
-				status={order.status}
-			/>
-		</div>
+			</div>
+		</>
 	);
 }
