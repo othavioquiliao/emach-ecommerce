@@ -1,29 +1,32 @@
 import type { RefundStatus } from "@emach/db/schema/orders";
-import { cn } from "@emach/ui/lib/utils";
 import {
-	REFUND_BADGE_TONE_CLASS,
+	AccountBadge,
+	type BadgeFamily,
+} from "@/app/dashboard/_components/account-badge";
+import {
 	REFUND_STATUS_BADGE,
+	type RefundBadgeTone,
 } from "@/lib/refunds/status";
 
-interface RefundStatusBadgeProps {
-	className?: string;
-	status: RefundStatus;
-}
+const TONE_TO_FAMILY: Record<RefundBadgeTone, BadgeFamily> = {
+	info: "blue",
+	warning: "amber",
+	progress: "blue",
+	success: "green",
+	muted: "gray",
+};
 
 export function RefundStatusBadge({
 	status,
-	className,
-}: RefundStatusBadgeProps) {
-	const { label, tone } = REFUND_STATUS_BADGE[status];
+	tone = "light",
+}: {
+	status: RefundStatus;
+	tone?: "light" | "dark";
+}) {
+	const { label, tone: badgeTone } = REFUND_STATUS_BADGE[status];
 	return (
-		<span
-			className={cn(
-				"inline-flex items-center border px-2.5 py-1 font-display font-semibold text-[10px] uppercase tracking-[0.14em]",
-				REFUND_BADGE_TONE_CLASS[tone],
-				className
-			)}
-		>
+		<AccountBadge family={TONE_TO_FAMILY[badgeTone]} tone={tone}>
 			{label}
-		</span>
+		</AccountBadge>
 	);
 }
