@@ -450,4 +450,9 @@ Redesign que trouxe o chiaroscuro da home às telas da conta (Overview, Pedidos,
 - **`StatusStepper`: nodes têm largura fixa (`w-[88px]`), nunca `w-[25%]`** — com 4 nodes a 25% somam 100% e espremem as linhas conectoras (`flex-1`) a 0px (somem).
 - Token **`--amber`** (`#d97706`) + `--amber-text` (`#b45309`) foram adicionados em globals.css (`:root` + `@theme inline`) — é o único token de marca novo do redesign.
 
-**Pendente (próximo ciclo):** refatorar `pedidos/[id]` (detalhe + `/pagar`) com estes padrões; eles ainda usam o estilo claro antigo (`order-detail-header`, `section-block`, etc.).
+**Detalhe do pedido (`pedidos/[id]`) — feito (commit `e755299`).** Mesmo padrão: hero escuro full-bleed (`order-detail-header`) com o `StatusStepper` (trilha vermelha, `buildOrderSteps`) embutido — o stepper saiu do `order-tracking` (que agora só mostra código de rastreio + histórico colapsável). Terminal-negativo → aviso sem stepper. Sections continuam claras (`SectionBlock` em `gray-10`, padrão dados-pessoais — o all-dark é só dos cards de lista). Itens ganharam model/sku/fabricante (`MetaChips`); novo bloco `OrderDocuments` (NF-e número + DANFE + XML + status, comprovante de pagamento). A NF-e saiu de `OrderActions` (que ficou só com cancelar/pagar/recomprar).
+
+**Pendente (próximo ciclo):**
+- `pedidos/[id]/pagar` (stub de pagamento Asaas) ainda usa estilo antigo — refatorar quando o pagamento real entrar (roadmap #4).
+- Polir `dados-pessoais` mais um pouco no mesmo padrão.
+- **`OrderDocuments` não expõe `orderAttachment`** (anexos do pedido) porque a tabela não tem flag cliente-vs-interno — expor todos arriscaria vazar documento interno do staff. Precisa de coluna `isCustomerVisible` que **nasce no dashboard** (ADR-0009), depois sincroniza e entra no bloco Documentos.
