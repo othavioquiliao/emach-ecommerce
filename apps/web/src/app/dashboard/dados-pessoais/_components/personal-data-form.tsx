@@ -13,6 +13,7 @@ import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { AccountBadge } from "@/app/dashboard/_components/account-badge";
+import { AccountSection } from "@/app/dashboard/_components/account-section";
 import { authClient } from "@/lib/auth-client";
 import {
 	isValidCpfCnpj,
@@ -42,12 +43,8 @@ export function PersonalDataForm({ initialData }: PersonalDataFormProps) {
 	const [data, setData] = useState(initialData);
 
 	return (
-		<section>
-			<h2 className="mb-6 font-display font-semibold text-[12px] text-gray-50 uppercase tracking-[0.16em]">
-				Seus dados
-			</h2>
-
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+		<AccountSection bodyClassName="p-0" title="Seus dados">
+			<div className="grid grid-cols-1 sm:grid-cols-2">
 				<NameCard
 					initialValue={data.name}
 					onSaved={(v) => setData((d) => ({ ...d, name: v }))}
@@ -62,7 +59,7 @@ export function PersonalDataForm({ initialData }: PersonalDataFormProps) {
 					onSaved={(v) => setData((d) => ({ ...d, document: v }))}
 				/>
 			</div>
-		</section>
+		</AccountSection>
 	);
 }
 
@@ -71,14 +68,20 @@ interface CardShellProps {
 	children: React.ReactNode;
 }
 
+/**
+ * Célula de um campo dentro da seção "Seus dados". Bordas internas formam a
+ * grade (igual à listagem flat do detalhe do pedido) — sem box-in-box. A
+ * borda direita só aparece na coluna esquerda (`sm`); a inferior, nas duas
+ * primeiras células.
+ */
 function CardShell({ accent = "default", children }: CardShellProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-start justify-between gap-4 border bg-gray-10 p-6",
-				accent === "danger"
-					? "border-emach-red bg-emach-red/5"
-					: "border-border"
+				"flex items-start justify-between gap-4 border-border p-5",
+				"border-b sm:[&:nth-child(odd)]:border-r",
+				"sm:[&:nth-child(3)]:border-b-0 [&:nth-child(4)]:border-b-0",
+				accent === "danger" && "bg-emach-red/5"
 			)}
 		>
 			{children}
