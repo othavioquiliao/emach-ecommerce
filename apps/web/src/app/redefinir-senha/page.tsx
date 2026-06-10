@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { ResetPasswordForm } from "./_components/reset-password-form";
+
+export const metadata: Metadata = {
+	title: "Redefinir senha",
+	robots: { index: false, follow: false },
+};
 
 function ResetPasswordFallback() {
 	return (

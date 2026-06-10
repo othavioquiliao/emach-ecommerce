@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { AccountHero } from "@/app/dashboard/_components/account-hero";
 import { listClientOrders } from "@/lib/orders/queries";
 import { requireCurrentClient } from "@/lib/session";
 import { OrdersTabs } from "./_components/orders-tabs";
+
+export const metadata: Metadata = {
+	title: "Meus pedidos",
+};
 
 export default async function PedidosPage() {
 	const session = await requireCurrentClient();

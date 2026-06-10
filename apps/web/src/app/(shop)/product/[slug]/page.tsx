@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/site-header";
 
 import { ProductGallery } from "./_components/product-gallery";
 import { ProductInfo } from "./_components/product-info";
+import { ProductJsonLd } from "./_components/product-json-ld";
 import { ProductReviews } from "./_components/product-reviews";
 import { ProductTabs } from "./_components/product-tabs";
 import { RelatedProducts } from "./_components/related-products";
@@ -52,11 +53,12 @@ export async function generateMetadata({
 	const detail = await getToolBySlug(db, slug);
 
 	if (!detail) {
-		return { title: "Produto não encontrado — EMACH" };
+		return { title: "Produto não encontrado" };
 	}
 
-	const title = `${detail.tool.name} — EMACH`;
+	const title = detail.tool.name;
 	const description = detail.tool.description ?? detail.tool.name;
+	const ogImage = detail.images[0]?.url;
 	return {
 		title,
 		description,
@@ -66,11 +68,13 @@ export async function generateMetadata({
 			type: "website",
 			url: `/product/${detail.tool.slug ?? detail.tool.id}`,
 			siteName: "EMACH",
+			...(ogImage ? { images: [ogImage] } : {}),
 		},
 		twitter: {
 			card: "summary_large_image",
 			title,
 			description,
+			...(ogImage ? { images: [ogImage] } : {}),
 		},
 	};
 }
@@ -104,6 +108,7 @@ export default async function ProductPage({
 
 	return (
 		<>
+			<ProductJsonLd detail={detail} />
 			<SiteHeader />
 
 			<div className="border-border border-b px-20 py-4">

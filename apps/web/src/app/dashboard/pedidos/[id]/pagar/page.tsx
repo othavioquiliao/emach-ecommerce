@@ -1,7 +1,12 @@
+import type { Metadata } from "next";
 import { notFound, redirect } from "next/navigation";
 import { getClientOrderDetail } from "@/lib/orders/queries";
 import { requireCurrentClient } from "@/lib/session";
 import { PaymentMethods } from "./_components/payment-methods";
+
+export const metadata: Metadata = {
+	title: "Pagamento",
+};
 
 export default async function PagarPage({
 	params,

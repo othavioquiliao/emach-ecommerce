@@ -12,9 +12,9 @@ import {
 } from "@/lib/branches";
 
 export const metadata: Metadata = {
-	title: "Sobre a EMACH — Ferramentas Profissionais",
+	title: "Quem somos",
 	description:
-		"Conheça a EMACH, nossa curadoria de ferramentas profissionais e nossas filiais.",
+		"Como escolhemos as ferramentas que vendemos, o suporte que damos antes e depois da compra e onde ficam nossas filiais.",
 };
 
 const aboutPillars = [

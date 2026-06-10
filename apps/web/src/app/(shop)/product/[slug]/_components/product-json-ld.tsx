@@ -1,0 +1,74 @@
+import type { ToolDetail } from "@emach/db/queries/catalog";
+import { numericToCents } from "@/lib/format";
+import { effectiveAutoDiscountCents } from "@/lib/promotions";
+
+const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+
+function finalPriceAmount(
+	priceAmount: string,
+	promotion: ToolDetail["activePromotion"]
+): string {
+	if (!promotion) {
+		return priceAmount;
+	}
+	const baseCents = numericToCents(priceAmount);
+	const discountedCents = effectiveAutoDiscountCents(
+		baseCents,
+		promotion.discountType,
+		promotion.discountValue
+	);
+	if (discountedCents >= baseCents) {
+		return priceAmount;
+	}
+	return (discountedCents / 100).toFixed(2);
+}
+
+export function ProductJsonLd({ detail }: { detail: ToolDetail }) {
+	const { tool, variants, images, stockByVariant, reviewStats } = detail;
+	const url = `${BASE_URL}/product/${tool.slug ?? tool.id}`;
+
+	const offers = variants.map((v) => ({
+		"@type": "Offer",
+		availability: stockByVariant[v.id]
+			? "https://schema.org/InStock"
+			: "https://schema.org/OutOfStock",
+		price: finalPriceAmount(v.priceAmount, detail.activePromotion),
+		priceCurrency: "BRL",
+		sku: v.sku,
+		url,
+	}));
+
+	const data = {
+		"@context": "https://schema.org",
+		"@type": "Product",
+		name: tool.name,
+		...(tool.description ? { description: tool.description } : {}),
+		...(images.length > 0 ? { image: images.map((i) => i.url) } : {}),
+		...(variants[0] ? { sku: variants[0].sku } : {}),
+		...(tool.manufacturerName
+			? { brand: { "@type": "Brand", name: tool.manufacturerName } }
+			: {}),
+		...(offers.length > 0
+			? { offers: offers.length === 1 ? offers[0] : offers }
+			: {}),
+		...(reviewStats.count > 0 && reviewStats.avg !== null
+			? {
+					aggregateRating: {
+						"@type": "AggregateRating",
+						ratingValue: Number(reviewStats.avg.toFixed(2)),
+						reviewCount: reviewStats.count,
+					},
+				}
+			: {}),
+	};
+
+	return (
+		<script
+			// biome-ignore lint/security/noDangerouslySetInnerHtml: JSON-LD exige <script> inline; "<" escapado bloqueia injeção via dados do catálogo
+			dangerouslySetInnerHTML={{
+				__html: JSON.stringify(data).replace(/</g, "\\u003c"),
+			}}
+			type="application/ld+json"
+		/>
+	);
+}

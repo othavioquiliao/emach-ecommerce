@@ -68,20 +68,20 @@ export async function generateMetadata({
 	const { cat, q } = await searchParams;
 	if (q) {
 		return {
-			title: `“${q}” — Catálogo EMACH`,
-			description: `Resultados de busca para “${q}” no catálogo EMACH.`,
+			title: `Busca: “${q}”`,
+			description: `Resultados para “${q}” no catálogo da EMACH.`,
 		};
 	}
 	if (cat) {
 		return {
-			title: `${cat} — Catálogo EMACH`,
-			description: `Explore produtos da categoria ${cat} no catálogo EMACH.`,
+			title: cat,
+			description: `Produtos de ${cat} no catálogo da EMACH, com preço e estoque atualizados.`,
 		};
 	}
 	return {
-		title: "Catálogo — EMACH",
+		title: "Catálogo",
 		description:
-			"Explore ferramentas elétricas, manuais, equipamentos de medição e segurança EMACH.",
+			"Todas as ferramentas da EMACH: elétricas, manuais, medição e EPIs. Filtre por categoria, voltagem e preço.",
 	};
 }
 

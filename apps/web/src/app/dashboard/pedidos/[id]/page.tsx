@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import { getClientOrderDetail } from "@/lib/orders/queries";
 import {
@@ -16,6 +17,10 @@ import { OrderTotals } from "./_components/order-totals";
 import { OrderTracking } from "./_components/order-tracking";
 import { RequestRefundButton } from "./_components/request-refund-button";
 import { ShippingAddress } from "./_components/shipping-address";
+
+export const metadata: Metadata = {
+	title: "Detalhes do pedido",
+};
 
 interface PageProps {
 	params: Promise<{ id: string }>;

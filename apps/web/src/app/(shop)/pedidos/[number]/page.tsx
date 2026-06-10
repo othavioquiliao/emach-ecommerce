@@ -11,9 +11,17 @@ import { SiteHeader } from "@/components/site-header";
 import { fmtNumericBRL } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
 
-export const metadata: Metadata = {
-	title: "Pedido — EMACH",
-};
+export async function generateMetadata({
+	params,
+}: {
+	params: Promise<{ number: string }>;
+}): Promise<Metadata> {
+	const { number } = await params;
+	return {
+		title: `Pedido #${number}`,
+		robots: { index: false, follow: false },
+	};
+}
 
 interface AddressSnapshot {
 	city?: string;
