@@ -7,8 +7,8 @@ import { requireCurrentClient } from "@/lib/session";
 import { CheckoutContent } from "./_components/checkout-content";
 
 export const metadata: Metadata = {
-	title: "Checkout — EMACH",
-	description: "Finalize seu pedido EMACH com segurança.",
+	title: "Finalizar compra",
+	description: "Endereço de entrega, frete e pagamento do seu pedido.",
 };
 
 export default async function CheckoutPage() {

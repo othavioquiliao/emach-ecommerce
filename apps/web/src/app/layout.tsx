@@ -23,12 +23,22 @@ export const metadata: Metadata = {
 		process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001"
 	),
 	title: {
-		default: "EMACH — Ferramentas Profissionais",
-		template: "%s",
+		default: "EMACH Ferramentas — Furadeiras, Serras e EPIs",
+		template: "%s · EMACH",
 	},
 	description:
-		"Ferramentas elétricas e manuais de alta performance para profissionais.",
+		"Furadeiras, serras, equipamentos de medição e EPIs para obra e oficina. Compra direta na EMACH, com envio para todo o Brasil.",
 	applicationName: "EMACH",
+	openGraph: {
+		siteName: "EMACH",
+		type: "website",
+		locale: "pt_BR",
+		images: ["/images/og-default.png"],
+	},
+	twitter: {
+		card: "summary_large_image",
+		images: ["/images/og-default.png"],
+	},
 };
 
 export const viewport: Viewport = {

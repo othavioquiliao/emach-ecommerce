@@ -1,7 +1,13 @@
+import type { Metadata } from "next";
 import { SiteHeader } from "@/components/site-header";
 import { requireCurrentClient } from "@/lib/session";
 import { DashboardNavMobile } from "./_components/dashboard-nav-mobile";
 import { DashboardSidebar } from "./_components/dashboard-sidebar";
+
+export const metadata: Metadata = {
+	title: "Minha conta",
+	robots: { index: false, follow: false },
+};
 
 export default async function DashboardLayout({
 	children,

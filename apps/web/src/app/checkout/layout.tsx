@@ -1,7 +1,12 @@
 import { AlertTriangle } from "lucide-react";
+import type { Metadata } from "next";
 
 import { CheckoutFooter } from "@/components/checkout-footer";
 import { CheckoutHeader } from "@/components/checkout-header";
+
+export const metadata: Metadata = {
+	robots: { index: false, follow: false },
+};
 
 export default function CheckoutLayout({
 	children,

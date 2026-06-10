@@ -1,5 +1,11 @@
+import type { Metadata } from "next";
 import { Suspense } from "react";
 import { VerifyEmailContent } from "./_components/verify-email-content";
+
+export const metadata: Metadata = {
+	title: "Verificar e-mail",
+	robots: { index: false, follow: false },
+};
 
 function VerifyEmailFallback() {
 	return (

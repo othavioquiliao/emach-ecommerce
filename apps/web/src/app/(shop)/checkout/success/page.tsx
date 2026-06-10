@@ -7,8 +7,8 @@ import { PageContainer } from "@/components/page-container";
 import { SiteHeader } from "@/components/site-header";
 
 export const metadata: Metadata = {
-	title: "Pedido confirmado — EMACH",
-	description: "Seu pedido EMACH foi confirmado com sucesso.",
+	title: "Pedido confirmado",
+	description: "Recebemos seu pedido e ele já está em processamento.",
 	robots: { index: false, follow: false },
 };
 

@@ -14,8 +14,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	const staticRoutes: MetadataRoute.Sitemap = [
 		{ url: `${BASE_URL}/`, lastModified: now, priority: 1 },
 		{ url: `${BASE_URL}/catalog`, lastModified: now, priority: 0.9 },
-		{ url: `${BASE_URL}/cart`, lastModified: now, priority: 0.4 },
-		{ url: `${BASE_URL}/login`, lastModified: now, priority: 0.4 },
+		{ url: `${BASE_URL}/sobre`, lastModified: now, priority: 0.5 },
 	];
 
 	const [toolSlugs, categorySlugs] = await Promise.all([

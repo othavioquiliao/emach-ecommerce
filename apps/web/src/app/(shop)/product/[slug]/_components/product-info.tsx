@@ -144,7 +144,7 @@ export function ProductInfo({
 				? `/product/${tool.slug ?? tool.id}`
 				: window.location.href;
 		const data = {
-			title: `${tool.name} — EMACH`,
+			title: `${tool.name} · EMACH`,
 			text: tool.description ?? tool.name,
 			url,
 		};

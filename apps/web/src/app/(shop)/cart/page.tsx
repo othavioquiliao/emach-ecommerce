@@ -4,8 +4,9 @@ import { SiteHeader } from "@/components/site-header";
 import { CartContent } from "./_components/cart-content";
 
 export const metadata: Metadata = {
-	title: "Carrinho — EMACH",
-	description: "Revise os itens do seu carrinho e finalize a compra.",
+	title: "Carrinho",
+	description: "Revise os itens do seu carrinho e siga para o pagamento.",
+	robots: { index: false, follow: false },
 };
 
 export default function CartPage() {

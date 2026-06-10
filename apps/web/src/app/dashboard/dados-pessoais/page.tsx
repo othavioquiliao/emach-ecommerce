@@ -1,11 +1,16 @@
 import { db } from "@emach/db";
 import { clientAddress } from "@emach/db/schema/client";
 import { desc, eq } from "drizzle-orm";
+import type { Metadata } from "next";
 
 import { requireCurrentClient } from "@/lib/session";
 import { AddressesSection } from "./_components/addresses-section";
 import { PersonalDataForm } from "./_components/personal-data-form";
 import { ProfileHeader } from "./_components/profile-header";
+
+export const metadata: Metadata = {
+	title: "Dados pessoais",
+};
 
 export default async function PersonalDataPage() {
 	const session = await requireCurrentClient();
