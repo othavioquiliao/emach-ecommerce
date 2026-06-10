@@ -157,7 +157,7 @@ export function BranchMap({
 								<span className="font-display font-semibold text-[20px] text-white">
 									{p.name}
 								</span>
-								<span className="font-display font-semibold text-[12px] text-emach-red uppercase tracking-[0.1em]">
+								<span className="font-display font-semibold text-[12px] text-emach-red-on-dark uppercase tracking-[0.1em]">
 									{p.uf}
 								</span>
 							</div>

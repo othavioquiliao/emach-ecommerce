@@ -65,7 +65,7 @@ export async function BranchMapSection() {
 		<section className="overflow-hidden border-emach-red border-y-2 bg-cinema-3 text-white [color-scheme:dark]">
 			<PageContainer className="grid min-h-110 grid-cols-1 px-0 md:grid-cols-[36%_1fr]">
 				<div className="flex flex-col justify-center gap-4 px-10 py-16 md:px-16">
-					<SectionLabel tone="accent">Onde estamos</SectionLabel>
+					<SectionLabel tone="accent-on-dark">Onde estamos</SectionLabel>
 					<h2 className="font-display font-semibold text-[42px] leading-[1.0] tracking-[-0.01em]">
 						Perto de quem
 						<br />

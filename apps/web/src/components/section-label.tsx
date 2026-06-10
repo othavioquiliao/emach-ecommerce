@@ -9,6 +9,7 @@ const sectionLabelVariants = cva(
 				default: "text-gray-50",
 				light: "text-white/70",
 				accent: "text-emach-red",
+				"accent-on-dark": "text-emach-red-on-dark",
 			},
 		},
 		defaultVariants: {
