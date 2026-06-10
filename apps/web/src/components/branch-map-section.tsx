@@ -1,0 +1,100 @@
+import Link from "next/link";
+import { BranchMap } from "@/components/branch-map";
+import { EmachButton } from "@/components/emach-button";
+import { PageContainer } from "@/components/page-container";
+import { SectionLabel } from "@/components/section-label";
+import { BRAZIL_STATES, BRAZIL_VIEWBOX } from "@/lib/branch-map/brazil-states";
+import { cityToXY } from "@/lib/branch-map/geocode";
+import {
+	buildMapMaskDataUri,
+	buildMapSvgDataUri,
+} from "@/lib/branch-map/map-svg";
+import type { BranchPin, StateShape } from "@/lib/branch-map/types";
+import {
+	branchMapsUrl,
+	formatBranchAddress,
+	formatBusinessHours,
+	formatPhone,
+	getActiveBranches,
+} from "@/lib/branches";
+import { log } from "@/lib/evlog";
+
+export async function BranchMapSection() {
+	const branches = await getActiveBranches();
+
+	const pins: BranchPin[] = [];
+	for (const b of branches) {
+		const xy = b.city && b.state ? cityToXY(b.city, b.state) : null;
+		if (!xy) {
+			log.warn({
+				action: "branch_map_geocode_miss",
+				branchId: b.id,
+				city: b.city,
+				uf: b.state,
+			});
+			continue;
+		}
+		pins.push({
+			id: b.id,
+			name: b.name,
+			city: b.city ?? "",
+			uf: (b.state ?? "").toUpperCase(),
+			address: formatBranchAddress(b),
+			phone: formatPhone(b.phone),
+			hours: formatBusinessHours(b.businessHours),
+			x: xy[0],
+			y: xy[1],
+			mapsUrl: branchMapsUrl(b),
+		});
+	}
+
+	if (pins.length === 0) {
+		return null;
+	}
+
+	const ufsWithBranch = new Set(pins.map((p) => p.uf));
+	const states: StateShape[] = BRAZIL_STATES.map((s) => ({
+		...s,
+		highlighted: ufsWithBranch.has(s.uf),
+	}));
+	const mapUri = buildMapSvgDataUri(states, BRAZIL_VIEWBOX);
+	const mapMaskUri = buildMapMaskDataUri(states, BRAZIL_VIEWBOX);
+	const [, , mapWidth, mapHeight] = BRAZIL_VIEWBOX.split(" ").map(Number);
+
+	return (
+		<section className="overflow-hidden border-emach-red border-y-2 bg-cinema-3 text-white [color-scheme:dark]">
+			<PageContainer className="grid min-h-110 grid-cols-1 px-0 md:grid-cols-[36%_1fr]">
+				<div className="flex flex-col justify-center gap-4 px-10 py-16 md:px-16">
+					<SectionLabel tone="accent">Onde estamos</SectionLabel>
+					<h2 className="font-display font-semibold text-[42px] leading-[1.0] tracking-[-0.01em]">
+						Perto de quem
+						<br />
+						coloca a mão
+						<br />
+						na massa.
+					</h2>
+					<p className="max-w-[42ch] text-[15px] text-white/70 leading-relaxed">
+						{pins.length === 1 ? "Loja física" : `${pins.length} lojas físicas`}{" "}
+						no Sul e Sudeste. Você passa, vê a ferramenta na bancada, tira
+						dúvida com quem usa e leva com nota fiscal.
+					</p>
+					<div className="mt-1">
+						<Link href="/sobre">
+							<EmachButton size="lg" variant="outline-light">
+								Ver filiais →
+							</EmachButton>
+						</Link>
+					</div>
+				</div>
+
+				<BranchMap
+					mapHeight={mapHeight}
+					mapMaskUri={mapMaskUri}
+					mapUri={mapUri}
+					mapWidth={mapWidth}
+					pins={pins}
+				/>
+			</PageContainer>
+		</section>
+	);
+}

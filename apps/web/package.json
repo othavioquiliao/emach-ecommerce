@@ -38,6 +38,7 @@
     "@types/node": "^22.13.14",
     "@types/react": "catalog:",
     "@types/react-dom": "catalog:",
+    "d3-geo": "^3.1.1",
     "tailwindcss": "catalog:",
     "typescript": "^6",
     "vitest": "^2.1.8"

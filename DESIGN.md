@@ -401,6 +401,17 @@ Card de produto **escuro** e flat (sem box-shadow). Borda hairline branca (`bord
 ### CategoryTile (dark, home)
 Tile **escuro cinematográfico** (`.emach-bg-tile-spot` — spotlight radial de estúdio), aspect `4/5`, borda hairline branca. A ferramenta (PNG recortado, fundo transparente) flutua centralizada com **cor plena** (`object-contain`), **sem overlay** por cima — o degradê escuro (`.emach-bg-tile-foot`) fica só na base, pra legibilidade do nome. Número-índice **marca d'água** monumental (`text-[220px]`, outline branco → vermelho no destaque) sangrando o canto inferior direito. Régua vermelha (fade-in) + seta `ArrowRight` (desloca) reagem no destaque; "Explorar" fica branco. **Auto-cycle** (`category-grid.tsx`): o destaque percorre os tiles automaticamente (~2,6s) pra revelar a interação — pausa quando o mouse entra no grid (aí o `:hover` real assume) e desliga em `prefers-reduced-motion`. O estado de destaque (`data-active`) espelha o `:hover` via `group-data-[active=true]:`.
 
+### Branch map — seção "Onde estamos" (PR #71)
+Seção **dark cinematográfica** (`bg-cinema-3` #0A0A0A) com **borda vermelha em cima e embaixo** (`border-y-2 border-emach-red`) emoldurando a faixa — acento Ferrari de fechamento, dentro da regra "vermelho é verbo". Grid 36%/64%: à esquerda o copy (`SectionLabel` "Onde estamos" + h2 + CTA `outline-light` "Ver filiais"), à direita o **mapa do Brasil + lista de filiais**.
+
+**Render do mapa (decisões não-óbvias):**
+- O mapa base é uma **`<img>` com SVG data-URI** (`lib/branch-map/map-svg.ts > buildMapSvgDataUri`), não SVG inline — fundo `#0A0A0A` (= a seção, sem "quadrado"), estados em branco translúcido (`fill-opacity` 0.05 / 0.13 nos destacados) sobre o preto = a silhueta cinza com a diferenciação dos estados.
+- Uma **`mask-image`** no formato da silhueta (`buildMapMaskDataUri`) recorta o retângulo, garantindo que nada de fundo "vaze" além do Brasil.
+- Os **pins são overlay HTML** (`<a>` posicionados por `left/top` % das coords projetadas), **não** elementos SVG — permite hover/click nativos e fica imune ao tratamento de imagem do navegador. Círculo vermelho pequeno (`h-2.5`, cresce no destaque) + glow.
+- Os paths dos estados vêm de `brazil-states.ts` (gerado offline). **Geração tem gotcha crítico** — ver `CLAUDE.md > Gotchas` (projeção manual, nunca `geoPath`).
+
+**Interação:** **auto-cycle** (`branch-map.tsx`, ~2,2s) percorre as filiais destacando pin + card da lista (mesmo padrão do `CategoryTile`); **pausa** quando o mouse entra (o hover real assume) e **desliga** em `prefers-reduced-motion`. Hover no pin ↔ destaque do card é sincronizado; com >3 filiais a lista vira carrossel com scroll interno até a filial ativa (sem mover a página). Click no pin/card → Google Maps ("Como chegar"). Componentes: `branch-map-section.tsx` (server) + `branch-map.tsx` (client).
+
 ### ProductImage
 Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrench`, `medicao→Ruler`, `seguranca→Shield`, `acessorios→Disc3`. Radial gradient background. Zoom `group-hover:scale-[1.04]` (zoom-**in**) quando `zoom` ativo. Component: `src/components/product-image.tsx`.
 
