@@ -1,0 +1,33 @@
+# .graphifyignore — exclui ruído da análise do knowledge graph (graphify)
+# Sintaxe: gitignore. node_modules/.next/dist/lockfiles já são pulados por padrão.
+# Objetivo: tirar manifestos de config que viram json-keys soltas (scripts,
+# compilerOptions, dependencies) sem valor arquitetural. As dependências REAIS
+# entre packages continuam capturadas via `import` no AST.
+
+# Manifestos de package/build (geram ~193 nós de ruído: scripts, deps, etc.)
+package.json
+turbo.json
+
+# TypeScript config (compilerOptions, paths)
+tsconfig.json
+tsconfig.*.json
+tsconfig.base.json
+
+# Lint/format/UI config
+biome.json
+components.json
+
+# Tooling do Claude Code / MCP (skills, servers — não é código do produto)
+.mcp.json
+skills-lock.json
+.claude/
+.agents/
+.superpowers/
+.github/skills/
+
+# Caches de build não cobertos pelo default
+.turbo/
+
+# Lockfiles extras não cobertos pelo default
+bun.lock
+bun.lockb
