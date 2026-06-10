@@ -183,7 +183,7 @@ export default async function AboutPage() {
 								aria-hidden="true"
 								className="absolute inset-x-0 top-12 bottom-12 hidden -skew-x-12 border border-white/15 lg:block"
 							/>
-							<div className="relative flex flex-col items-center text-center">
+							<div className="relative flex -skew-x-[9deg] flex-col items-center text-center">
 								<div className="font-bold font-display text-[12px] text-white/55 uppercase tracking-[0.2em]">
 									Presença local
 								</div>
