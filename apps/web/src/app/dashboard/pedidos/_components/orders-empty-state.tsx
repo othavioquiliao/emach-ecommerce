@@ -15,7 +15,7 @@ export function OrdersEmptyState({ statusLabel }: OrdersEmptyStateProps) {
 	return (
 		<div className="flex flex-col items-center justify-center border border-border bg-gray-10 px-6 py-16 text-center">
 			<PackageOpen className="mb-4 h-12 w-12 text-gray-50" strokeWidth={1.2} />
-			<p className="mb-6 text-[14px] text-gray-60">{text}</p>
+			<p className="mb-6 text-[15px] text-gray-60">{text}</p>
 			<Link href="/catalog">
 				<EmachButton size="sm" variant="outline">
 					Ir ao catálogo

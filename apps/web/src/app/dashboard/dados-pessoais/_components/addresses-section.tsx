@@ -1,11 +1,10 @@
 "use client";
 
 import type { ClientAddress } from "@emach/db/schema/client";
-import { cn } from "@emach/ui/lib/utils";
 import { useRouter } from "next/navigation";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { toast } from "sonner";
-
+import { AccountSection } from "@/app/dashboard/_components/account-section";
 import { setDefaultAddressAction } from "@/app/dashboard/dados-pessoais/_actions/addresses";
 
 import { AddressSheet, type AddressSheetMode } from "./address-sheet";
@@ -23,105 +22,78 @@ export function AddressesSection({ addresses }: AddressesSectionProps) {
 	const [sheetMode, setSheetMode] = useState<AddressSheetMode>(null);
 	const [expanded, setExpanded] = useState(false);
 
-	const { primary, others } = useMemo(() => {
-		const sorted = [...addresses].sort((a, b) => {
-			if (a.isDefault && !b.isDefault) {
-				return -1;
-			}
-			if (!a.isDefault && b.isDefault) {
-				return 1;
-			}
-			return b.updatedAt.getTime() - a.updatedAt.getTime();
-		});
-		return { primary: sorted[0] ?? null, others: sorted.slice(1) };
-	}, [addresses]);
+	const sorted = [...addresses].sort((a, b) => {
+		if (a.isDefault && !b.isDefault) {
+			return -1;
+		}
+		if (!a.isDefault && b.isDefault) {
+			return 1;
+		}
+		return b.updatedAt.getTime() - a.updatedAt.getTime();
+	});
+	const primary = sorted[0] ?? null;
+	const others = sorted.slice(1);
 
 	const hasOthers = addresses.length > 0;
 
 	return (
-		<section>
-			<header className="mb-10 border-near-black border-b-2 pb-6">
-				<div className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
-					Minha conta
-				</div>
-				<h2 className="mt-2 font-semibold text-[32px] text-near-black leading-tight tracking-tight">
-					Endereço de Entrega
-				</h2>
-				<p className="mt-3 max-w-[560px] text-[14px] text-gray-50">
-					Cadastre o endereço onde quer receber seus pedidos. Você pode salvar
-					mais de um e escolher na hora da compra.
-				</p>
-			</header>
-
+		<AccountSection bodyClassName="p-0" title="Endereço de entrega">
 			{primary === null ? (
 				<EmptyState
 					onAdd={() => setSheetMode({ kind: "create", hasOthers: false })}
 				/>
 			) : (
-				<div className="space-y-3">
+				<div className="divide-y divide-border">
 					<AddressCard
 						address={primary}
-						highlighted
 						onEdit={() => setSheetMode({ kind: "edit", address: primary })}
 					/>
 
 					{others.length > 0 && (
-						<>
-							<button
-								className="font-display font-semibold text-[11px] text-near-black uppercase tracking-[0.14em] hover:underline"
-								onClick={() => setExpanded((v) => !v)}
-								type="button"
-							>
-								{expanded
-									? `Ocultar outros endereços (${others.length})`
-									: `Ver outros endereços (${others.length})`}
-							</button>
-
-							{expanded && (
-								<div className="space-y-3">
-									{others.map((addr) => (
-										<AddressCard
-											address={addr}
-											key={addr.id}
-											onEdit={() =>
-												setSheetMode({ kind: "edit", address: addr })
-											}
-										/>
-									))}
-								</div>
-							)}
-						</>
-					)}
-
-					<div className="pt-4">
 						<button
-							className="font-display font-semibold text-[12px] text-near-black uppercase tracking-[0.08em] hover:underline"
-							onClick={() => setSheetMode({ kind: "create", hasOthers })}
+							className="w-full px-5 py-3 text-left font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em] hover:text-near-black"
+							onClick={() => setExpanded((v) => !v)}
 							type="button"
 						>
-							+ Adicionar endereço
+							{expanded
+								? `Ocultar outros endereços (${others.length})`
+								: `Ver outros endereços (${others.length})`}
 						</button>
-					</div>
+					)}
+
+					{expanded &&
+						others.map((addr) => (
+							<AddressCard
+								address={addr}
+								key={addr.id}
+								onEdit={() => setSheetMode({ kind: "edit", address: addr })}
+							/>
+						))}
+
+					<button
+						className="w-full px-5 py-3.5 text-left font-display font-semibold text-[12px] text-near-black uppercase tracking-[0.08em] hover:underline"
+						onClick={() => setSheetMode({ kind: "create", hasOthers })}
+						type="button"
+					>
+						+ Adicionar endereço
+					</button>
 				</div>
 			)}
 
 			<AddressSheet mode={sheetMode} onClose={() => setSheetMode(null)} />
-		</section>
+		</AccountSection>
 	);
 }
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
 	return (
-		<div className="flex items-start justify-between gap-4 border border-emach-red bg-emach-red/5 p-6">
+		<div className="flex items-start justify-between gap-4 bg-emach-red/5 p-5">
 			<div className="min-w-0 flex-1">
 				<div className="font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.14em]">
-					Endereço de Entrega
-				</div>
-				<div className="mt-1 text-[14px] text-gray-50 italic">
 					Nenhum endereço cadastrado
 				</div>
-				<div className="mt-1 text-[11px] text-gray-50">
-					Necessário para finalizar compras
+				<div className="mt-1 text-[13px] text-gray-60">
+					Necessário para finalizar compras.
 				</div>
 			</div>
 			<button
@@ -137,15 +109,10 @@ function EmptyState({ onAdd }: { onAdd: () => void }) {
 
 interface AddressCardProps {
 	address: ClientAddress;
-	highlighted?: boolean;
 	onEdit: () => void;
 }
 
-function AddressCard({
-	address,
-	highlighted = false,
-	onEdit,
-}: AddressCardProps) {
+function AddressCard({ address, onEdit }: AddressCardProps) {
 	const router = useRouter();
 	const [isPending, startTransition] = useTransition();
 
@@ -171,12 +138,7 @@ function AddressCard({
 	].join(" · ");
 
 	return (
-		<div
-			className={cn(
-				"flex items-start justify-between gap-4 border bg-gray-10 p-6",
-				highlighted ? "border-near-black" : "border-border"
-			)}
-		>
+		<div className="flex items-start justify-between gap-4 p-5">
 			<div className="min-w-0 flex-1">
 				<div className="flex items-center gap-2">
 					<div className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">

@@ -5,6 +5,7 @@ import { desc, eq } from "drizzle-orm";
 import { requireCurrentClient } from "@/lib/session";
 import { AddressesSection } from "./_components/addresses-section";
 import { PersonalDataForm } from "./_components/personal-data-form";
+import { ProfileHeader } from "./_components/profile-header";
 
 export default async function PersonalDataPage() {
 	const session = await requireCurrentClient();
@@ -23,17 +24,22 @@ export default async function PersonalDataPage() {
 		.orderBy(desc(clientAddress.isDefault), desc(clientAddress.updatedAt));
 
 	return (
-		<div className="space-y-16">
-			<PersonalDataForm
-				initialData={{
-					name: user.name,
-					email: user.email,
-					emailVerified: user.emailVerified,
-					phone: user.phone ?? null,
-					document: user.document ?? null,
-				}}
-			/>
-			<AddressesSection addresses={addresses} />
-		</div>
+		<>
+			<ProfileHeader name={user.name} />
+			<div className="px-6 py-8 md:px-10">
+				<div className="mx-auto max-w-[920px]">
+					<PersonalDataForm
+						initialData={{
+							name: user.name,
+							email: user.email,
+							emailVerified: user.emailVerified,
+							phone: user.phone ?? null,
+							document: user.document ?? null,
+						}}
+					/>
+					<AddressesSection addresses={addresses} />
+				</div>
+			</div>
+		</>
 	);
 }

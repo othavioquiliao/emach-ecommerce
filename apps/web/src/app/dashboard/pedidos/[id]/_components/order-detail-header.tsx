@@ -1,8 +1,10 @@
 import type { OrderStatus } from "@emach/db/schema/orders";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Ban } from "lucide-react";
 import Link from "next/link";
-import { SectionLabel } from "@/components/section-label";
-import { type BadgeTone, ORDER_STATUS_BADGE } from "@/lib/orders/status";
+import { StatusStepper } from "@/app/dashboard/_components/status-stepper";
+import { isTerminalNegative, ORDER_STATUS_BADGE } from "@/lib/orders/status";
+import { OrderStatusBadge } from "../../_components/order-status-badge";
+import { buildOrderSteps } from "../../_components/order-steps";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	day: "2-digit",
@@ -10,58 +12,89 @@ const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	year: "numeric",
 });
 
-const TONE_BG: Record<BadgeTone, string> = {
-	neutral: "bg-gray-50 text-white",
-	danger: "bg-emach-red text-white",
-	info: "bg-info text-white",
-	progress: "bg-near-black text-white",
-	transit: "bg-near-black text-white",
-	success: "bg-success text-white",
-	muted: "bg-gray-50 text-white",
-	warning: "bg-warning text-white",
-};
+const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
+	day: "2-digit",
+	month: "2-digit",
+	year: "numeric",
+	hour: "2-digit",
+	minute: "2-digit",
+});
 
 export function OrderDetailHeader({
 	createdAt,
 	number,
 	status,
+	negativeAt,
 }: {
 	createdAt: Date;
+	negativeAt: Date | null;
 	number: string;
 	status: OrderStatus;
 }) {
-	const { label, tone } = ORDER_STATUS_BADGE[status];
+	const negative = isTerminalNegative(status);
+
 	return (
-		<header className="mb-7">
+		<header className="border-emach-red border-b-[3px] bg-near-black px-6 py-8 text-white md:px-10">
 			<Link
-				className="mb-6 flex w-fit items-center gap-1.5 font-semibold text-[12px] text-gray-60 tracking-[0.04em] hover:text-near-black"
+				className="mb-6 inline-flex w-fit items-center gap-1.5 font-semibold text-[13px] text-white/55 tracking-[0.04em] transition-colors hover:text-white"
 				href="/dashboard/pedidos"
 			>
-				<ArrowLeft className="h-3.5 w-3.5" strokeWidth={1.8} />
+				<ArrowLeft className="h-4 w-4" strokeWidth={1.8} />
 				Voltar para Pedidos
 			</Link>
-			<SectionLabel>Pedido</SectionLabel>
-			<h1 className="mt-1.5 mb-1.5 break-all font-display font-medium text-[36px] leading-none">
-				#{number}
-			</h1>
-			<div className="flex flex-wrap items-center gap-x-3.5 gap-y-2 text-[12px] text-gray-60">
-				<span>
-					Realizado em{" "}
-					<strong className="font-semibold text-near-black">
-						{DATE_FMT.format(createdAt)}
-					</strong>
-				</span>
-				<span aria-hidden="true">·</span>
-				<span
-					className={`inline-flex h-[22px] items-center gap-1.5 px-2.5 font-display font-semibold text-[11px] uppercase tracking-[0.12em] ${TONE_BG[tone]}`}
-				>
-					<span
-						aria-hidden="true"
-						className="h-1.5 w-1.5 rounded-full bg-current"
-					/>
-					{label}
-				</span>
+
+			<div className="flex flex-wrap items-end justify-between gap-x-6 gap-y-4">
+				<div className="min-w-0">
+					<div className="font-display font-semibold text-[13px] text-gray-50 uppercase tracking-[0.18em]">
+						Pedido
+					</div>
+					<h1 className="mt-1.5 break-all font-display font-medium text-[44px] leading-[0.95]">
+						#{number}
+					</h1>
+					<p className="mt-2.5 text-[14px] text-white/65">
+						Realizado em{" "}
+						<strong className="font-semibold text-white">
+							{DATE_FMT.format(createdAt)}
+						</strong>
+					</p>
+				</div>
+				<OrderStatusBadge status={status} tone="dark" />
+			</div>
+
+			<div className="mt-7 border border-white/12">
+				{negative ? (
+					<NegativeNotice at={negativeAt} status={status} />
+				) : (
+					<StatusStepper steps={buildOrderSteps(status)} tone="dark" />
+				)}
 			</div>
 		</header>
+	);
+}
+
+function NegativeNotice({
+	status,
+	at,
+}: {
+	at: Date | null;
+	status: OrderStatus;
+}) {
+	const { label } = ORDER_STATUS_BADGE[status];
+	return (
+		<div className="flex items-center gap-3.5 px-[18px] py-4">
+			<span className="flex h-[38px] w-[38px] shrink-0 items-center justify-center rounded-full border border-white/25 text-white/70">
+				<Ban className="h-[19px] w-[19px]" strokeWidth={1.8} />
+			</span>
+			<div>
+				<div className="font-display font-semibold text-[14px] text-white uppercase tracking-[0.08em]">
+					{label}
+				</div>
+				{at ? (
+					<div className="text-[13px] text-white/55">
+						{DATETIME_FMT.format(at)}
+					</div>
+				) : null}
+			</div>
+		</div>
 	);
 }

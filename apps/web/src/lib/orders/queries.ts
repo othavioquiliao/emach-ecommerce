@@ -44,12 +44,14 @@ const ORDER_ITEM_COLUMNS = {
 	quantity: orderItem.quantity,
 	lineTotal: orderItem.lineTotal,
 	discountAmount: orderItem.discountAmount,
+	manufacturerName: orderItem.manufacturerName,
 } as const;
 
 export interface OrderItemRow {
 	discountAmount: string;
 	id: string;
 	lineTotal: string;
+	manufacturerName: string | null;
 	model: string | null;
 	name: string;
 	orderId: string;

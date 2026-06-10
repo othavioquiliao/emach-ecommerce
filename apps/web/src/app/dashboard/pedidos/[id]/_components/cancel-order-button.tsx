@@ -6,7 +6,13 @@ import { toast } from "sonner";
 import { EmachButton } from "@/components/emach-button";
 import { cancelOrderAction } from "../../_actions/orders";
 
-export function CancelOrderButton({ orderId }: { orderId: string }) {
+export function CancelOrderButton({
+	orderId,
+	variant = "ghost",
+}: {
+	orderId: string;
+	variant?: "outline" | "outline-light" | "ghost";
+}) {
 	const [confirming, setConfirming] = useState(false);
 	const [pending, start] = useTransition();
 	const router = useRouter();
@@ -34,7 +40,7 @@ export function CancelOrderButton({ orderId }: { orderId: string }) {
 			onBlur={() => setConfirming(false)}
 			onClick={onClick}
 			size="sm"
-			variant="ghost"
+			variant={variant}
 		>
 			{confirming ? "Confirmar cancelamento?" : "Cancelar pedido"}
 		</EmachButton>

@@ -1,7 +1,8 @@
+import { AccountSection } from "@/app/dashboard/_components/account-section";
 import { fmtNumericBRL } from "@/lib/format";
-import { SectionBlock } from "./section-block";
 
 interface OrderTotalsProps {
+	couponApplied?: boolean;
 	discountAmount: string;
 	itemCount: number;
 	paymentMethod: string | null;
@@ -34,7 +35,7 @@ function PriceRow({
 }) {
 	const tone = emphasis === "discount" ? "text-emach-red" : "text-near-black";
 	return (
-		<div className="flex items-center justify-between border-border border-b border-dashed py-2 text-[13px] last:border-b-0">
+		<div className="flex items-center justify-between border-border border-b border-dashed py-2.5 text-[14px] last:border-b-0">
 			<span className={tone}>{label}</span>
 			<span className={tone}>{value}</span>
 		</div>
@@ -42,6 +43,7 @@ function PriceRow({
 }
 
 export function OrderTotals({
+	couponApplied,
 	discountAmount,
 	itemCount,
 	paymentMethod,
@@ -53,7 +55,7 @@ export function OrderTotals({
 	const hasDiscount = Number(discountAmount) > 0;
 	const shippingFree = Number(shippingAmount) === 0;
 	return (
-		<SectionBlock title="Valores">
+		<AccountSection title="Valores">
 			<PriceRow
 				label={`Subtotal (${itemCount} ${itemCount === 1 ? "item" : "itens"})`}
 				value={fmtNumericBRL(subtotalAmount)}
@@ -65,7 +67,7 @@ export function OrderTotals({
 			{hasDiscount ? (
 				<PriceRow
 					emphasis="discount"
-					label="Desconto"
+					label={couponApplied ? "Desconto (cupom)" : "Desconto"}
 					value={`−${fmtNumericBRL(discountAmount)}`}
 				/>
 			) : null}
@@ -89,6 +91,6 @@ export function OrderTotals({
 					</div>
 				</div>
 			) : null}
-		</SectionBlock>
+		</AccountSection>
 	);
 }

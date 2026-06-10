@@ -48,7 +48,7 @@ export const authEcommerce = betterAuth({
 		},
 	},
 	emailVerification: {
-		sendOnSignUp: false,
+		sendOnSignUp: true,
 		autoSignInAfterVerification: true,
 		sendVerificationEmail: async ({ user, url }) => {
 			await sendEmail({
@@ -63,15 +63,6 @@ export const authEcommerce = betterAuth({
 			clientId: env.GOOGLE_CLIENT_ID,
 			clientSecret: env.GOOGLE_CLIENT_SECRET,
 		}),
-	},
-	databaseHooks: {
-		user: {
-			create: {
-				before: async (user) => ({
-					data: { ...user, emailVerified: true },
-				}),
-			},
-		},
 	},
 	user: {
 		modelName: "client",

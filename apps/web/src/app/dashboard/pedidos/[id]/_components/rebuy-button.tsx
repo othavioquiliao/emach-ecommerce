@@ -12,7 +12,7 @@ export function RebuyButton({
 	variant = "outline",
 }: {
 	orderId: string;
-	variant?: "outline" | "primary" | "ghost";
+	variant?: "outline" | "outline-light" | "primary" | "ghost";
 }) {
 	const { add } = useCart();
 	const [pending, start] = useTransition();

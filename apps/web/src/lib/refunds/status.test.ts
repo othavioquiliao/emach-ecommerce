@@ -3,6 +3,8 @@ import {
 	countRefundsByTab,
 	REFUND_REASON_OPTIONS,
 	REFUND_STATUS_BADGE,
+	REFUND_STEPPER_PHASES,
+	refundStepDisplayState,
 	statusToRefundTab,
 } from "./status";
 
@@ -58,5 +60,26 @@ describe("REFUND_STATUS_BADGE / REFUND_REASON_OPTIONS", () => {
 		expect(REFUND_REASON_OPTIONS).toHaveLength(5);
 		expect(REFUND_REASON_OPTIONS[0]).toBe("defeito");
 		expect(REFUND_REASON_OPTIONS.at(-1)).toBe("outro");
+	});
+});
+
+describe("refundStepDisplayState", () => {
+	it("under_review: solicitado done, em análise current", () => {
+		expect(refundStepDisplayState("under_review", "requested")).toBe("done");
+		expect(refundStepDisplayState("under_review", "under_review")).toBe(
+			"current"
+		);
+		expect(refundStepDisplayState("under_review", "approved")).toBe("upcoming");
+	});
+
+	it("refunded: fase final é 'ok' (verde), as anteriores done", () => {
+		expect(refundStepDisplayState("refunded", "approved")).toBe("done");
+		expect(refundStepDisplayState("refunded", "refunded")).toBe("ok");
+	});
+
+	it("rejected é terminal-negativo: tudo upcoming (card não mostra stepper)", () => {
+		for (const phase of REFUND_STEPPER_PHASES) {
+			expect(refundStepDisplayState("rejected", phase)).toBe("upcoming");
+		}
 	});
 });

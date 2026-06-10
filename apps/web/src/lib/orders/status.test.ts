@@ -3,6 +3,7 @@ import {
 	countByTab,
 	isTerminalNegative,
 	ORDER_STATUS_BADGE,
+	orderStepDisplayState,
 	statusToTab,
 	stepStateFor,
 } from "./status";
@@ -107,5 +108,25 @@ describe("isTerminalNegative", () => {
 		expect(isTerminalNegative("returned")).toBe(true);
 		expect(isTerminalNegative("delivered")).toBe(false);
 		expect(isTerminalNegative("pending_payment")).toBe(false);
+	});
+});
+
+describe("orderStepDisplayState", () => {
+	it("pending_payment marca a fase 'paid' (Pagamento) como current", () => {
+		expect(orderStepDisplayState("pending_payment", "paid")).toBe("current");
+		expect(orderStepDisplayState("pending_payment", "preparing")).toBe(
+			"upcoming"
+		);
+	});
+
+	it("payment_failed também marca 'paid' como current", () => {
+		expect(orderStepDisplayState("payment_failed", "paid")).toBe("current");
+	});
+
+	it("demais status delegam a stepStateFor", () => {
+		expect(orderStepDisplayState("shipped", "paid")).toBe("done");
+		expect(orderStepDisplayState("shipped", "preparing")).toBe("done");
+		expect(orderStepDisplayState("shipped", "shipped")).toBe("current");
+		expect(orderStepDisplayState("shipped", "delivered")).toBe("upcoming");
 	});
 });

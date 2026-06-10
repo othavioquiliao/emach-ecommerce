@@ -1,25 +1,39 @@
 import type { OrderStatus } from "@emach/db/schema/orders";
-import { cn } from "@emach/ui/lib/utils";
-import { BADGE_TONE_CLASS, ORDER_STATUS_BADGE } from "@/lib/orders/status";
+import {
+	AccountBadge,
+	type BadgeFamily,
+} from "@/app/dashboard/_components/account-badge";
+import type { BadgeTone } from "@/lib/orders/status";
+import { ORDER_STATUS_BADGE } from "@/lib/orders/status";
+
+const TONE_TO_FAMILY: Record<BadgeTone, BadgeFamily> = {
+	neutral: "amber",
+	danger: "red",
+	info: "blue",
+	progress: "blue",
+	transit: "blue",
+	success: "green",
+	muted: "gray",
+	// refunded/returned são terminais (encerrados), não "atenção" — cinza os
+	// distingue do âmbar de pending_payment.
+	warning: "gray",
+};
 
 export function OrderStatusBadge({
 	status,
-	className,
+	tone = "light",
 }: {
-	className?: string;
 	status: OrderStatus;
+	tone?: "light" | "dark";
 }) {
-	const { label, tone } = ORDER_STATUS_BADGE[status];
+	const { label, tone: badgeTone } = ORDER_STATUS_BADGE[status];
 	return (
-		<span
-			className={cn(
-				"inline-flex items-center border px-2.5 py-1 font-display font-semibold text-[10px] uppercase tracking-[0.14em]",
-				BADGE_TONE_CLASS[tone],
-				tone === "muted" && "line-through",
-				className
-			)}
+		<AccountBadge
+			className={badgeTone === "muted" ? "line-through" : undefined}
+			family={TONE_TO_FAMILY[badgeTone]}
+			tone={tone}
 		>
 			{label}
-		</span>
+		</AccountBadge>
 	);
 }

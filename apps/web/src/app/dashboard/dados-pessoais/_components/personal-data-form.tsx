@@ -12,6 +12,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
+import { AccountBadge } from "@/app/dashboard/_components/account-badge";
+import { AccountSection } from "@/app/dashboard/_components/account-section";
 import { authClient } from "@/lib/auth-client";
 import {
 	isValidCpfCnpj,
@@ -41,21 +43,8 @@ export function PersonalDataForm({ initialData }: PersonalDataFormProps) {
 	const [data, setData] = useState(initialData);
 
 	return (
-		<section>
-			<header className="mb-10 border-near-black border-b-2 pb-6">
-				<div className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
-					Minha conta
-				</div>
-				<h1 className="mt-2 font-semibold text-[32px] text-near-black leading-tight tracking-tight">
-					Dados Pessoais
-				</h1>
-				<p className="mt-3 max-w-[560px] text-[14px] text-gray-50">
-					Mantenha suas informações atualizadas para garantir que pedidos e
-					notas fiscais sejam emitidos corretamente.
-				</p>
-			</header>
-
-			<div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+		<AccountSection bodyClassName="p-0" title="Seus dados">
+			<div className="grid grid-cols-1 sm:grid-cols-2">
 				<NameCard
 					initialValue={data.name}
 					onSaved={(v) => setData((d) => ({ ...d, name: v }))}
@@ -70,7 +59,7 @@ export function PersonalDataForm({ initialData }: PersonalDataFormProps) {
 					onSaved={(v) => setData((d) => ({ ...d, document: v }))}
 				/>
 			</div>
-		</section>
+		</AccountSection>
 	);
 }
 
@@ -79,14 +68,20 @@ interface CardShellProps {
 	children: React.ReactNode;
 }
 
+/**
+ * Célula de um campo dentro da seção "Seus dados". Bordas internas formam a
+ * grade (igual à listagem flat do detalhe do pedido) — sem box-in-box. A
+ * borda direita só aparece na coluna esquerda (`sm`); a inferior, nas duas
+ * primeiras células.
+ */
 function CardShell({ accent = "default", children }: CardShellProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-start justify-between gap-4 border bg-gray-10 p-6",
-				accent === "danger"
-					? "border-emach-red bg-emach-red/5"
-					: "border-border"
+				"flex items-start justify-between gap-4 border-border p-5",
+				"border-b sm:[&:nth-child(odd)]:border-r",
+				"sm:[&:nth-child(3)]:border-b-0 [&:nth-child(4)]:border-b-0",
+				accent === "danger" && "bg-emach-red/5"
 			)}
 		>
 			{children}
@@ -191,7 +186,7 @@ function NameCard({
 			<CardShell>
 				<div className="min-w-0 flex-1">
 					<FieldLabel>Nome</FieldLabel>
-					<div className="mt-1 truncate text-[16px] text-near-black">
+					<div className="mt-1 truncate text-[17px] text-near-black">
 						{initialValue}
 					</div>
 				</div>
@@ -255,21 +250,56 @@ function NameCard({
 }
 
 function EmailCard({ email, verified }: { email: string; verified: boolean }) {
+	const [sending, setSending] = useState(false);
+
+	const handleVerify = async () => {
+		setSending(true);
+		try {
+			await authClient.sendVerificationEmail(
+				{ email, callbackURL: "/dashboard/dados-pessoais" },
+				{
+					onSuccess: () => {
+						toast.success("E-mail de verificação enviado");
+					},
+					onError: (err) => {
+						toast.error(err.error.message || "Não foi possível enviar.");
+					},
+				}
+			);
+		} finally {
+			setSending(false);
+		}
+	};
+
 	return (
 		<CardShell>
 			<div className="min-w-0 flex-1">
-				<FieldLabel>E-mail</FieldLabel>
-				<div className="mt-1 truncate text-[16px] text-near-black">{email}</div>
-				<div className="mt-1 text-[11px] text-gray-50">Somente leitura</div>
-			</div>
-			<span
-				className={cn(
-					"shrink-0 px-2 py-1 font-display font-semibold text-[10px] text-white uppercase tracking-[0.08em]",
-					verified ? "bg-[#0a8a0a]" : "bg-gray-50"
+				<div className="flex items-center justify-between gap-2">
+					<FieldLabel>E-mail</FieldLabel>
+					<AccountBadge family={verified ? "green" : "amber"}>
+						{verified ? "Verificado" : "Não verificado"}
+					</AccountBadge>
+				</div>
+				<div className="mt-2 truncate text-[17px] text-near-black">{email}</div>
+				{verified ? (
+					<div className="mt-1 text-[12px] text-gray-50">Somente leitura</div>
+				) : (
+					<div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-border border-t border-dashed pt-3">
+						<span className="text-[13px] text-gray-60">
+							Confirme seu e-mail para receber atualizações de pedido.
+						</span>
+						<Button
+							className="shrink-0 rounded-none border-amber-text text-amber-text"
+							disabled={sending}
+							onClick={handleVerify}
+							type="button"
+							variant="outline"
+						>
+							{sending ? "Enviando..." : "Verificar e-mail"}
+						</Button>
+					</div>
 				)}
-			>
-				{verified ? "Verificado" : "Pendente"}
-			</span>
+			</div>
 		</CardShell>
 	);
 }
@@ -302,7 +332,7 @@ function PhoneCard({
 				<div className="min-w-0 flex-1">
 					<FieldLabel>Telefone</FieldLabel>
 					{initialValue ? (
-						<div className="mt-1 text-[16px] text-near-black">
+						<div className="mt-1 text-[17px] text-near-black">
 							{maskPhone(initialValue)}
 						</div>
 					) : (
@@ -410,7 +440,7 @@ function DocumentCard({
 						CPF / CNPJ
 					</FieldLabel>
 					{initialValue ? (
-						<div className="mt-1 text-[16px] text-near-black">
+						<div className="mt-1 text-[17px] text-near-black">
 							{maskCpfCnpj(initialValue)}
 						</div>
 					) : (
@@ -418,8 +448,9 @@ function DocumentCard({
 							<div className="mt-1 text-[14px] text-gray-50 italic">
 								Não informado
 							</div>
-							<div className="mt-1 text-[11px] text-gray-50">
-								Necessário para emitir nota fiscal
+							<div className="mt-1 text-[12px] text-gray-50">
+								Você também informa na finalização da compra, ao emitir a nota
+								fiscal.
 							</div>
 						</>
 					)}
