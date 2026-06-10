@@ -3,8 +3,6 @@ import {
 	getStoreSocialLinks,
 	type SocialNetwork,
 } from "@emach/db/queries/store-settings";
-import { branch as branchTable } from "@emach/db/schema/inventory";
-import { asc, eq } from "drizzle-orm";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -12,22 +10,15 @@ import type { ComponentProps } from "react";
 
 import { PageContainer } from "@/components/page-container";
 
-const linkClassName =
-	"rounded-[2px] font-medium text-[13.5px] text-gray-20 no-underline transition-colors duration-150 ease-out hover:text-emach-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3";
-
-const headingClassName =
-	"mb-3.5 font-display font-semibold text-[12.5px] text-white uppercase tracking-[0.14em]";
+const navLinkClassName =
+	"rounded-[2px] font-display font-medium text-[14px] text-gray-20 uppercase tracking-[0.06em] no-underline transition-colors duration-150 ease-out hover:text-emach-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3";
 
 const navLinks: { href: Route; label: string }[] = [
 	{ href: "/catalog", label: "Catálogo" },
 	{ href: "/catalog", label: "Categorias" },
 	{ href: "/catalog?promo=1" as Route, label: "Ofertas" },
 	{ href: "/catalog?sort=newest" as Route, label: "Novidades" },
-];
-
-const institutionalLinks: { href: Route; label: string }[] = [
-	{ href: "/sobre", label: "Sobre a EMACH" },
-	{ href: "/sobre#filiais" as Route, label: "Filiais" },
+	{ href: "/sobre", label: "Sobre" },
 ];
 
 const socialNetworkMeta: Record<
@@ -75,29 +66,13 @@ function SocialIcon({
 	);
 }
 
-function getFooterBranches() {
-	return db
-		.select({
-			id: branchTable.id,
-			name: branchTable.name,
-			state: branchTable.state,
-		})
-		.from(branchTable)
-		.where(eq(branchTable.status, "active"))
-		.orderBy(asc(branchTable.createdAt), asc(branchTable.id))
-		.limit(3);
-}
-
 export async function SiteFooter() {
-	const [branches, socialLinks] = await Promise.all([
-		getFooterBranches(),
-		getStoreSocialLinks(db),
-	]);
+	const socialLinks = await getStoreSocialLinks(db);
 
 	return (
 		<footer className="bg-cinema-3 text-gray-60" role="contentinfo">
 			<PageContainer className="py-10">
-				<div className="grid grid-cols-1 gap-10 md:grid-cols-2 lg:grid-cols-[1.7fr_1fr_1fr_1.1fr] lg:gap-11">
+				<div className="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
 					<div>
 						<Link
 							aria-label="EMACH"
@@ -113,96 +88,51 @@ export async function SiteFooter() {
 								width={2041}
 							/>
 						</Link>
-						<p className="mt-3.5 max-w-62.5 text-[13px] text-gray-55 leading-relaxed">
+						<p className="mt-3.5 max-w-[40ch] text-[13.5px] text-gray-55 leading-relaxed">
 							Ferramentas profissionais que não abandonam você no meio da obra.
 						</p>
-						{socialLinks.length > 0 && (
-							<nav
-								aria-label="Redes sociais"
-								className="mt-4 flex items-center gap-4"
-							>
-								{socialLinks.map(({ network, url }) => (
-									<a
-										aria-label={socialNetworkMeta[network].label}
-										className="rounded-[2px] text-gray-20 transition-colors hover:text-emach-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3"
-										href={url}
-										key={network}
-										rel="noopener noreferrer"
-										target="_blank"
-									>
-										<SocialIcon network={network} />
-									</a>
-								))}
-							</nav>
-						)}
-						<div className="mt-6 text-[12.5px] text-gray-55 leading-relaxed">
-							<p className="font-medium text-gray-20">
-								EMACH Ferramentas Gerais LTDA
-							</p>
-							<p>CNPJ 04.128.615/0001-59</p>
-							<p>
-								<span className="text-emach-red">©</span> 2026 EMACH. Todos os
-								direitos reservados.
-							</p>
-						</div>
 					</div>
 
-					<nav aria-label="Navegar">
-						<h4 className={headingClassName}>Navegar</h4>
-						<ul className="flex flex-col gap-2.5">
-							{navLinks.map((link) => (
-								<li key={link.label}>
-									<Link className={linkClassName} href={link.href}>
-										{link.label}
-									</Link>
-								</li>
-							))}
-						</ul>
+					<nav
+						aria-label="Navegar"
+						className="flex flex-wrap gap-x-7 gap-y-2.5 md:justify-end md:pt-1.5"
+					>
+						{navLinks.map((link) => (
+							<Link
+								className={navLinkClassName}
+								href={link.href}
+								key={link.label}
+							>
+								{link.label}
+							</Link>
+						))}
 					</nav>
+				</div>
 
-					<nav aria-label="Institucional">
-						<h4 className={headingClassName}>Institucional</h4>
-						<ul className="flex flex-col gap-2.5">
-							{institutionalLinks.map((link) => (
-								<li key={link.label}>
-									<Link className={linkClassName} href={link.href}>
-										{link.label}
-									</Link>
-								</li>
-							))}
-						</ul>
-					</nav>
-
-					<nav aria-label="Filiais">
-						<h4 className={headingClassName}>Filiais</h4>
-						<ul className="flex flex-col gap-2.5">
-							{branches.map((branch) => (
-								<li key={branch.id}>
-									<Link
-										className="flex flex-col rounded-[2px] no-underline transition-colors hover:text-emach-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3"
-										href={"/sobre#filiais" as Route}
-									>
-										<span className="font-medium text-[13.5px] text-gray-20">
-											{branch.name}
-										</span>
-										{branch.state && (
-											<span className="font-display text-[11px] text-gray-55 uppercase tracking-[0.12em]">
-												{branch.state}
-											</span>
-										)}
-									</Link>
-								</li>
-							))}
-							<li className="mt-1">
-								<Link
-									className="inline-flex items-center gap-1.5 rounded-[2px] font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.1em] no-underline transition-colors hover:text-emach-red-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3"
-									href={"/sobre#filiais" as Route}
+				<div className="mt-8 flex flex-col gap-5 border-[#1f1f1f] border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
+					<p className="text-[12px] text-gray-60 leading-relaxed">
+						<span className="font-medium text-gray-20">
+							EMACH Ferramentas Gerais LTDA
+						</span>
+						<span className="mx-1.5">·</span>
+						CNPJ 04.128.615/0001-59
+					</p>
+					{socialLinks.length > 0 && (
+						<nav aria-label="Redes sociais" className="flex items-center gap-4">
+							{socialLinks.map(({ network, url }) => (
+								<a
+									aria-label={socialNetworkMeta[network].label}
+									className="rounded-[2px] text-gray-20 transition-colors hover:text-emach-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3"
+									href={url}
+									key={network}
+									rel="noopener noreferrer"
+									target="_blank"
 								>
-									Ver todas →
-								</Link>
-							</li>
-						</ul>
-					</nav>
+									<SocialIcon network={network} />
+								</a>
+							))}
+						</nav>
+					)}
 				</div>
 			</PageContainer>
 		</footer>
