@@ -345,6 +345,10 @@ Brand tokens live in `:root` **and** are registered in `@theme inline` so Tailwi
 **Brand palette**:
 `--emach-red` (#DA291C), `--emach-red-hover` (#B01E0A), `--emach-red-deep` (#9D2211), `--near-black` (#181818), `--gray-10/20/50/55/60/90`, `--warning` (#F13A2C), `--success` (#16A34A), `--info` (#4C98B9), `--link-hover` (#3860BE).
 
+**`*-on-dark` — variantes claras p/ detalhe pequeno no escuro** (`--emach-red-on-dark` #F39B92, `--success-on-dark` #7FDFA0, `--info-on-dark` #8FD0E8, `--amber-on-dark` #F9C77E; do #74).
+
+> **Regra de vermelho sobre superfície escura (cinema-3 / near-black / black):** o **`--emach-red` puro continua a cor principal**, inclusive no escuro — tudo que é **protagonista** usa vermelho vivo: kickers de seção (`SectionLabel tone="accent"`), CTAs/botões `primary`, dígitos de countdown, © e links de destaque do footer, selos, pins e bordas/réguas. `--emach-red-on-dark` (#F39B92) é **exceção, só para detalhe pequeno/secundário** onde o vermelho puro (~4:1, sub-AA) prejudicaria a leitura e o elemento **não** é protagonista — ex.: a **UF da filial** na lista do branch map, badges de status (`AccountBadge` família `red` + `tone="dark"`, #74). Nunca usar on-dark num elemento principal "só pra passar no contraste"; se é protagonista, é vermelho vivo.
+
 **Surface / gradient stops** (supplementing brand palette):
 `--black` (#000), `--image-bg` (#ECECEC — product placeholder tile), `--cinema-1/2/3` (#2A2A2A / #1A1A1A / #0A0A0A — cinematic hero gradients), `--placeholder-light/mid/dark` (#F6F6F6 / #D8D8D8 / #C8C8C8 — radial used when product has no image).
 
@@ -411,6 +415,8 @@ Seção **dark cinematográfica** (`bg-cinema-3` #0A0A0A) com **borda vermelha e
 - Os paths dos estados vêm de `brazil-states.ts` (gerado offline). **Geração tem gotcha crítico** — ver `CLAUDE.md > Gotchas` (projeção manual, nunca `geoPath`).
 
 **Interação:** **auto-cycle** (`branch-map.tsx`, ~2,2s) percorre as filiais destacando pin + card da lista (mesmo padrão do `CategoryTile`); **pausa** quando o mouse entra (o hover real assume) e **desliga** em `prefers-reduced-motion`. Hover no pin ↔ destaque do card é sincronizado; com >3 filiais a lista vira carrossel com scroll interno até a filial ativa (sem mover a página). Click no pin/card → Google Maps ("Como chegar"). Componentes: `branch-map-section.tsx` (server) + `branch-map.tsx` (client).
+
+**Cor (aplica a regra de vermelho-no-escuro acima):** kicker "Onde estamos" (`SectionLabel tone="accent"`), pins, bordas/régua e selos em `--emach-red` puro — são protagonistas. Só a **UF** ao lado do nome da filial usa `--emach-red-on-dark` (detalhe pequeno legível no escuro). O kicker "Ofertas" (`PromoHighlight`) segue a mesma lógica: vermelho puro.
 
 ### ProductImage
 Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrench`, `medicao→Ruler`, `seguranca→Shield`, `acessorios→Disc3`. Radial gradient background. Zoom `group-hover:scale-[1.04]` (zoom-**in**) quando `zoom` ativo. Component: `src/components/product-image.tsx`.

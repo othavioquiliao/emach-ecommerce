@@ -21,7 +21,7 @@ export function PromoHighlight({
 			<PageContainer className="px-14 py-18">
 				<div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
 					<div className="flex flex-col gap-3">
-						<SectionLabel tone="accent-on-dark">Ofertas</SectionLabel>
+						<SectionLabel tone="accent">Ofertas</SectionLabel>
 						<h2 className="font-display font-medium text-[44px] text-white leading-[1.02] tracking-[-0.01em]">
 							{promotion.title}
 						</h2>
