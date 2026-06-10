@@ -24,6 +24,11 @@
 	--amber: #d97706;
 	--amber-text: #b45309;
 	--link-hover: #3860be;
+	/* Texto de status legível sobre superfície escura (hero/cards near-black) */
+	--success-on-dark: #7fdfa0;
+	--info-on-dark: #8fd0e8;
+	--amber-on-dark: #f9c77e;
+	--emach-red-on-dark: #f39b92;
 
 	/* Surfaces */
 	--black: #000;
@@ -612,6 +617,10 @@
 	--color-info: var(--info);
 	--color-amber: var(--amber);
 	--color-amber-text: var(--amber-text);
+	--color-success-on-dark: var(--success-on-dark);
+	--color-info-on-dark: var(--info-on-dark);
+	--color-amber-on-dark: var(--amber-on-dark);
+	--color-emach-red-on-dark: var(--emach-red-on-dark);
 	--color-link-hover: var(--link-hover);
 	--color-emach-red: var(--emach-red);
 	--color-emach-red-hover: var(--emach-red-hover);

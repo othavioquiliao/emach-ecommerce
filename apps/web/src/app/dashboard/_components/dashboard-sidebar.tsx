@@ -30,7 +30,7 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 				<div className="font-semibold text-[16px]">{userName}</div>
 			</div>
 
-			<nav className="flex flex-1 flex-col">
+			<nav aria-label="Navegação da conta" className="flex flex-1 flex-col">
 				{NAV_ITEMS.map((item) => {
 					if (item.kind === "link") {
 						const active = pathname === item.href;

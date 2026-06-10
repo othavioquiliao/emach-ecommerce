@@ -10,7 +10,10 @@ export function DashboardNavMobile() {
 	const pathname = usePathname();
 
 	return (
-		<nav className="flex gap-1 overflow-x-auto border-white/10 border-b bg-near-black px-3 md:hidden">
+		<nav
+			aria-label="Navegação da conta"
+			className="flex gap-1 overflow-x-auto border-white/10 border-b bg-near-black px-3 md:hidden"
+		>
 			{NAV_ITEMS.map((item) => {
 				if (item.kind === "link") {
 					const active = pathname === item.href;

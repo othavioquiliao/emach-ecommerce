@@ -11,10 +11,10 @@ const FAMILY_LIGHT: Record<BadgeFamily, string> = {
 };
 
 const FAMILY_DARK: Record<BadgeFamily, string> = {
-	amber: "text-[#F9C77E] border-[#F9C77E]/40 bg-amber/20",
-	blue: "text-[#8FD0E8] border-[#8FD0E8]/35 bg-info/25",
-	green: "text-[#7FDFA0] border-[#7FDFA0]/35 bg-success/20",
-	red: "text-[#F39B92] border-[#F39B92]/40 bg-emach-red/20",
+	amber: "text-amber-on-dark border-amber-on-dark/40 bg-amber/20",
+	blue: "text-info-on-dark border-info-on-dark/35 bg-info/25",
+	green: "text-success-on-dark border-success-on-dark/35 bg-success/20",
+	red: "text-emach-red-on-dark border-emach-red-on-dark/40 bg-emach-red/20",
 	gray: "text-gray-50 border-white/25 bg-white/5",
 };
 
