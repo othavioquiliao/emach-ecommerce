@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 
 import { PageContainer } from "@/components/page-container";
-import { SectionLabel } from "@/components/section-label";
 import { SiteHeader } from "@/components/site-header";
 import {
 	branchMapsUrl,
@@ -21,17 +20,17 @@ const aboutPillars = [
 	{
 		id: "curadoria",
 		label: "Curadoria",
-		title: "Desenvolvidas para uso profissional.",
+		title: "Escolhidas pra trabalho pesado",
 		description:
-			"Projetadas para atender às demandas de aplicação industrial e construtiva.",
+			"Cada ferramenta do catálogo aguenta rotina de obra e indústria, sem item de vitrine",
 		tone: "light",
 	},
 	{
 		id: "atendimento",
 		label: "Atendimento",
-		title: "Suporte antes e depois da compra.",
+		title: "Suporte de quem entende de ferramenta",
 		description:
-			"Equipe especializada para auxiliar na escolha técnica, acionamento de garantia e resolução de ocorrências.",
+			"A gente ajuda a escolher e resolve se der problema, da garantia ao reparo",
 		tone: "dark",
 	},
 ] as const;
@@ -40,26 +39,24 @@ const sideNotes = [
 	{
 		id: "linha-profissional",
 		label: "Linha profissional",
-		text: "Ferramentas dimensionadas para rotina profissional.",
+		text: "Feitas pra trabalhar todo dia, não pro fim de semana",
 	},
 	{
 		id: "presenca-fisica",
 		label: "Presença física",
-		text: "Unidades físicas para retirada, atendimento técnico presencial e suporte pós-venda.",
+		text: "Loja de verdade: você retira, testa e tira dúvida pessoalmente",
 	},
 	{
 		id: "garantia",
 		label: "Garantia",
-		text: "Cobertura técnica realizada pela própria Emach, com responsabilidade direta sobre projeto, peças e mão de obra.",
+		text: "A garantia é nossa, não terceirizada: peça e mão de obra por conta da EMACH",
 	},
 ] as const;
 
 interface BranchCardData {
-	accent: "red" | "dark";
 	address: string;
 	hours: string | null;
 	id: string;
-	kicker: string;
 	locality: string;
 	mapEmbedUrl: string | null;
 	mapsUrl: string | null;
@@ -93,7 +90,7 @@ function buildMapsEmbedUrl(query: string) {
 async function getBranches(): Promise<BranchCardData[]> {
 	const rows = await getActiveBranches();
 
-	return rows.map((row, index) => {
+	return rows.map((row) => {
 		const address = formatBranchAddress(row);
 		const locality = [row.city, row.state].filter(Boolean).join("/");
 		const mapsQuery = [row.street, row.streetNumber, row.neighborhood, locality]
@@ -102,7 +99,6 @@ async function getBranches(): Promise<BranchCardData[]> {
 
 		return {
 			id: row.id,
-			kicker: `Filial ${String(index + 1).padStart(2, "0")}`,
 			name: row.name,
 			locality,
 			address,
@@ -110,7 +106,6 @@ async function getBranches(): Promise<BranchCardData[]> {
 			hours: formatBusinessHours(row.businessHours),
 			mapEmbedUrl: mapsQuery ? buildMapsEmbedUrl(mapsQuery) : null,
 			mapsUrl: mapsQuery ? branchMapsUrl(row) : null,
-			accent: index % 2 === 0 ? "red" : "dark",
 		};
 	});
 }
@@ -143,15 +138,9 @@ export default async function AboutPage() {
 
 					<PageContainer className="relative grid min-h-[calc(100svh-56px)] grid-cols-1 gap-8 px-6 py-12 sm:px-8 lg:grid-cols-[minmax(0,1.05fr)_360px_minmax(0,0.9fr)] lg:px-12 lg:py-14 xl:gap-10">
 						<div className="flex flex-col justify-between gap-10">
-							<div>
-								<div className="mb-5 flex items-center gap-3">
-									<div className="h-0.5 w-10 bg-emach-red" />
-									<SectionLabel tone="light">Sobre a EMACH</SectionLabel>
-								</div>
-								<h1 className="max-w-180 text-balance font-bold font-display text-[clamp(46px,8vw,82px)] leading-[0.88] tracking-[-0.02em]">
-									Equipamento profissional, suporte especializado.
-								</h1>
-							</div>
+							<h1 className="max-w-180 text-balance font-bold font-display text-[clamp(46px,8vw,82px)] leading-[0.88] tracking-[-0.02em]">
+								Ferramenta profissional, e quem responde por ela
+							</h1>
 
 							<div className="grid gap-3 sm:grid-cols-2">
 								{aboutPillars.map((pillar) => (
@@ -194,22 +183,16 @@ export default async function AboutPage() {
 								aria-hidden="true"
 								className="absolute inset-x-0 top-12 bottom-12 hidden -skew-x-12 border border-white/15 lg:block"
 							/>
-							<div className="relative flex min-h-80 w-full flex-col justify-between bg-emach-red p-7 text-white sm:min-h-95">
-								<div className="font-bold font-display text-[11px] uppercase tracking-[0.18em]">
+							<div className="relative flex flex-col items-center text-center">
+								<div className="font-bold font-display text-[11px] text-white/55 uppercase tracking-[0.18em]">
 									Presença local
 								</div>
-								<div>
-									<div className="font-bold font-display text-[clamp(112px,17vw,168px)] leading-[0.72] tracking-[-0.08em]">
-										{branchCount}
-									</div>
-									<div className="mt-3 font-bold font-display text-[clamp(38px,5vw,48px)] leading-[0.86] tracking-[-0.03em]">
-										{branchLabel}
-									</div>
+								<div className="my-1 font-display font-semibold text-[clamp(120px,17vw,180px)] text-transparent leading-[0.8] tracking-[-0.05em] [-webkit-text-stroke:2.5px_#da291c]">
+									{branchCount}
 								</div>
-								<p className="max-w-62.5 text-[13px] text-white/85 leading-relaxed">
-									{branchCount} {branchLabel} para retirada, atendimento técnico
-									presencial e suporte pós-venda.
-								</p>
+								<div className="font-bold font-display text-[clamp(30px,4vw,42px)] text-white leading-[0.86] tracking-[-0.03em]">
+									{branchLabel}
+								</div>
 							</div>
 						</div>
 
@@ -242,12 +225,9 @@ export default async function AboutPage() {
 				>
 					<PageContainer className="px-6 sm:px-8 lg:px-12">
 						<div className="mb-6 flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
-							<div>
-								<SectionLabel>Filiais</SectionLabel>
-								<h2 className="mt-2 max-w-155 font-bold font-display text-[clamp(36px,5vw,52px)] text-near-black leading-[0.95] tracking-[-0.01em]">
-									Confira nossas filiais.
-								</h2>
-							</div>
+							<h2 className="max-w-155 font-bold font-display text-[clamp(36px,5vw,52px)] text-near-black leading-[0.95] tracking-[-0.01em]">
+								Onde a gente te atende
+							</h2>
 							<div
 								aria-hidden="true"
 								className="h-0.5 w-40 bg-near-black sm:w-55"
@@ -267,24 +247,22 @@ export default async function AboutPage() {
 }
 
 function BranchCard({ branch }: { branch: BranchCardData }) {
-	const isRed = branch.accent === "red";
-
-	return (
-		<article className="grid overflow-hidden border border-gray-20 bg-gray-10 lg:grid-rows-[minmax(210px,240px)_auto]">
-			<div className="relative min-h-55 overflow-hidden bg-gray-20">
+	const inner = (
+		<>
+			<div className="relative min-h-55 overflow-hidden bg-[#232323]">
 				{branch.mapEmbedUrl ? (
 					<iframe
-						allowFullScreen
-						className="absolute inset-0 h-full w-full border-0 grayscale"
+						className="pointer-events-none absolute inset-0 h-full w-full border-0 grayscale"
 						loading="lazy"
 						referrerPolicy="no-referrer-when-downgrade"
 						src={branch.mapEmbedUrl}
+						tabIndex={-1}
 						title={`Mapa da filial ${branch.name}`}
 					/>
 				) : (
-					<div className="absolute inset-0 bg-gray-20" />
+					<div className="absolute inset-0 bg-[#232323]" />
 				)}
-				<div className="pointer-events-none absolute inset-0 bg-near-black/12 mix-blend-multiply" />
+				<div className="pointer-events-none absolute inset-0 bg-near-black/35 mix-blend-multiply" />
 
 				<div className="absolute right-5 bottom-4 min-w-37.5 bg-emach-red p-3 text-white">
 					<div className="font-bold font-display text-[10px] text-white uppercase tracking-[0.16em]">
@@ -302,40 +280,47 @@ function BranchCard({ branch }: { branch: BranchCardData }) {
 			</div>
 
 			<div className="grid gap-5 p-5 sm:grid-cols-[1fr_auto] sm:items-end">
-				<div className="grid gap-2 text-[13px] text-gray-60 leading-relaxed">
+				<div className="grid gap-2 text-[13px] text-white/62 leading-relaxed">
 					<div>
-						<strong className="text-near-black">Endereço</strong>:{" "}
-						{branch.address}
+						<strong className="text-white">Endereço</strong>: {branch.address}
 					</div>
 					{branch.phone && (
 						<div>
-							<strong className="text-near-black">Telefone</strong>:{" "}
-							{branch.phone}
+							<strong className="text-white">Telefone</strong>: {branch.phone}
 						</div>
 					)}
 					{branch.hours && (
 						<div>
-							<strong className="text-near-black">Horário</strong>:{" "}
-							{branch.hours}
+							<strong className="text-white">Horário</strong>: {branch.hours}
 						</div>
 					)}
 				</div>
 
 				{branch.mapsUrl && (
-					<a
-						className={
-							isRed
-								? "inline-flex h-10.5 items-center justify-center border border-emach-red bg-white px-5 font-bold text-[13px] text-emach-red transition-colors hover:bg-emach-red hover:text-white"
-								: "inline-flex h-10.5 items-center justify-center border border-emach-red bg-white px-5 font-bold text-[13px] text-emach-red transition-colors hover:bg-emach-red hover:text-white"
-						}
-						href={branch.mapsUrl}
-						rel="noopener"
-						target="_blank"
-					>
+					<span className="inline-flex h-10.5 items-center justify-center border border-white/60 px-5 font-bold text-[13px] text-white uppercase tracking-[0.08em] transition-colors group-hover:border-emach-red group-hover:bg-emach-red group-hover:text-white">
 						Ver rota
-					</a>
+					</span>
 				)}
 			</div>
-		</article>
+		</>
+	);
+
+	const className =
+		"group grid overflow-hidden border border-black bg-near-black text-white transition-colors hover:border-white/25 lg:grid-rows-[minmax(210px,240px)_auto]";
+
+	if (!branch.mapsUrl) {
+		return <article className={className}>{inner}</article>;
+	}
+
+	return (
+		<a
+			aria-label={`Ver rota da filial ${branch.name} no Google Maps`}
+			className={`${className} cursor-pointer`}
+			href={branch.mapsUrl}
+			rel="noopener"
+			target="_blank"
+		>
+			{inner}
+		</a>
 	);
 }
