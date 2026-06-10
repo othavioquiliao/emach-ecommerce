@@ -184,13 +184,13 @@ export default async function AboutPage() {
 								className="absolute inset-x-0 top-12 bottom-12 hidden -skew-x-12 border border-white/15 lg:block"
 							/>
 							<div className="relative flex flex-col items-center text-center">
-								<div className="font-bold font-display text-[11px] text-white/55 uppercase tracking-[0.18em]">
+								<div className="font-bold font-display text-[12px] text-white/55 uppercase tracking-[0.2em]">
 									Presença local
 								</div>
-								<div className="my-1 font-display font-semibold text-[clamp(120px,17vw,180px)] text-transparent leading-[0.8] tracking-[-0.05em] [-webkit-text-stroke:2.5px_#da291c]">
+								<div className="-my-2 font-display font-semibold text-[clamp(190px,26vw,320px)] text-transparent leading-[0.78] tracking-[-0.04em] [-webkit-text-stroke:3px_#da291c]">
 									{branchCount}
 								</div>
-								<div className="font-bold font-display text-[clamp(30px,4vw,42px)] text-white leading-[0.86] tracking-[-0.03em]">
+								<div className="font-bold font-display text-[clamp(22px,2.6vw,32px)] text-white uppercase tracking-[0.2em]">
 									{branchLabel}
 								</div>
 							</div>
