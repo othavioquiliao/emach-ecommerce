@@ -30,7 +30,7 @@ export function ReviewCard({
 	return (
 		<article
 			className={cn(
-				"border-border border-b px-6 py-6",
+				"border-white/12 border-b px-6 py-6",
 				index % 2 === 0 && "md:border-r",
 				index >= lastRowStart && "md:border-b-0",
 				index === total - 1 && "max-md:border-b-0"
@@ -39,24 +39,24 @@ export function ReviewCard({
 			<header className="mb-2.5 flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5">
 					<StarRating rating={review.rating} />
-					<span className="font-semibold text-[13px] text-foreground">
+					<span className="font-semibold text-[13px] text-white">
 						{review.clientName}
 					</span>
 				</div>
 				<time
-					className="font-display text-[11px] text-gray-50 uppercase tracking-[0.08em]"
+					className="font-display text-[11px] text-white/50 uppercase tracking-[0.08em]"
 					dateTime={review.createdAt.toISOString()}
 				>
 					{formatReviewDate(review.createdAt)}
 				</time>
 			</header>
 			{review.title && (
-				<h4 className="mb-1 font-semibold text-[14px] text-foreground">
+				<h4 className="mb-1 font-semibold text-[14px] text-white">
 					{review.title}
 				</h4>
 			)}
 			{review.body && (
-				<p className="text-[13.5px] text-gray-70 leading-relaxed">
+				<p className="text-[13.5px] text-white/72 leading-relaxed">
 					{review.body}
 				</p>
 			)}

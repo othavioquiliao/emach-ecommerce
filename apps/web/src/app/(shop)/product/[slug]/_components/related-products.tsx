@@ -62,14 +62,17 @@ export async function RelatedProducts({
 	}
 
 	return (
-		<section className="px-20 pt-16 pb-20">
-			<h2 className="mb-6 font-display font-medium text-[28px]">
-				Você também pode gostar
-			</h2>
-			<div className="grid grid-cols-5 gap-6">
-				{picked.map((tool) => (
-					<ProductCard key={tool.id} tool={tool} />
-				))}
+		<section className="pt-16 pb-20">
+			{/* Mesma coluna alinhada ao topo (galeria w-1/2 + buy box w-[480px]). */}
+			<div className="mx-auto w-[calc(50%_+_480px)] max-w-[calc(100%_-_2.5rem)]">
+				<h2 className="mb-6 font-display font-medium text-[28px]">
+					Você também pode gostar
+				</h2>
+				<div className="grid grid-cols-5 gap-6">
+					{picked.map((tool) => (
+						<ProductCard key={tool.id} tool={tool} />
+					))}
+				</div>
 			</div>
 		</section>
 	);

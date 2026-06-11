@@ -49,8 +49,10 @@ export function ProductSpecs({
 		rest.length % 2 === 0 ? rest.length - 2 : rest.length - 1;
 
 	return (
-		<section className="px-20 py-14">
-			<div className="mx-auto max-w-[1080px]">
+		<section className="py-14">
+			{/* Largura alinhada ao topo (galeria w-1/2 + buy box w-[480px],
+			    centrados) — replica 50vw + 480px, com teto p/ telas estreitas. */}
+			<div className="mx-auto w-[calc(50%_+_480px)] max-w-[calc(100%_-_2.5rem)]">
 				<div className="mb-5 flex items-baseline justify-between gap-6">
 					<SectionLabel tone="accent">Ficha da ferramenta</SectionLabel>
 					{categoryName && (

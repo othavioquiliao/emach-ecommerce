@@ -70,9 +70,9 @@ function buildHref(
 }
 
 const PAGE_BTN =
-	"border border-foreground bg-background px-5 py-2 font-display font-semibold text-[11px] text-foreground uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background";
+	"border border-white/40 px-5 py-2 font-display font-semibold text-[11px] text-white uppercase tracking-[0.14em] transition-colors hover:border-white hover:bg-white hover:text-near-black";
 const PAGE_BTN_DISABLED =
-	"border border-gray-20 bg-background px-5 py-2 font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]";
+	"border border-white/20 px-5 py-2 font-display font-semibold text-[11px] text-white/30 uppercase tracking-[0.14em]";
 
 export function ReviewList({
 	reviews,
@@ -98,16 +98,16 @@ export function ReviewList({
 		reviews.length % 2 === 0 ? reviews.length - 2 : reviews.length - 1;
 
 	return (
-		<div className="mt-3.5 border border-border">
-			<div className="flex items-center justify-between gap-3 border-border border-b px-6 py-3">
-				<span className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.12em]">
+		<>
+			<div className="flex items-center justify-between gap-3 border-white/15 border-b px-6 py-3">
+				<span className="font-display font-semibold text-[11px] text-white/60 uppercase tracking-[0.12em]">
 					{total} {total === 1 ? "avaliação" : "avaliações"}
 				</span>
 				<ReviewSort current={sort} />
 			</div>
 
 			{reviews.length === 0 ? (
-				<div className="py-12 text-center text-[14px] text-gray-50">
+				<div className="py-12 text-center text-[14px] text-white/60">
 					Nenhuma avaliação aprovada ainda.
 				</div>
 			) : (
@@ -127,7 +127,7 @@ export function ReviewList({
 			{totalPages > 1 && (
 				<nav
 					aria-label="Paginação de avaliações"
-					className="flex items-center justify-center gap-3 border-border border-t px-6 py-5"
+					className="flex items-center justify-center gap-3 border-white/12 border-t px-6 py-5"
 				>
 					{prevHref ? (
 						<Link className={PAGE_BTN} href={prevHref} scroll={false}>
@@ -136,7 +136,7 @@ export function ReviewList({
 					) : (
 						<span className={PAGE_BTN_DISABLED}>Anterior</span>
 					)}
-					<span className="font-display text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+					<span className="font-display text-[11px] text-white/60 uppercase tracking-[0.14em]">
 						Página {page} de {totalPages}
 					</span>
 					{nextHref ? (
@@ -148,6 +148,6 @@ export function ReviewList({
 					)}
 				</nav>
 			)}
-		</div>
+		</>
 	);
 }
