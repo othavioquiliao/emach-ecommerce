@@ -5,6 +5,7 @@ import { stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
 import { promotion } from "@emach/db/schema/promotions";
 import { tool, toolVariant } from "@emach/db/schema/tools";
+import { isValidCpfCnpj } from "@emach/validators";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -17,7 +18,6 @@ import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
 import { quoteShipping } from "@/lib/superfrete/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
-import { isValidCpfCnpj } from "@/lib/validators/cpf-cnpj";
 
 const PRICE_TOLERANCE_CENTS = 1;
 

@@ -1,0 +1,16 @@
+{
+  "name": "@emach/validators",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "devDependencies": {
+    "@emach/config": "workspace:*",
+    "typescript": "^6"
+  }
+}

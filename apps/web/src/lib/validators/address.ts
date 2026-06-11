@@ -1,6 +1,5 @@
+import { onlyDigits } from "@emach/validators";
 import { z } from "zod";
-
-import { onlyDigits } from "@/lib/validators/cpf-cnpj";
 
 export const addressFieldsSchema = z.object({
 	zipCode: z.string().refine((v) => onlyDigits(v).length === 8, "CEP inválido"),

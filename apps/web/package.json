@@ -14,6 +14,7 @@
     "@emach/db": "workspace:*",
     "@emach/env": "workspace:*",
     "@emach/ui": "workspace:*",
+    "@emach/validators": "workspace:*",
     "@tanstack/react-form": "^1.28.0",
     "@vercel/analytics": "^2.0.1",
     "@vercel/speed-insights": "^2.0.0",
