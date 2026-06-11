@@ -29,12 +29,7 @@ export function OrderCard({ order }: { order: OrderListItem }) {
 	const canRebuy = order.status === "delivered" || terminalNeg;
 
 	return (
-		<article
-			className={cn(
-				"mb-3.5 border border-black bg-near-black text-white",
-				terminalNeg && "opacity-80"
-			)}
-		>
+		<article className="mb-3.5 border border-black bg-near-black text-white">
 			<header className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-white/12 border-b px-[18px] py-3.5">
 				<MetaPair label="Pedido" value={`#${order.number}`} />
 				<MetaPair
