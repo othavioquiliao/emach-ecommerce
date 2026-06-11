@@ -13,6 +13,10 @@ import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
 import { nextCookies } from "better-auth/next-js";
 import { createGoogleProviderConfig } from "./google";
+import {
+	createRateLimitStorage,
+	RATE_LIMIT_WINDOW_SECONDS,
+} from "./rate-limit-storage";
 
 const db = createDb();
 const schema = { client, clientSession, clientAccount, clientVerification };
@@ -90,8 +94,28 @@ export const authEcommerce = betterAuth({
 	},
 	secret: env.BETTER_AUTH_SECRET,
 	baseURL: ecommerceBaseURL,
+	rateLimit: {
+		// `enabled: true` liga inclusive em dev (o Better Auth só ativa em prod
+		// por default), permitindo testar o 429 localmente. Limite global frouxo;
+		// regras agressivas nos paths sensíveis logo abaixo.
+		enabled: true,
+		window: RATE_LIMIT_WINDOW_SECONDS,
+		max: 100,
+		customStorage: createRateLimitStorage(),
+		customRules: {
+			"/sign-in/email": { window: RATE_LIMIT_WINDOW_SECONDS, max: 5 },
+			"/sign-up/email": { window: RATE_LIMIT_WINDOW_SECONDS, max: 5 },
+			"/forget-password": { window: RATE_LIMIT_WINDOW_SECONDS, max: 3 },
+		},
+	},
 	advanced: {
 		cookiePrefix: "ecommerce",
+		// Atrás da Vercel o IP do cliente chega em x-forwarded-for. Sem declarar
+		// o header, o Better Auth não resolve o IP e pula o rate limit. Na Vercel
+		// esse header é setado pela infra (não é user-controlled).
+		ipAddress: {
+			ipAddressHeaders: ["x-forwarded-for"],
+		},
 	},
 	plugins: [nextCookies()],
 });
