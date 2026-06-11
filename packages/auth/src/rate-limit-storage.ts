@@ -37,7 +37,10 @@ type RateLimitData = {
 
 type RateLimitStorage = {
 	get: (key: string) => Promise<RateLimitData | undefined>;
-	set: (key: string, value: RateLimitData) => Promise<void>;
+	// O Better Auth passa um 3º arg `update` (insert vs. update). Ignoramos —
+	// sempre gravamos o `value` completo (que já vem com o `count` resolvido),
+	// então o overwrite é correto. Declarado por fidelidade ao contrato.
+	set: (key: string, value: RateLimitData, update?: boolean) => Promise<void>;
 };
 
 function createInMemoryStorage(): RateLimitStorage {

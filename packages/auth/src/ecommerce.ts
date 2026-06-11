@@ -37,15 +37,22 @@ const ecommerceBaseURL = isProd
 
 // Validação server-side de CPF/CNPJ (#92). A política client-side (Zod) é só
 // UX; requests diretos aos endpoints do Better Auth (sign-up, updateUser)
-// bypassam o cliente. Normaliza para só dígitos (invariante do schema:
-// `client.document` guarda dígitos crus) e rejeita documento com dígito
-// verificador inválido antes de persistir. Lança `APIError` (não `Error`
-// plano) porque só ela propaga a mensagem ao cliente.
-function normalizeAndValidateDocument(raw: unknown): string | undefined {
-	if (typeof raw !== "string" || raw.length === 0) {
+// bypassam o cliente. Lança `APIError` (não `Error` plano) porque só ela
+// propaga a mensagem ao cliente. Retorno tri-estado:
+//   - `undefined`: campo não veio no payload → o hook não mexe no documento.
+//   - `null`: campo veio vazio → limpar (grava NULL, **não** "" — string vazia
+//     colidiria no unique `client_document_unique` no 2º cliente que limpasse,
+//     e violaria a invariante "só dígitos" do schema).
+//   - `string`: CPF/CNPJ normalizado (só dígitos) e válido.
+function normalizeDocumentForWrite(raw: unknown): string | null | undefined {
+	if (typeof raw !== "string") {
 		return;
 	}
-	const document = onlyDigits(raw);
+	const trimmed = raw.trim();
+	if (trimmed === "") {
+		return null;
+	}
+	const document = onlyDigits(trimmed);
 	if (!isValidCpfCnpj(document)) {
 		throw new APIError("BAD_REQUEST", {
 			message: "CPF ou CNPJ inválido.",
@@ -113,19 +120,22 @@ export const authEcommerce = betterAuth({
 				before: async (user) => {
 					// `document` é additionalField — o Better Auth ainda não infere
 					// seu tipo, daí o acesso por cast estrutural (não é `any`).
-					const document = normalizeAndValidateDocument(
+					const document = normalizeDocumentForWrite(
 						(user as { document?: unknown }).document
 					);
-					return { data: document ? { ...user, document } : user };
+					// `undefined` = campo ausente (não mexe); `null`/string = grava.
+					return {
+						data: document === undefined ? user : { ...user, document },
+					};
 				},
 			},
 			update: {
 				before: async (userData) => {
-					const document = normalizeAndValidateDocument(
+					const document = normalizeDocumentForWrite(
 						(userData as { document?: unknown }).document
 					);
 					return {
-						data: document ? { ...userData, document } : userData,
+						data: document === undefined ? userData : { ...userData, document },
 					};
 				},
 			},
@@ -153,7 +163,13 @@ export const authEcommerce = betterAuth({
 		customRules: {
 			"/sign-in/email": { window: RATE_LIMIT_WINDOW_SECONDS, max: 5 },
 			"/sign-up/email": { window: RATE_LIMIT_WINDOW_SECONDS, max: 5 },
-			"/forget-password": { window: RATE_LIMIT_WINDOW_SECONDS, max: 3 },
+			// O endpoint email/password real no Better Auth 1.6.11 é
+			// `/request-password-reset` (envia o e-mail) — NÃO `/forget-password`
+			// (que é do plugin email-OTP, não usado aqui; seria dead code). E
+			// `/reset-password` é a troca efetiva com o token. Os customRules
+			// usam `p === path` (match exato), por isso o path tem que ser exato.
+			"/request-password-reset": { window: RATE_LIMIT_WINDOW_SECONDS, max: 3 },
+			"/reset-password": { window: RATE_LIMIT_WINDOW_SECONDS, max: 5 },
 		},
 	},
 	advanced: {

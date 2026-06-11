@@ -21,7 +21,9 @@ function maskEmail(email: string): string {
 	}
 	const local = email.slice(0, at);
 	const domain = email.slice(at + 1);
-	const head = local.slice(0, 2);
+	// Locais de ≤2 chars não mostram prefixo — senão "a@x.com" viraria
+	// "a***@x.com" e o e-mail inteiro vazaria sem mascaramento real.
+	const head = local.length > 2 ? local.slice(0, 2) : "";
 	return `${head}***@${domain}`;
 }
 
