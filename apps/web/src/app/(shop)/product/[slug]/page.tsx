@@ -120,7 +120,11 @@ export default async function ProductPage({
 				/>
 			</div>
 
-			<ProductSpecs attributes={detail.attributes} tool={detail.tool} />
+			<ProductSpecs
+				attributes={detail.attributes}
+				categoryName={primaryCategoryName}
+				tool={detail.tool}
+			/>
 
 			<RelatedProducts
 				categoryPath={detail.primaryCategory?.path ?? null}

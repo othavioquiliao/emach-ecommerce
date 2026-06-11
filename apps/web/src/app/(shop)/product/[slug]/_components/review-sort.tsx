@@ -44,15 +44,12 @@ export function ReviewSort({ current }: ReviewSortProps) {
 	}
 
 	return (
-		<div
-			aria-busy={isPending}
-			className="flex items-center justify-end gap-2 py-4"
-		>
-			<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.14em]">
+		<div aria-busy={isPending} className="flex items-center gap-2">
+			<span className="font-display text-[10px] text-white/50 uppercase tracking-[0.14em]">
 				Ordenar
 			</span>
 			<Select onValueChange={handleChange} value={current}>
-				<SelectTrigger className="h-8 min-w-[160px] border-gray-20">
+				<SelectTrigger className="h-8 min-w-[160px] border-white/30 text-white">
 					<SelectValue>
 						{(value) => SORT_LABELS[value as ReviewSortKey]}
 					</SelectValue>

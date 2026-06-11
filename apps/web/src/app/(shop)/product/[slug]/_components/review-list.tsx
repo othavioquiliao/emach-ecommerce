@@ -6,7 +6,6 @@ import { ReviewSort, type ReviewSortKey } from "./review-sort";
 
 interface ReviewListProps {
 	currentSearchParams: Record<string, string | string[] | undefined>;
-	gridCols2?: boolean;
 	page: number;
 	pageSize: number;
 	pathname: string;
@@ -70,6 +69,11 @@ function buildHref(
 	return (qs ? `${pathname}?${qs}` : pathname) as Route;
 }
 
+const PAGE_BTN =
+	"border border-white/40 px-5 py-2 font-display font-semibold text-[11px] text-white uppercase tracking-[0.14em] transition-colors hover:border-white hover:bg-white hover:text-near-black";
+const PAGE_BTN_DISABLED =
+	"border border-white/20 px-5 py-2 font-display font-semibold text-[11px] text-white/30 uppercase tracking-[0.14em]";
+
 export function ReviewList({
 	reviews,
 	total,
@@ -78,7 +82,6 @@ export function ReviewList({
 	sort,
 	pathname,
 	currentSearchParams,
-	gridCols2 = false,
 }: ReviewListProps) {
 	const totalPages = Math.max(1, Math.ceil(total / pageSize));
 	const prevHref =
@@ -89,40 +92,33 @@ export function ReviewList({
 		page < totalPages
 			? buildHref(pathname, currentSearchParams, { reviewPage: page + 1 })
 			: null;
+	// Primeira célula da última linha do grid de 2 colunas — zera a border
+	// inferior dessa linha (linhas correm de borda a borda, igual à ficha).
+	const lastRowStart =
+		reviews.length % 2 === 0 ? reviews.length - 2 : reviews.length - 1;
 
 	return (
 		<>
-			<div className={gridCols2 ? "px-20 md:px-10" : undefined}>
+			<div className="flex items-center justify-between gap-3 border-white/15 border-b px-6 py-3">
+				<span className="font-display font-semibold text-[11px] text-white/60 uppercase tracking-[0.12em]">
+					{total} {total === 1 ? "avaliação" : "avaliações"}
+				</span>
 				<ReviewSort current={sort} />
 			</div>
 
 			{reviews.length === 0 ? (
-				<div
-					className={
-						gridCols2
-							? "py-12 text-center text-[14px] text-white/60"
-							: "py-12 text-center text-[14px] text-gray-60"
-					}
-				>
+				<div className="py-12 text-center text-[14px] text-white/60">
 					Nenhuma avaliação aprovada ainda.
 				</div>
 			) : (
-				<div
-					className={
-						gridCols2
-							? "grid grid-cols-1 md:grid-cols-2"
-							: "grid grid-cols-1 md:grid-cols-2"
-					}
-				>
+				<div className="grid grid-cols-1 md:grid-cols-2">
 					{reviews.map((review, index) => (
 						<ReviewCard
-							dark={gridCols2}
-							isLast={index === reviews.length - 1}
-							isPenultimateOnEven={
-								index === reviews.length - 2 && reviews.length % 2 === 0
-							}
+							index={index}
 							key={review.id}
+							lastRowStart={lastRowStart}
 							review={review}
+							total={reviews.length}
 						/>
 					))}
 				</div>
@@ -131,66 +127,24 @@ export function ReviewList({
 			{totalPages > 1 && (
 				<nav
 					aria-label="Paginação de avaliações"
-					className={
-						gridCols2
-							? "mt-8 flex items-center justify-center gap-3 px-20 pb-8 md:px-10"
-							: "mt-8 flex items-center justify-center gap-3"
-					}
+					className="flex items-center justify-center gap-3 border-white/12 border-t px-6 py-5"
 				>
 					{prevHref ? (
-						<Link
-							className={
-								gridCols2
-									? "border border-white/40 px-5 py-2 font-display font-semibold text-[11px] text-white uppercase tracking-[0.14em] transition-colors hover:border-white hover:bg-white hover:text-black"
-									: "border border-foreground bg-background px-5 py-2 font-display font-semibold text-[11px] text-foreground uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background"
-							}
-							href={prevHref}
-							scroll={false}
-						>
+						<Link className={PAGE_BTN} href={prevHref} scroll={false}>
 							Anterior
 						</Link>
 					) : (
-						<span
-							className={
-								gridCols2
-									? "border border-white/20 px-5 py-2 font-display font-semibold text-[11px] text-white/30 uppercase tracking-[0.14em]"
-									: "border border-gray-20 bg-background px-5 py-2 font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]"
-							}
-						>
-							Anterior
-						</span>
+						<span className={PAGE_BTN_DISABLED}>Anterior</span>
 					)}
-					<span
-						className={
-							gridCols2
-								? "font-display text-[11px] text-white/60 uppercase tracking-[0.14em]"
-								: "font-display text-[11px] text-gray-60 uppercase tracking-[0.14em]"
-						}
-					>
+					<span className="font-display text-[11px] text-white/60 uppercase tracking-[0.14em]">
 						Página {page} de {totalPages}
 					</span>
 					{nextHref ? (
-						<Link
-							className={
-								gridCols2
-									? "border border-white/40 px-5 py-2 font-display font-semibold text-[11px] text-white uppercase tracking-[0.14em] transition-colors hover:border-white hover:bg-white hover:text-black"
-									: "border border-foreground bg-background px-5 py-2 font-display font-semibold text-[11px] text-foreground uppercase tracking-[0.14em] transition-colors hover:bg-foreground hover:text-background"
-							}
-							href={nextHref}
-							scroll={false}
-						>
+						<Link className={PAGE_BTN} href={nextHref} scroll={false}>
 							Próxima
 						</Link>
 					) : (
-						<span
-							className={
-								gridCols2
-									? "border border-white/20 px-5 py-2 font-display font-semibold text-[11px] text-white/30 uppercase tracking-[0.14em]"
-									: "border border-gray-20 bg-background px-5 py-2 font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]"
-							}
-						>
-							Próxima
-						</span>
+						<span className={PAGE_BTN_DISABLED}>Próxima</span>
 					)}
 				</nav>
 			)}

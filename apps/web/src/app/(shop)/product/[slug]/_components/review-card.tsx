@@ -3,10 +3,10 @@ import { cn } from "@emach/ui/lib/utils";
 import { StarRating } from "./star-rating";
 
 interface ReviewCardProps {
-	dark?: boolean;
-	isLast: boolean;
-	isPenultimateOnEven: boolean;
+	index: number;
+	lastRowStart: number;
 	review: Review & { clientName: string };
+	total: number;
 }
 
 const DATE_FORMATTER = new Intl.DateTimeFormat("pt-BR", {
@@ -23,76 +23,40 @@ function formatReviewDate(date: Date): string {
 
 export function ReviewCard({
 	review,
-	isLast,
-	isPenultimateOnEven,
-	dark = false,
+	index,
+	total,
+	lastRowStart,
 }: ReviewCardProps) {
-	if (dark) {
-		return (
-			<article
-				className={cn(
-					"px-20 py-7 md:px-10 md:even:border-white/12 md:even:border-l",
-					!isLast && "border-white/12 border-b",
-					isPenultimateOnEven && "md:border-b-0"
-				)}
-			>
-				<header className="mb-2.5 flex items-center justify-between gap-3">
-					<div className="flex items-center gap-2.5">
-						<StarRating rating={review.rating} />
-						<span className="font-semibold text-[13px] text-white">
-							{review.clientName}
-						</span>
-					</div>
-					<time
-						className="font-display text-[11px] text-white/50 uppercase tracking-[0.08em]"
-						dateTime={review.createdAt.toISOString()}
-					>
-						{formatReviewDate(review.createdAt)}
-					</time>
-				</header>
-				{review.title && (
-					<h4 className="mb-1 font-semibold text-[14px] text-white">
-						{review.title}
-					</h4>
-				)}
-				{review.body && (
-					<p className="text-[13.5px] text-white/72 leading-relaxed">
-						{review.body}
-					</p>
-				)}
-			</article>
-		);
-	}
-
 	return (
 		<article
 			className={cn(
-				"py-7 md:even:pl-8 md:odd:pr-8",
-				!isLast && "border-gray-20 border-b",
-				isPenultimateOnEven && "md:border-b-0"
+				"border-white/12 border-b px-6 py-6",
+				index % 2 === 0 && "md:border-r",
+				index >= lastRowStart && "md:border-b-0",
+				index === total - 1 && "max-md:border-b-0"
 			)}
 		>
 			<header className="mb-2.5 flex items-center justify-between gap-3">
 				<div className="flex items-center gap-2.5">
 					<StarRating rating={review.rating} />
-					<span className="font-semibold text-[13px] text-foreground">
+					<span className="font-semibold text-[13px] text-white">
 						{review.clientName}
 					</span>
 				</div>
 				<time
-					className="font-display text-[11px] text-gray-50 uppercase tracking-[0.08em]"
+					className="font-display text-[11px] text-white/50 uppercase tracking-[0.08em]"
 					dateTime={review.createdAt.toISOString()}
 				>
 					{formatReviewDate(review.createdAt)}
 				</time>
 			</header>
 			{review.title && (
-				<h4 className="mb-1 font-semibold text-[14px] text-foreground">
+				<h4 className="mb-1 font-semibold text-[14px] text-white">
 					{review.title}
 				</h4>
 			)}
 			{review.body && (
-				<p className="text-[13.5px] text-gray-70 leading-relaxed">
+				<p className="text-[13.5px] text-white/72 leading-relaxed">
 					{review.body}
 				</p>
 			)}
