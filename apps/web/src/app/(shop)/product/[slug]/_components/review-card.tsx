@@ -3,6 +3,7 @@ import { cn } from "@emach/ui/lib/utils";
 import { StarRating } from "./star-rating";
 
 interface ReviewCardProps {
+	dark?: boolean;
 	isLast: boolean;
 	isPenultimateOnEven: boolean;
 	review: Review & { clientName: string };
@@ -24,7 +25,45 @@ export function ReviewCard({
 	review,
 	isLast,
 	isPenultimateOnEven,
+	dark = false,
 }: ReviewCardProps) {
+	if (dark) {
+		return (
+			<article
+				className={cn(
+					"px-20 py-7 md:px-10 md:even:border-white/12 md:even:border-l",
+					!isLast && "border-white/12 border-b",
+					isPenultimateOnEven && "md:border-b-0"
+				)}
+			>
+				<header className="mb-2.5 flex items-center justify-between gap-3">
+					<div className="flex items-center gap-2.5">
+						<StarRating rating={review.rating} />
+						<span className="font-semibold text-[13px] text-white">
+							{review.clientName}
+						</span>
+					</div>
+					<time
+						className="font-display text-[11px] text-white/50 uppercase tracking-[0.08em]"
+						dateTime={review.createdAt.toISOString()}
+					>
+						{formatReviewDate(review.createdAt)}
+					</time>
+				</header>
+				{review.title && (
+					<h4 className="mb-1 font-semibold text-[14px] text-white">
+						{review.title}
+					</h4>
+				)}
+				{review.body && (
+					<p className="text-[13.5px] text-white/72 leading-relaxed">
+						{review.body}
+					</p>
+				)}
+			</article>
+		);
+	}
+
 	return (
 		<article
 			className={cn(
