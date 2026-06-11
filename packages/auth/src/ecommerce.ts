@@ -9,8 +9,10 @@ import { sendEmail } from "@emach/email/send";
 import { ResetPasswordEmail } from "@emach/email/templates/reset-password";
 import { VerifyEmailEmail } from "@emach/email/templates/verify-email";
 import { env } from "@emach/env/server";
+import { isValidCpfCnpj, onlyDigits } from "@emach/validators";
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
+import { APIError } from "better-auth/api";
 import { nextCookies } from "better-auth/next-js";
 import { createGoogleProviderConfig } from "./google";
 import {
@@ -33,6 +35,25 @@ const ecommerceBaseURL = isProd
 	? env.BETTER_AUTH_URL_ECOMMERCE
 	: { allowedHosts: ["localhost:*"], protocol: "http" as const };
 
+// Validação server-side de CPF/CNPJ (#92). A política client-side (Zod) é só
+// UX; requests diretos aos endpoints do Better Auth (sign-up, updateUser)
+// bypassam o cliente. Normaliza para só dígitos (invariante do schema:
+// `client.document` guarda dígitos crus) e rejeita documento com dígito
+// verificador inválido antes de persistir. Lança `APIError` (não `Error`
+// plano) porque só ela propaga a mensagem ao cliente.
+function normalizeAndValidateDocument(raw: unknown): string | undefined {
+	if (typeof raw !== "string" || raw.length === 0) {
+		return;
+	}
+	const document = onlyDigits(raw);
+	if (!isValidCpfCnpj(document)) {
+		throw new APIError("BAD_REQUEST", {
+			message: "CPF ou CNPJ inválido.",
+		});
+	}
+	return document;
+}
+
 export const authEcommerce = betterAuth({
 	database: drizzleAdapter(db, {
 		provider: "pg",
@@ -41,6 +62,9 @@ export const authEcommerce = betterAuth({
 	trustedOrigins: isProd ? [env.ECOMMERCE_ORIGIN] : ["http://localhost:*"],
 	emailAndPassword: {
 		enabled: true,
+		// Enforce server-side do mínimo de senha (#92). O Zod no cliente é só UX;
+		// requests diretos ao endpoint bypassariam essa regra sem isto.
+		minPasswordLength: 8,
 		requireEmailVerification: false,
 		autoSignIn: true,
 		sendResetPassword: async ({ user, url }) => {
@@ -80,6 +104,30 @@ export const authEcommerce = betterAuth({
 				type: "string",
 				required: false,
 				input: true,
+			},
+		},
+	},
+	databaseHooks: {
+		user: {
+			create: {
+				before: async (user) => {
+					// `document` é additionalField — o Better Auth ainda não infere
+					// seu tipo, daí o acesso por cast estrutural (não é `any`).
+					const document = normalizeAndValidateDocument(
+						(user as { document?: unknown }).document
+					);
+					return { data: document ? { ...user, document } : user };
+				},
+			},
+			update: {
+				before: async (userData) => {
+					const document = normalizeAndValidateDocument(
+						(userData as { document?: unknown }).document
+					);
+					return {
+						data: document ? { ...userData, document } : userData,
+					};
+				},
 			},
 		},
 	},
