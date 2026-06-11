@@ -446,13 +446,16 @@ export async function placeOrder(
 			)[0];
 		if (!lock) {
 			// Promoção removida concorrentemente entre validateCoupon e o FOR UPDATE.
-			throw new OrderError("Cupom não disponível");
+			// Mensagem colapsada (anti-enumeração) — mesmo motivo do throw acima.
+			throw new OrderError(
+				publicCouponError("invalid", "Cupom não disponível")
+			);
 		}
 		if (
 			lock.max_redemptions !== null &&
 			lock.redemption_count >= lock.max_redemptions
 		) {
-			throw new OrderError("Cupom esgotado");
+			throw new OrderError(publicCouponError("exhausted", "Cupom esgotado"));
 		}
 
 		await tx

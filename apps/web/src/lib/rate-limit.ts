@@ -8,9 +8,6 @@ export interface Limiter {
 /** Janela compartilhada (auth + checkout) — fonte única em `@emach/redis`. */
 const WINDOW_MS = RATE_LIMIT_WINDOW_SECONDS * 1000;
 
-/** Acima deste tamanho, o fallback varre e descarta chaves fora da janela. */
-const MEMORY_SWEEP_THRESHOLD = 1024;
-
 /**
  * Fallback in-memory: BEST-EFFORT. Em serverless cada instância (lambda) tem o
  * próprio Map — o contador reseta em cold start e NÃO é compartilhado entre
@@ -20,13 +17,16 @@ const MEMORY_SWEEP_THRESHOLD = 1024;
  */
 function memoryLimiter(max: number): Limiter {
 	const hits = new Map<string, number[]>();
+	let lastSweep = 0;
 	return {
 		limit(key) {
 			const now = Date.now();
-			// Limpeza amortizada: sem isto, chaves de clientes que não voltam ficam
-			// no Map para sempre (leak em instância long-lived sem Upstash). Só varre
-			// quando o Map cresce, mantendo o custo por-request ~O(1).
-			if (hits.size > MEMORY_SWEEP_THRESHOLD) {
+			// Limpeza amortizada: no máximo UMA varredura por janela, independente do
+			// volume — remove chaves de clientes que não voltaram (evita leak em
+			// instância long-lived sem Upstash) sem custo O(n) por request mesmo em
+			// burst de chaves únicas.
+			if (now - lastSweep >= WINDOW_MS) {
+				lastSweep = now;
 				for (const [k, ts] of hits) {
 					if (now - (ts.at(-1) ?? 0) >= WINDOW_MS) {
 						hits.delete(k);
