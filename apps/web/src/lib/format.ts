@@ -18,3 +18,41 @@ export function fmtNumericBRL(amount: string | null | undefined): string {
 		currency: "BRL",
 	});
 }
+
+function withUnit(value: string, unit: string): string {
+	return unit ? `${value} ${unit}` : value;
+}
+
+function fmtNum(n: number): string {
+	return n.toLocaleString("pt-BR", { maximumFractionDigits: 4 });
+}
+
+export function fmtSpecNumber(value: string | null, unit: string): string {
+	if (value == null) {
+		return "—";
+	}
+	const n = Number(value);
+	if (!Number.isFinite(n)) {
+		return "—";
+	}
+	return withUnit(fmtNum(n), unit);
+}
+
+export function fmtSpecRange(
+	min: string | null,
+	max: string | null,
+	unit: string
+): string {
+	if (min == null) {
+		return "—";
+	}
+	const minN = Number(min);
+	if (max == null) {
+		return withUnit(fmtNum(minN), unit);
+	}
+	const maxN = Number(max);
+	if (minN === 0) {
+		return withUnit(`até ${fmtNum(maxN)}`, unit);
+	}
+	return withUnit(`${fmtNum(minN)} – ${fmtNum(maxN)}`, unit);
+}

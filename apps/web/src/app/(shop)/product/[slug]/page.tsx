@@ -1,15 +1,6 @@
 import { db } from "@emach/db";
 import { getReviews, getToolBySlug } from "@emach/db/queries/catalog";
-import {
-	Breadcrumb,
-	BreadcrumbItem,
-	BreadcrumbLink,
-	BreadcrumbList,
-	BreadcrumbPage,
-	BreadcrumbSeparator,
-} from "@emach/ui/components/breadcrumb";
 import type { Metadata } from "next";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SiteHeader } from "@/components/site-header";
@@ -18,7 +9,7 @@ import { ProductGallery } from "./_components/product-gallery";
 import { ProductInfo } from "./_components/product-info";
 import { ProductJsonLd } from "./_components/product-json-ld";
 import { ProductReviews } from "./_components/product-reviews";
-import { ProductTabs } from "./_components/product-tabs";
+import { ProductSpecs } from "./_components/product-specs";
 import { RelatedProducts } from "./_components/related-products";
 import type { ReviewSortKey } from "./_components/review-sort";
 
@@ -111,34 +102,6 @@ export default async function ProductPage({
 			<ProductJsonLd detail={detail} />
 			<SiteHeader />
 
-			<div className="border-border border-b px-20 py-4">
-				<Breadcrumb>
-					<BreadcrumbList>
-						<BreadcrumbItem>
-							<BreadcrumbLink render={<Link href="/" />}>Home</BreadcrumbLink>
-						</BreadcrumbItem>
-						<BreadcrumbSeparator />
-						{primaryCategorySlug && primaryCategoryName && (
-							<>
-								<BreadcrumbItem>
-									<BreadcrumbLink
-										render={
-											<Link href={`/catalog?cat=${primaryCategorySlug}`} />
-										}
-									>
-										{primaryCategoryName}
-									</BreadcrumbLink>
-								</BreadcrumbItem>
-								<BreadcrumbSeparator />
-							</>
-						)}
-						<BreadcrumbItem>
-							<BreadcrumbPage>{detail.tool.name}</BreadcrumbPage>
-						</BreadcrumbItem>
-					</BreadcrumbList>
-				</Breadcrumb>
-			</div>
-
 			<div className="flex flex-row justify-center py-8">
 				<ProductGallery
 					categorySlug={primaryCategorySlug ?? ""}
@@ -157,7 +120,13 @@ export default async function ProductPage({
 				/>
 			</div>
 
-			<ProductTabs attributes={detail.attributes} tool={detail.tool} />
+			<ProductSpecs attributes={detail.attributes} tool={detail.tool} />
+
+			<RelatedProducts
+				categoryPath={detail.primaryCategory?.path ?? null}
+				toolId={detail.tool.id}
+			/>
+
 			{reviewsResult.total > 0 && (
 				<ProductReviews
 					currentSearchParams={sp}
@@ -170,10 +139,6 @@ export default async function ProductPage({
 					total={reviewsResult.total}
 				/>
 			)}
-			<RelatedProducts
-				categoryPath={detail.primaryCategory?.path ?? null}
-				toolId={detail.tool.id}
-			/>
 		</>
 	);
 }
