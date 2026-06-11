@@ -19,7 +19,9 @@ Drizzle 0.45 + node-postgres + Supabase Postgres. Schema TS aqui é **cópia ver
 bun db:apply-triggers   # idempotente (CREATE OR REPLACE FUNCTION + DROP TRIGGER IF EXISTS)
 ```
 
-Idempotência de débito de venda em `stockMovement` **não** é trigger — é partial unique index no schema. RLS é gerenciada direto no Supabase (sem `_rls.sql`): catálogo público (SELECT anon+authenticated), demais tabelas deny-all (server-side via service role / Better Auth).
+Idempotência de débito de venda em `stockMovement` **não** é trigger — é partial unique index no schema.
+
+**RLS deny-all (#90):** `src/sql/rls.sql` (owned-by-dashboard, cópia aqui; canônico avaliado no dashboard #142) habilita RLS **sem policies** nas 13 tabelas `public` expostas via PostgREST (`tool*`, `category`, `branch`, `stock_level`, `promotion*`, `review`, `attribute_definition`). O app **não usa PostgREST** — todo acesso é server-side via Drizzle/`DATABASE_URL`, role `postgres` (BYPASSRLS), então deny-all fecha a porta REST (anon/authenticated veem 0 linhas) sem afetar o app. RLS é flag de tabela (não recriada por `db:push`) — **não** precisa reaplicar pós-push. Se algum dia o client ler catálogo via `supabase-js`, terá que **adicionar policy de SELECT pra anon** — hoje não há nenhuma (deny-all real).
 
 ## Convenções de schema
 

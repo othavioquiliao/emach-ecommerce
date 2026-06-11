@@ -12,7 +12,11 @@ import {
 	autoPromoToolIdsFromMap,
 	fetchAutoPromosByToolId,
 } from "@/lib/auto-promo";
-import { validateCoupon } from "@/lib/coupons/validate-coupon";
+import {
+	ENUMERABLE_REASONS,
+	publicCouponError,
+	validateCoupon,
+} from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
@@ -411,7 +415,13 @@ export async function placeOrder(
 			autoPromoToolIds
 		);
 		if (!coupon.ok) {
-			throw new OrderError(coupon.error);
+			// Anti-enumeração também neste caminho: createOrderAction valida o cupom
+			// direto (sem passar pelo apply-coupon), então a mensagem precisa ser
+			// colapsada aqui também, senão o controle do apply-coupon é contornável.
+			if (ENUMERABLE_REASONS.has(coupon.reason)) {
+				log.warn({ action: "coupon_rejected", reason: coupon.reason });
+			}
+			throw new OrderError(publicCouponError(coupon.reason, coupon.error));
 		}
 
 		// Trava a linha da promoção e re-checa o limite na mesma transação
@@ -436,13 +446,16 @@ export async function placeOrder(
 			)[0];
 		if (!lock) {
 			// Promoção removida concorrentemente entre validateCoupon e o FOR UPDATE.
-			throw new OrderError("Cupom não disponível");
+			// Mensagem colapsada (anti-enumeração) — mesmo motivo do throw acima.
+			throw new OrderError(
+				publicCouponError("invalid", "Cupom não disponível")
+			);
 		}
 		if (
 			lock.max_redemptions !== null &&
 			lock.redemption_count >= lock.max_redemptions
 		) {
-			throw new OrderError("Cupom esgotado");
+			throw new OrderError(publicCouponError("exhausted", "Cupom esgotado"));
 		}
 
 		await tx

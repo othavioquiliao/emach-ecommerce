@@ -436,9 +436,12 @@ describe("placeOrder (cupom)", () => {
 				...buildInput([{ toolId, variantId, quantity: 1 }]),
 				couponCode: "CHEIO",
 			};
+			// Anti-enumeração (#94): a mensagem é colapsada também neste caminho,
+			// senão createOrderAction vazaria o motivo real ("esgotado") e contornaria
+			// o controle do apply-coupon.
 			await expect(
 				placeOrder(tx, { clientId, input, ipAddress: null, userAgent: null })
-			).rejects.toThrow(/esgotado/i);
+			).rejects.toThrow(/inválido ou indisponível/i);
 		});
 	});
 

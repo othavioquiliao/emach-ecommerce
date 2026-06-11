@@ -3,8 +3,10 @@
 import { db } from "@emach/db";
 import { headers } from "next/headers";
 
+import { getClientIp } from "@/lib/client-ip";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
+import { orderLimiter, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
 import { requireCurrentClient } from "@/lib/session";
 
 import {
@@ -34,9 +36,13 @@ export async function createOrderAction(
 	const session = await requireCurrentClient();
 	const clientId = session.user.id;
 
+	const { success } = await orderLimiter.limit(`order:${clientId}`);
+	if (!success) {
+		return { ok: false, error: RATE_LIMIT_MESSAGE };
+	}
+
 	const reqHeaders = await headers();
-	const ipAddress =
-		reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+	const ipAddress = getClientIp(reqHeaders);
 	const userAgent = reqHeaders.get("user-agent") ?? null;
 
 	try {

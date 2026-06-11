@@ -14,9 +14,45 @@ export interface CouponLine {
 	toolId: string;
 }
 
+export type CouponFailReason =
+	| "empty"
+	| "invalid"
+	| "expired"
+	| "exhausted"
+	| "not_eligible"
+	| "min_order";
+
+/** Razões que revelam EXISTÊNCIA do código → colapsar em msg genérica (anti-enumeração). */
+export const ENUMERABLE_REASONS = new Set<CouponFailReason>([
+	"empty",
+	"invalid",
+	"expired",
+	"exhausted",
+]);
+
 export type CouponValidation =
 	| { ok: true; discountCents: number; promotionId: string }
-	| { ok: false; error: string };
+	| { ok: false; error: string; reason: CouponFailReason };
+
+/**
+ * Mensagem de falha de cupom segura para exibir ao cliente.
+ *
+ * Reasons enumeráveis (existência do código) → mensagem genérica
+ * (anti-enumeração). Reasons que dependem do carrinho (`not_eligible`,
+ * `min_order`) preservam o `error` original (UX legítima, não revela código).
+ *
+ * Fonte ÚNICA do colapso — usar em TODO caller que expõe falha de cupom ao
+ * cliente (apply-coupon, place-order) para não vazar a mensagem detalhada por
+ * um caminho alternativo.
+ */
+export function publicCouponError(
+	reason: CouponFailReason,
+	fallbackError: string
+): string {
+	return ENUMERABLE_REASONS.has(reason)
+		? "Cupom inválido ou indisponível"
+		: fallbackError;
+}
 
 /** Desconto do cupom em centavos, com clamp na base elegível e em zero. */
 function couponDiscountCents(
@@ -40,7 +76,7 @@ export async function validateCoupon(
 ): Promise<CouponValidation> {
 	const code = rawCode.trim();
 	if (!code) {
-		return { ok: false, error: "Cupom inválido" };
+		return { ok: false, error: "Cupom inválido", reason: "empty" };
 	}
 	const now = new Date();
 
@@ -56,19 +92,19 @@ export async function validateCoupon(
 		.limit(1);
 
 	if (!promo?.active) {
-		return { ok: false, error: "Cupom inválido" };
+		return { ok: false, error: "Cupom inválido", reason: "invalid" };
 	}
 	if (promo.startsAt && promo.startsAt > now) {
-		return { ok: false, error: "Cupom inválido" };
+		return { ok: false, error: "Cupom inválido", reason: "invalid" };
 	}
 	if (promo.endsAt && promo.endsAt <= now) {
-		return { ok: false, error: "Cupom expirado" };
+		return { ok: false, error: "Cupom expirado", reason: "expired" };
 	}
 	if (
 		promo.maxRedemptions !== null &&
 		promo.redemptionCount >= promo.maxRedemptions
 	) {
-		return { ok: false, error: "Cupom esgotado" };
+		return { ok: false, error: "Cupom esgotado", reason: "exhausted" };
 	}
 
 	const toolIds = Array.from(new Set(lines.map((l) => l.toolId)));
@@ -101,7 +137,11 @@ export async function validateCoupon(
 	}
 
 	if (eligibleSubtotalCents === 0) {
-		return { ok: false, error: "Cupom não cobre nenhum item do carrinho" };
+		return {
+			ok: false,
+			error: "Cupom não cobre nenhum item do carrinho",
+			reason: "not_eligible",
+		};
 	}
 
 	// Decisão de produto: o pedido mínimo é avaliado contra o subtotal ELEGÍVEL
@@ -113,6 +153,7 @@ export async function validateCoupon(
 			return {
 				ok: false,
 				error: `Pedido mínimo de ${fmtNumericBRL(promo.minOrderAmount)}`,
+				reason: "min_order",
 			};
 		}
 	}
