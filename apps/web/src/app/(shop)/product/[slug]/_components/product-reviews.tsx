@@ -57,7 +57,7 @@ export function ProductReviews({
 	}));
 
 	return (
-		<section className="emach-bg-cinema text-white [color-scheme:dark]">
+		<section className="emach-bg-cinema border-emach-red border-b-2 text-white [color-scheme:dark]">
 			<div className="px-20 pt-12 pb-2">
 				<SectionLabel tone="accent">O que dizem os clientes</SectionLabel>
 			</div>
