@@ -6,6 +6,7 @@ import {
 	Check,
 	CheckCircle,
 	Share2,
+	ShieldCheck,
 	ShoppingBag,
 	Truck,
 	Zap,
@@ -103,6 +104,19 @@ export function ProductInfo({
 	const finalAmount = discounted ?? selected.priceAmount;
 	const inStock = stockByVariant[selected.id] ?? false;
 	const installmentCents = Math.round(numericToCents(finalAmount) / 12);
+	const baseCents = numericToCents(selected.priceAmount);
+	const finalCents = numericToCents(finalAmount);
+	const discountPct =
+		discounted != null && baseCents > 0
+			? Math.round((1 - finalCents / baseCents) * 100)
+			: 0;
+	const savingsCents = baseCents - finalCents;
+	const variantPricesDiffer =
+		new Set(
+			orderedVariants.map(
+				(v) => applyDiscount(v.priceAmount, activePromotion) ?? v.priceAmount
+			)
+		).size > 1;
 
 	function buildCartItem(): CartItemSnapshot {
 		return {
@@ -179,7 +193,12 @@ export function ProductInfo({
 			</div>
 
 			<div className="border-border border-y py-5">
-				<div className="flex items-baseline gap-3">
+				<div className="flex items-center gap-3">
+					{discountPct > 0 && (
+						<span className="bg-emach-red px-2 py-1 font-bold font-display text-[14px] text-white tracking-[0.04em]">
+							−{discountPct}%
+						</span>
+					)}
 					<span className="font-bold font-display text-[40px] tabular-nums">
 						{fmtNumericBRL(finalAmount)}
 					</span>
@@ -189,44 +208,63 @@ export function ProductInfo({
 						</span>
 					)}
 				</div>
-				<div className="mt-1.5 text-[13px] text-gray-60">
+				{savingsCents > 0 && (
+					<div className="mt-1.5 font-semibold text-[13px] text-success">
+						Você economiza {fmtBRL(savingsCents)}
+					</div>
+				)}
+				<div className="mt-1 text-[13px] text-gray-60">
 					Em até <strong>12× de {fmtBRL(installmentCents)}</strong> sem juros
 				</div>
 			</div>
 
 			{orderedVariants.length > 1 && (
 				<div>
-					<div className="mb-2.5 font-semibold text-md">Opções disponíveis</div>
+					<div className="mb-2.5 font-semibold text-md">Voltagem</div>
 					<div className="flex flex-wrap gap-2">
 						{orderedVariants.map((v) => {
 							const variantStock = stockByVariant[v.id] ?? false;
 							const isActive = v.id === selectedVariantId;
+							const vPrice =
+								applyDiscount(v.priceAmount, activePromotion) ?? v.priceAmount;
 							return (
 								<button
 									className={cn(
-										"flex min-w-[140px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors",
-										isActive
-											? "border-emach-red bg-near-black text-white"
-											: "border-gray-20 bg-background text-foreground hover:border-foreground"
+										"flex min-w-[120px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors",
+										!variantStock &&
+											"cursor-not-allowed border-gray-20 border-dashed opacity-45",
+										variantStock &&
+											isActive &&
+											"border-emach-red bg-near-black text-white",
+										variantStock &&
+											!isActive &&
+											"border-gray-20 bg-background text-foreground hover:border-foreground"
 									)}
+									disabled={!variantStock}
 									key={v.id}
-									onClick={() => setSelectedVariantId(v.id)}
+									onClick={() => variantStock && setSelectedVariantId(v.id)}
 									type="button"
 								>
-									<span className="font-display font-semibold text-[11px] uppercase tracking-[0.14em] opacity-70">
-										{v.voltage ?? "Padrão"}
-									</span>
-									<span className="font-bold text-[16px] tabular-nums">
-										{fmtNumericBRL(
-											applyDiscount(v.priceAmount, activePromotion) ??
-												v.priceAmount
+									<span className="flex items-center justify-between gap-2">
+										<span className="font-display font-semibold text-[12px] uppercase tracking-[0.12em] opacity-75">
+											{v.voltage ?? "Padrão"}
+										</span>
+										{!variantStock && (
+											<span className="border border-emach-red/60 px-1.5 font-display text-[9px] text-emach-red uppercase tracking-[0.08em]">
+												Esgotado
+											</span>
 										)}
 									</span>
-									<span className="text-[11px] opacity-70">
-										SKU {v.sku}
-										{!variantStock && " · Esgotado"}
-										{v.isDefault && " · Padrão"}
-									</span>
+									{variantPricesDiffer && (
+										<span
+											className={cn(
+												"font-bold text-[15px] tabular-nums",
+												!variantStock && "line-through"
+											)}
+										>
+											{fmtNumericBRL(vPrice)}
+										</span>
+									)}
 								</button>
 							);
 						})}
@@ -285,21 +323,26 @@ export function ProductInfo({
 				toolId={tool.id}
 			/>
 
-			<div className="flex h-16 justify-between rounded-sm bg-gray-10 px-5">
-				<div className="flex items-center gap-2">
+			<div className="flex border border-border">
+				<div className="flex flex-1 items-center gap-2.5 border-border border-r px-4 py-3">
 					<Truck size={16} />
 					<div>
-						<div className="font-semibold text-sm">
-							Frete para todo o Brasil
-						</div>
-						<div className="text-gray-60 text-xs">calculado pelo seu CEP</div>
+						<div className="font-semibold text-[12px]">Frete Brasil</div>
+						<div className="text-[10.5px] text-gray-60">pelo seu CEP</div>
 					</div>
 				</div>
-				<div className="flex items-center gap-2">
+				<div className="flex flex-1 items-center gap-2.5 border-border border-r px-4 py-3">
 					<CheckCircle size={16} />
 					<div>
-						<div className="font-semibold text-sm">Garantia 2 anos</div>
-						<div className="text-gray-60 text-xs">direto com a marca</div>
+						<div className="font-semibold text-[12px]">Garantia 2 anos</div>
+						<div className="text-[10.5px] text-gray-60">com a marca</div>
+					</div>
+				</div>
+				<div className="flex flex-1 items-center gap-2.5 px-4 py-3">
+					<ShieldCheck size={16} />
+					<div>
+						<div className="font-semibold text-[12px]">Compra segura</div>
+						<div className="text-[10.5px] text-gray-60">nota fiscal</div>
 					</div>
 				</div>
 			</div>
