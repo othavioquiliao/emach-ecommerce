@@ -27,8 +27,7 @@ export function CartItemRow({
 }: CartItemRowProps) {
 	const isCompact = variant === "compact";
 	const lineTotalCents = numericToCents(item.priceAmount) * item.quantity;
-	const labelText =
-		item.categoryName ?? (item.voltage ? item.voltage : `SKU ${item.sku}`);
+	const labelText = item.categoryName ?? "";
 
 	return (
 		<div
@@ -55,7 +54,7 @@ export function CartItemRow({
 			</div>
 
 			<div className="min-w-0">
-				<SectionLabel>{labelText}</SectionLabel>
+				{labelText && <SectionLabel>{labelText}</SectionLabel>}
 				{isCompact ? (
 					<Link
 						className="mt-0.5 block overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[14px] hover:underline"
@@ -68,15 +67,16 @@ export function CartItemRow({
 				) : (
 					<div className="mt-1 font-medium text-[16px]">{item.name}</div>
 				)}
-				<div
-					className={cn(
-						"text-gray-60",
-						isCompact ? "mt-0.5 text-[11px]" : "mt-1 text-[12px]"
-					)}
-				>
-					SKU {item.sku}
-					{item.voltage && ` · ${item.voltage}`}
-				</div>
+				{item.voltage && (
+					<div
+						className={cn(
+							"text-gray-60",
+							isCompact ? "mt-0.5 text-[11px]" : "mt-1 text-[12px]"
+						)}
+					>
+						{item.voltage}
+					</div>
+				)}
 				<div
 					className={cn(
 						"flex",

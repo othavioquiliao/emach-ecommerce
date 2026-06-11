@@ -2,11 +2,12 @@
 
 import {
 	Sheet,
+	SheetClose,
 	SheetContent,
 	SheetHeader,
 	SheetTitle,
 } from "@emach/ui/components/sheet";
-import { ShoppingBag } from "lucide-react";
+import { ShoppingBag, X } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
@@ -43,17 +44,27 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 		<Sheet onOpenChange={onOpenChange} open={open}>
 			<SheetContent
 				className="flex w-full flex-col p-0 sm:max-w-md"
+				showCloseButton={false}
 				side="right"
 			>
-				<SheetHeader className="gap-0 border-b px-5 py-4">
-					<SheetTitle className="flex items-center gap-2 font-bold font-display text-[15px] uppercase tracking-[0.14em]">
-						Carrinho
-						{totalItems > 0 && (
-							<span className="font-medium text-[13px] text-gray-60 tracking-[0.08em]">
-								· {totalItems} {totalItems === 1 ? "item" : "itens"}
-							</span>
-						)}
-					</SheetTitle>
+				{/* Header escuro com régua vermelha — assinatura do chiaroscuro EMACH */}
+				<SheetHeader className="gap-0 border-emach-red border-b-2 bg-near-black px-5 py-4">
+					<div className="flex items-center justify-between gap-2">
+						<SheetTitle className="flex items-center gap-2 font-bold font-display text-[15px] text-white uppercase tracking-[0.14em]">
+							Carrinho
+							{totalItems > 0 && (
+								<span className="font-medium text-[13px] text-white/55 tracking-[0.08em]">
+									· {totalItems} {totalItems === 1 ? "item" : "itens"}
+								</span>
+							)}
+						</SheetTitle>
+						<SheetClose
+							aria-label="Fechar carrinho"
+							className="-mr-1 flex size-8 cursor-pointer items-center justify-center text-white/60 transition-colors hover:text-white"
+						>
+							<X size={18} />
+						</SheetClose>
+					</div>
 				</SheetHeader>
 
 				{items.length === 0 ? (
@@ -94,7 +105,8 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 							))}
 						</div>
 
-						<div className="border-gray-10 border-t px-5 pt-4 pb-5">
+						{/* Footer escuro — fecha a drawer com o CTA vermelho em destaque */}
+						<div className="bg-near-black px-5 pt-4 pb-5 text-white">
 							<div className="flex items-baseline justify-between">
 								<span className="font-bold font-display text-[13px] uppercase tracking-[0.12em]">
 									Subtotal
@@ -103,7 +115,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 									{fmtBRL(subtotal)}
 								</span>
 							</div>
-							<div className="mb-3.5 text-right text-[11px] text-gray-60">
+							<div className="mb-3.5 text-right text-[11px] text-white/55">
 								ou 12× de {fmtBRL(subtotal / 12)} sem juros
 							</div>
 
@@ -113,7 +125,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 								</EmachButton>
 							</Link>
 							<Link className="block" href="/cart" onClick={close}>
-								<EmachButton full size="md" variant="ghost">
+								<EmachButton full size="md" variant="outline-light">
 									Ver carrinho
 								</EmachButton>
 							</Link>

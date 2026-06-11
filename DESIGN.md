@@ -424,6 +424,8 @@ Lucide icon placeholder per category slug: `eletricas→Drill`, `manuais→Wrenc
 ### Cart state
 Client-side cart via React Context + localStorage (`emach:cart`). Provider in `src/lib/cart-context.tsx`. Store helpers in `src/lib/cart-store.ts`. Cart count badge in SiteHeader updates reactively.
 
+**Drawer (`cart-sheet.tsx`) = chiaroscuro** (espelha `AccountHero` + corpo claro): header `bg-near-black` com **régua vermelha** inferior (`border-emach-red border-b-2`) e título/contagem brancos; corpo claro com a lista de itens (`CartItemRow variant="compact"`); footer `bg-near-black` com subtotal branco + CTA `primary` (Finalizar compra) + `outline-light` (Ver carrinho — **nunca `ghost`/`outline` no escuro**, ficam invisíveis). O `Sheet` (pkg `@emach/ui`) recebe `showCloseButton={false}` e a drawer renderiza o próprio `SheetClose` branco no header escuro. **SKU não aparece no carrinho** (drawer nem `/cart`): `CartItemRow` mostra só categoria (label) + voltagem (meta) — SKU não serve ao cliente final.
+
 ### Shared layout primitives (`apps/web/src/components/`)
 
 New DRY helpers. Prefer composing these over raw markup when the pattern applies:
