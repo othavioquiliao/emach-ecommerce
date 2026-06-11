@@ -11,7 +11,13 @@ export async function proxy(req: NextRequest) {
 	const isProtected = PROTECTED.some((p) => req.nextUrl.pathname.startsWith(p));
 
 	if (isProtected) {
-		const token = req.cookies.get("ecommerce.session_token");
+		// Better Auth prefixa o cookie com `__Secure-` quando roda sob HTTPS
+		// (produção). Em dev (HTTP) o nome é cru. Checar as duas variantes —
+		// senão o proxy nunca acha a sessão em prod e entra em loop de redirect
+		// /dashboard → /login → /dashboard (tela preta do loader).
+		const token =
+			req.cookies.get("ecommerce.session_token") ??
+			req.cookies.get("__Secure-ecommerce.session_token");
 		if (!token) {
 			const url = req.nextUrl.clone();
 			url.pathname = "/login";
