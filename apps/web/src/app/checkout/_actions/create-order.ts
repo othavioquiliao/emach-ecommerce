@@ -3,6 +3,7 @@
 import { db } from "@emach/db";
 import { headers } from "next/headers";
 
+import { getClientIp } from "@/lib/client-ip";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
 import { requireCurrentClient } from "@/lib/session";
@@ -35,8 +36,7 @@ export async function createOrderAction(
 	const clientId = session.user.id;
 
 	const reqHeaders = await headers();
-	const ipAddress =
-		reqHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? null;
+	const ipAddress = getClientIp(reqHeaders);
 	const userAgent = reqHeaders.get("user-agent") ?? null;
 
 	try {
