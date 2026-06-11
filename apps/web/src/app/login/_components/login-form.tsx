@@ -10,6 +10,7 @@ import {
 	TabsTrigger,
 } from "@emach/ui/components/tabs";
 import { cn } from "@emach/ui/lib/utils";
+import { maskPhone, onlyDigits } from "@emach/validators";
 import { useForm } from "@tanstack/react-form";
 import type { Route } from "next";
 import Image from "next/image";
@@ -20,7 +21,6 @@ import { toast } from "sonner";
 import z from "zod";
 import Loader from "@/components/loader";
 import { authClient } from "@/lib/auth-client";
-import { maskPhone, onlyDigits } from "@/lib/validators/cpf-cnpj";
 import { PasswordInput } from "./password-input";
 
 const TRIGGER_CLASS =

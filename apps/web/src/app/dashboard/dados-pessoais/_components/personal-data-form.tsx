@@ -8,6 +8,12 @@ import {
 	ToggleGroupItem,
 } from "@emach/ui/components/toggle-group";
 import { cn } from "@emach/ui/lib/utils";
+import {
+	isValidCpfCnpj,
+	maskCpfCnpj,
+	maskPhone,
+	onlyDigits,
+} from "@emach/validators";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -15,12 +21,6 @@ import z from "zod";
 import { AccountBadge } from "@/app/dashboard/_components/account-badge";
 import { AccountSection } from "@/app/dashboard/_components/account-section";
 import { authClient } from "@/lib/auth-client";
-import {
-	isValidCpfCnpj,
-	maskCpfCnpj,
-	maskPhone,
-	onlyDigits,
-} from "@/lib/validators/cpf-cnpj";
 
 type AccountType = "PF" | "PJ";
 

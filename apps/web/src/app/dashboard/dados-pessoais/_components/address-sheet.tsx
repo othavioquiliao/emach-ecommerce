@@ -14,11 +14,11 @@ import {
 	SheetTitle,
 } from "@emach/ui/components/sheet";
 import { cn } from "@emach/ui/lib/utils";
+import { onlyDigits } from "@emach/validators";
 import { useForm } from "@tanstack/react-form";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-
 import {
 	createAddressAction,
 	deleteAddressAction,
@@ -28,7 +28,6 @@ import {
 	type AddressInput,
 	addressInputSchema,
 } from "@/lib/validators/address";
-import { onlyDigits } from "@/lib/validators/cpf-cnpj";
 
 const RE_CEP = /^(\d{5})(\d)/;
 const maskCep = (v: string): string => {

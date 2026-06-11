@@ -16,7 +16,10 @@
     "@emach/db": "workspace:*",
     "@emach/email": "workspace:*",
     "@emach/env": "workspace:*",
-    "better-auth": "catalog:"
+    "@emach/redis": "workspace:*",
+    "@emach/validators": "workspace:*",
+    "better-auth": "catalog:",
+    "evlog": "^2.14.1"
   },
   "devDependencies": {
     "@emach/config": "workspace:*",

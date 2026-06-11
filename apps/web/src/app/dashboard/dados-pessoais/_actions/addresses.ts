@@ -2,17 +2,16 @@
 
 import { db } from "@emach/db";
 import { clientAddress } from "@emach/db/schema/client";
+import { onlyDigits } from "@emach/validators";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-
 import { log } from "@/lib/evlog";
 import { requireCurrentClient } from "@/lib/session";
 import {
 	type AddressInput,
 	addressInputSchema,
 } from "@/lib/validators/address";
-import { onlyDigits } from "@/lib/validators/cpf-cnpj";
 
 export type ActionResult = { ok: true } | { ok: false; error: string };
 

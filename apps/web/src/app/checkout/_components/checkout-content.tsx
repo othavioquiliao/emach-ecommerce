@@ -3,6 +3,13 @@
 import type { ClientAddress } from "@emach/db/schema/client";
 import { Checkbox } from "@emach/ui/components/checkbox";
 import { Separator } from "@emach/ui/components/separator";
+import {
+	isValidCpfCnpj,
+	maskCpfCnpj,
+	maskPhone,
+	onlyDigits,
+	onlyLetters,
+} from "@emach/validators";
 import { revalidateLogic, useForm, useStore } from "@tanstack/react-form";
 import type { Route } from "next";
 import NextImage from "next/image";
@@ -24,13 +31,6 @@ import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
 import type { ShippingOption } from "@/lib/superfrete/types";
 import { addressFieldsSchema } from "@/lib/validators/address";
-import {
-	isValidCpfCnpj,
-	maskCpfCnpj,
-	maskPhone,
-	onlyDigits,
-	onlyLetters,
-} from "@/lib/validators/cpf-cnpj";
 
 const NEW_ADDRESS_ID = "__new__";
 
