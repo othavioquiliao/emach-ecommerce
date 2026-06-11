@@ -6,9 +6,14 @@ import { inArray } from "drizzle-orm";
 import { z } from "zod";
 
 import { couponCartItemSchema } from "@/app/checkout/_lib/coupon-schema";
-import { type CouponLine, validateCoupon } from "@/lib/coupons/validate-coupon";
+import {
+	type CouponLine,
+	ENUMERABLE_REASONS,
+	validateCoupon,
+} from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
+import { couponLimiter, RATE_LIMIT_MESSAGE } from "@/lib/rate-limit";
 import { requireCurrentClient } from "@/lib/session";
 
 const schema = z.object({
@@ -27,8 +32,14 @@ export async function applyCouponAction(
 	if (!parsed.success) {
 		return { ok: false, error: "Dados inválidos" };
 	}
-	await requireCurrentClient();
+	const session = await requireCurrentClient();
+	const clientId = session.user.id;
 	const { code, cartItems } = parsed.data;
+
+	const { success } = await couponLimiter.limit(`coupon:${clientId}`);
+	if (!success) {
+		return { ok: false, error: RATE_LIMIT_MESSAGE };
+	}
 
 	try {
 		const variantIds = cartItems.map((i) => i.variantId);
@@ -57,6 +68,11 @@ export async function applyCouponAction(
 
 		const result = await validateCoupon(db, code, lines);
 		if (!result.ok) {
+			if (ENUMERABLE_REASONS.has(result.reason)) {
+				// Anti-enumeração: motivo real só no evlog; usuário vê msg genérica.
+				log.warn({ action: "coupon_rejected", reason: result.reason });
+				return { ok: false, error: "Cupom inválido ou indisponível" };
+			}
 			return { ok: false, error: result.error };
 		}
 		return { ok: true, discountCents: result.discountCents };
