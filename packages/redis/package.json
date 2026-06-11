@@ -1,0 +1,21 @@
+{
+  "name": "@emach/redis",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "dependencies": {
+    "@emach/env": "workspace:*",
+    "@upstash/redis": "^1.35.0"
+  },
+  "devDependencies": {
+    "@emach/config": "workspace:*",
+    "@types/node": "^25.8.0",
+    "typescript": "^6"
+  }
+}
