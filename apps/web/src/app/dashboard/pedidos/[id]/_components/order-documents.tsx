@@ -59,12 +59,12 @@ function DocRow({
 	title: string;
 }) {
 	return (
-		<div className="flex flex-wrap items-center gap-3.5 border border-border bg-white px-4 py-3.5">
-			<span className="flex h-10 w-10 shrink-0 items-center justify-center border border-near-black text-near-black">
+		<div className="flex flex-wrap items-center gap-3.5 border border-white/10 bg-near-black px-4 py-3.5">
+			<span className="flex h-10 w-10 shrink-0 items-center justify-center border border-white/30 text-white">
 				<Icon className="h-5 w-5" strokeWidth={1.6} />
 			</span>
 			<div className="min-w-0 flex-1">
-				<div className="font-semibold text-[14px] text-near-black">{title}</div>
+				<div className="font-semibold text-[14px] text-white">{title}</div>
 				{subtitle ? (
 					<div className="text-[12px] text-gray-50">{subtitle}</div>
 				) : null}
@@ -77,7 +77,7 @@ function DocRow({
 function DocLink({ href, label }: { href: string; label: string }) {
 	return (
 		<a
-			className="inline-flex h-9 items-center justify-center gap-1.5 border border-near-black bg-white px-3.5 font-sans font-semibold text-[13px] text-near-black tracking-[0.04em] transition-all duration-180 hover:bg-near-black hover:text-white"
+			className="inline-flex h-9 items-center justify-center gap-1.5 border border-white/30 bg-transparent px-3.5 font-sans font-semibold text-[13px] text-white tracking-[0.04em] transition-all duration-180 hover:bg-white/10 hover:text-white"
 			href={href}
 			rel="noopener noreferrer"
 			target="_blank"

@@ -20,7 +20,11 @@ export default async function DashboardLayout({
 		<>
 			<SiteHeader />
 			<main className="grid h-[calc(100vh-3.5rem)] w-full grid-cols-1 md:grid-cols-[260px_1fr]">
-				<DashboardSidebar userName={session.user.name} />
+				<DashboardSidebar
+					userEmail={session.user.email}
+					userImage={session.user.image}
+					userName={session.user.name}
+				/>
 				<div className="flex min-w-0 flex-col overflow-y-auto">
 					<DashboardNavMobile />
 					<div className="min-w-0">{children}</div>

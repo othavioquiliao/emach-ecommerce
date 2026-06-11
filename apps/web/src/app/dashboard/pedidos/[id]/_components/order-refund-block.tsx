@@ -26,11 +26,10 @@ export function OrderRefundBlock({
 		const date = refund.resolvedAt ? DATE_FMT.format(refund.resolvedAt) : "—";
 		return (
 			<Row
-				bg="bg-gray-10"
 				label="Reembolso"
 				text={
 					<>
-						Estornado em <strong className="text-near-black">{date}</strong>
+						Estornado em <strong className="text-white">{date}</strong>
 					</>
 				}
 				variant={variant}
@@ -41,9 +40,10 @@ export function OrderRefundBlock({
 	if (refund.status === "rejected") {
 		return (
 			<Row
-				bg="bg-[#FFF5F5]"
+				bg="bg-emach-red/15"
 				label="Decisão"
 				text={refund.rejectionReason ?? "Solicitação recusada."}
+				tone="danger"
 				variant={variant}
 			/>
 		);
@@ -54,9 +54,7 @@ export function OrderRefundBlock({
 		refund.status === "approved"
 			? "Aprovada · estorno em processamento"
 			: "Em andamento";
-	return (
-		<Row bg="bg-gray-10" label="Devolução" text={text} variant={variant} />
-	);
+	return <Row label="Devolução" text={text} variant={variant} />;
 }
 
 function Row({
@@ -64,25 +62,32 @@ function Row({
 	text,
 	bg,
 	variant,
+	tone = "default",
 }: {
-	bg: string;
+	bg?: string;
 	label: string;
 	text: React.ReactNode;
+	tone?: "default" | "danger";
 	variant: "card" | "page";
 }) {
 	const padding = variant === "page" ? "px-[18px] py-4" : "px-[18px] py-3";
 	return (
 		<div
 			className={cn(
-				"flex flex-wrap items-baseline gap-x-6 gap-y-1 border-border border-t",
+				"flex flex-wrap items-baseline gap-x-6 gap-y-1 border-white/12 border-t",
 				bg,
 				padding
 			)}
 		>
-			<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
+			<span
+				className={cn(
+					"font-display font-semibold text-[11px] uppercase tracking-[0.14em]",
+					tone === "danger" ? "text-emach-red-on-dark" : "text-gray-50"
+				)}
+			>
 				{label}
 			</span>
-			<span className="text-[13px] text-gray-60 leading-relaxed">{text}</span>
+			<span className="text-[13px] text-white/80 leading-relaxed">{text}</span>
 		</div>
 	);
 }

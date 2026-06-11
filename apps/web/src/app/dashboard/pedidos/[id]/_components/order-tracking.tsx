@@ -33,20 +33,20 @@ function TrackingCode({
 		}
 	};
 	return (
-		<div className="grid grid-cols-1 gap-4 border border-border bg-white px-4 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
+		<div className="grid grid-cols-1 gap-4 border border-white/10 bg-near-black px-4 py-4 sm:grid-cols-[1fr_auto] sm:items-center">
 			<div>
 				{method ? (
-					<div className="mb-1 font-display font-semibold text-[12px] text-gray-60 uppercase tracking-[0.12em]">
+					<div className="mb-1 font-display font-semibold text-[12px] text-white/65 uppercase tracking-[0.12em]">
 						{method}
 					</div>
 				) : null}
-				<div className="font-mono font-semibold text-[18px] text-near-black tracking-[0.04em]">
+				<div className="font-mono font-semibold text-[18px] text-white tracking-[0.04em]">
 					{code}
 				</div>
 			</div>
 			<button
 				aria-label="Copiar código de rastreio"
-				className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 border border-near-black bg-white px-4 font-sans font-semibold text-[13px] text-near-black tracking-[0.04em] transition-all duration-180 hover:bg-near-black hover:text-white"
+				className="inline-flex h-10 cursor-pointer items-center justify-center gap-1.5 border border-white/30 bg-transparent px-4 font-sans font-semibold text-[13px] text-white tracking-[0.04em] transition-all duration-180 hover:bg-white/10 hover:text-white"
 				onClick={handleCopy}
 				type="button"
 			>
@@ -75,7 +75,7 @@ function TrackingBody({
 		return <TrackingCode code={trackingCode} method={method} />;
 	}
 	return (
-		<div className="border border-border border-dashed bg-white px-4 py-3.5 text-[13px] text-gray-60">
+		<div className="border border-white/10 border-dashed bg-near-black px-4 py-3.5 text-[13px] text-white/65">
 			{placeholderMessage(status)}
 		</div>
 	);
@@ -100,7 +100,7 @@ function HistoryTimeline({ history }: { history: OrderDetailData["history"] }) {
 				<li className="flex gap-3 text-[13px]" key={h.id}>
 					<div className="mt-1.5 h-2.5 w-2.5 shrink-0 rounded-full bg-emach-red" />
 					<div>
-						<div className="font-semibold text-near-black">
+						<div className="font-semibold text-white">
 							{ORDER_STATUS_BADGE[h.toStatus].label}
 						</div>
 						<div className="text-[12px] text-gray-50">
@@ -137,7 +137,7 @@ export function OrderTracking({
 				aria-controls="order-history"
 				aria-expanded={open}
 				className={cn(
-					"inline-flex items-center gap-1.5 font-semibold text-[13px] text-gray-60 hover:text-near-black",
+					"inline-flex items-center gap-1.5 font-semibold text-[13px] text-white/65 hover:text-white",
 					negative ? "" : "mt-5"
 				)}
 				onClick={() => setOpen((v) => !v)}
@@ -150,7 +150,10 @@ export function OrderTracking({
 				{open ? "Ocultar histórico" : "Ver histórico completo"}
 			</button>
 			{open ? (
-				<div className="mt-3.5 border-border border-t pt-4" id="order-history">
+				<div
+					className="mt-3.5 border-white/10 border-t pt-4"
+					id="order-history"
+				>
 					<HistoryTimeline history={history} />
 				</div>
 			) : null}

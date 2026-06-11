@@ -6,13 +6,20 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { signOut } from "@/lib/auth-client";
+import { AccountAvatar } from "./account-avatar";
 import { NAV_ITEMS } from "./nav-items";
 
 interface DashboardSidebarProps {
+	userEmail: string;
+	userImage?: string | null;
 	userName: string;
 }
 
-export function DashboardSidebar({ userName }: DashboardSidebarProps) {
+export function DashboardSidebar({
+	userEmail,
+	userImage,
+	userName,
+}: DashboardSidebarProps) {
 	const pathname = usePathname();
 	const router = useRouter();
 
@@ -22,12 +29,22 @@ export function DashboardSidebar({ userName }: DashboardSidebarProps) {
 	};
 
 	return (
-		<aside className="hidden h-full flex-col bg-near-black pt-8 text-white md:flex">
-			<div className="border-white/10 border-b px-[22px] pb-[22px]">
-				<div className="mb-1.5 font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
-					Olá,
+		<aside className="hidden h-full flex-col border-black border-r-2 bg-near-black pt-8 text-white md:flex">
+			<div className="flex items-center gap-3 border-white/10 border-b px-[22px] pb-[22px]">
+				<AccountAvatar
+					className="size-[42px]"
+					fallbackClassName="text-[16px]"
+					image={userImage}
+					name={userName}
+				/>
+				<div className="min-w-0">
+					<div className="truncate font-semibold text-[15px] leading-tight">
+						{userName}
+					</div>
+					<div className="mt-0.5 truncate text-[11.5px] text-gray-50">
+						{userEmail}
+					</div>
 				</div>
-				<div className="font-semibold text-[16px]">{userName}</div>
 			</div>
 
 			<nav aria-label="Navegação da conta" className="flex flex-1 flex-col">

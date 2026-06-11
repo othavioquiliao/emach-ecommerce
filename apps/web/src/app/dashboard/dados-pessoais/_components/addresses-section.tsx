@@ -43,7 +43,7 @@ export function AddressesSection({ addresses }: AddressesSectionProps) {
 					onAdd={() => setSheetMode({ kind: "create", hasOthers: false })}
 				/>
 			) : (
-				<div className="divide-y divide-border">
+				<div className="divide-y divide-white/10">
 					<AddressCard
 						address={primary}
 						onEdit={() => setSheetMode({ kind: "edit", address: primary })}
@@ -51,7 +51,7 @@ export function AddressesSection({ addresses }: AddressesSectionProps) {
 
 					{others.length > 0 && (
 						<button
-							className="w-full px-5 py-3 text-left font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em] hover:text-near-black"
+							className="w-full px-5 py-3 text-left font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em] hover:text-white"
 							onClick={() => setExpanded((v) => !v)}
 							type="button"
 						>
@@ -71,7 +71,7 @@ export function AddressesSection({ addresses }: AddressesSectionProps) {
 						))}
 
 					<button
-						className="w-full px-5 py-3.5 text-left font-display font-semibold text-[12px] text-near-black uppercase tracking-[0.08em] hover:underline"
+						className="w-full px-5 py-3.5 text-left font-display font-semibold text-[12px] text-white uppercase tracking-[0.08em] hover:underline"
 						onClick={() => setSheetMode({ kind: "create", hasOthers })}
 						type="button"
 					>
@@ -87,17 +87,17 @@ export function AddressesSection({ addresses }: AddressesSectionProps) {
 
 function EmptyState({ onAdd }: { onAdd: () => void }) {
 	return (
-		<div className="flex items-start justify-between gap-4 bg-emach-red/5 p-5">
+		<div className="flex items-start justify-between gap-4 bg-emach-red/15 p-5">
 			<div className="min-w-0 flex-1">
-				<div className="font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.14em]">
+				<div className="font-display font-semibold text-[11px] text-emach-red-on-dark uppercase tracking-[0.14em]">
 					Nenhum endereço cadastrado
 				</div>
-				<div className="mt-1 text-[13px] text-gray-60">
+				<div className="mt-1 text-[13px] text-white/65">
 					Necessário para finalizar compras.
 				</div>
 			</div>
 			<button
-				className="shrink-0 font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.08em] hover:underline"
+				className="shrink-0 font-display font-semibold text-[11px] text-emach-red-on-dark uppercase tracking-[0.08em] hover:underline"
 				onClick={onAdd}
 				type="button"
 			>
@@ -145,17 +145,17 @@ function AddressCard({ address, onEdit }: AddressCardProps) {
 						{address.label ?? "Endereço"}
 					</div>
 					{address.isDefault && (
-						<span className="bg-near-black px-2 py-0.5 font-display font-semibold text-[10px] text-white uppercase tracking-[0.08em]">
+						<span className="bg-white px-2 py-0.5 font-display font-semibold text-[10px] text-near-black uppercase tracking-[0.08em]">
 							Padrão
 						</span>
 					)}
 				</div>
-				<div className="mt-1 text-[16px] text-near-black">{lineMain}</div>
+				<div className="mt-1 text-[16px] text-white">{lineMain}</div>
 				<div className="mt-1 text-[13px] text-gray-50">{lineSub}</div>
 			</div>
 			<div className="flex shrink-0 flex-col items-end gap-2">
 				<button
-					className="font-display font-semibold text-[11px] text-near-black uppercase tracking-[0.08em] hover:underline"
+					className="font-display font-semibold text-[11px] text-white uppercase tracking-[0.08em] hover:underline"
 					onClick={onEdit}
 					type="button"
 				>
@@ -163,7 +163,7 @@ function AddressCard({ address, onEdit }: AddressCardProps) {
 				</button>
 				{!address.isDefault && (
 					<button
-						className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.08em] hover:text-near-black hover:underline disabled:opacity-50"
+						className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.08em] hover:text-white hover:underline disabled:opacity-50"
 						disabled={isPending}
 						onClick={handleSetDefault}
 						type="button"

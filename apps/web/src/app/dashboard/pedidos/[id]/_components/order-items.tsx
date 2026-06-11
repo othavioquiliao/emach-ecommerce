@@ -41,7 +41,7 @@ function MetaChips({ item }: { item: Item }) {
 		return null;
 	}
 	return (
-		<div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-gray-60">
+		<div className="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[12px] text-white/65">
 			{chips.map((chip, idx) => (
 				<span className="flex items-center gap-x-2" key={chip.key}>
 					{idx > 0 ? (
@@ -74,7 +74,7 @@ export function OrderItems({
 					<div
 						className={cn(
 							"flex items-center gap-3.5 py-3.5",
-							idx > 0 && "border-border border-t",
+							idx > 0 && "border-white/10 border-t",
 							idx === 0 && "pt-0",
 							idx === items.length - 1 && "pb-0"
 						)}
@@ -82,7 +82,7 @@ export function OrderItems({
 					>
 						<ItemThumb alt={item.name} url={item.imageUrl} />
 						<div className="min-w-0 flex-1">
-							<div className="font-semibold text-[15px] text-near-black leading-snug">
+							<div className="font-semibold text-[15px] text-white leading-snug">
 								{item.name}
 							</div>
 							<MetaChips item={item} />
@@ -94,7 +94,7 @@ export function OrderItems({
 							</div>
 						</div>
 						<div className="flex min-w-[100px] flex-col items-end gap-1.5">
-							<span className="font-semibold text-[15px] text-near-black">
+							<span className="font-semibold text-[15px] text-white">
 								{fmtNumericBRL(item.lineTotal)}
 							</span>
 							{status === "delivered" ? (

@@ -17,13 +17,13 @@ export function QuickActionCard({
 }) {
 	return (
 		<Link
-			className="flex flex-col gap-2.5 border border-border bg-gray-10 p-5 transition-colors hover:border-near-black"
+			className="flex flex-col gap-2.5 border border-black bg-near-black p-5 text-white transition-colors hover:border-emach-red"
 			href={href}
 		>
-			<span className="flex h-[42px] w-[42px] items-center justify-center border border-near-black">
-				<Icon className="h-5 w-5 text-near-black" strokeWidth={1.6} />
+			<span className="flex h-[42px] w-[42px] items-center justify-center border border-white/30">
+				<Icon className="h-5 w-5 text-white" strokeWidth={1.6} />
 			</span>
-			<span className="font-display font-semibold text-[19px] text-near-black">
+			<span className="font-display font-semibold text-[19px] text-white">
 				{title}
 			</span>
 			<span className="text-[13px] text-gray-50">{description}</span>

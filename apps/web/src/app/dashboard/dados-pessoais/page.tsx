@@ -30,20 +30,18 @@ export default async function PersonalDataPage() {
 
 	return (
 		<>
-			<ProfileHeader name={user.name} />
+			<ProfileHeader />
 			<div className="px-6 py-8 md:px-10">
-				<div className="mx-auto max-w-[920px]">
-					<PersonalDataForm
-						initialData={{
-							name: user.name,
-							email: user.email,
-							emailVerified: user.emailVerified,
-							phone: user.phone ?? null,
-							document: user.document ?? null,
-						}}
-					/>
-					<AddressesSection addresses={addresses} />
-				</div>
+				<PersonalDataForm
+					initialData={{
+						name: user.name,
+						email: user.email,
+						emailVerified: user.emailVerified,
+						phone: user.phone ?? null,
+						document: user.document ?? null,
+					}}
+				/>
+				<AddressesSection addresses={addresses} />
 			</div>
 		</>
 	);

@@ -23,7 +23,7 @@ export function ShippingAddress({ address }: { address: unknown }) {
 
 	return (
 		<AccountSection title="Endereço de entrega">
-			<div className="text-[14px] text-near-black leading-[1.6]">
+			<div className="text-[14px] text-white leading-[1.6]">
 				{a.recipient ? (
 					<div className="font-semibold">{a.recipient}</div>
 				) : null}
@@ -40,7 +40,7 @@ export function ShippingAddress({ address }: { address: unknown }) {
 					</div>
 				) : null}
 				{zipLine ? (
-					<div className="text-[12px] text-gray-60">{zipLine}</div>
+					<div className="text-[12px] text-white/65">{zipLine}</div>
 				) : null}
 			</div>
 		</AccountSection>

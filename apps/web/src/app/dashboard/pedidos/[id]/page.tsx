@@ -62,64 +62,62 @@ export default async function OrderDetailPage({ params }: PageProps) {
 				status={order.status}
 			/>
 			<div className="px-6 py-8 md:px-10">
-				<div className="mx-auto max-w-[920px]">
-					<OrderItems
-						items={items}
-						orderId={order.id}
-						reviewedToolIds={reviewedToolIds}
-						status={order.status}
-					/>
-					<OrderTotals
-						couponApplied={Boolean(order.couponId)}
-						discountAmount={order.discountAmount}
-						itemCount={itemCount}
-						paymentMethod={order.paymentMethod}
-						shippingAmount={order.shippingAmount}
-						shippingMethod={order.shippingMethod}
-						subtotalAmount={order.subtotalAmount}
-						totalAmount={order.totalAmount}
-					/>
-					<OrderTracking history={history} order={order} />
-					<BuyerInfo buyer={buyer} />
-					<ShippingAddress address={order.shippingAddress} />
-					<OrderDocuments
-						nfeNumber={order.nfeNumber}
-						nfeStatus={order.nfeStatus}
-						nfeUrl={order.nfeUrl}
-						nfeXmlUrl={order.nfeXmlUrl}
-						paymentReceiptUrl={order.paymentReceiptUrl}
-					/>
-					{refund ? (
-						<div className="mt-6 border border-border bg-gray-10">
-							<div className="flex items-center gap-x-3.5 bg-gray-10 px-[18px] py-3">
-								<span className="font-display font-semibold text-[11px] text-gray-60 uppercase tracking-[0.14em]">
-									Devolução
-								</span>
-								<span className="font-semibold text-[13px] text-near-black">
-									#{refund.id.slice(0, 8)}
-								</span>
-							</div>
-							<OrderRefundBlock
-								refund={{
-									status: refund.status,
-									rejectionReason: refund.rejectionReason,
-									resolvedAt: refund.resolvedAt,
-								}}
-								variant="page"
-							/>
+				<OrderItems
+					items={items}
+					orderId={order.id}
+					reviewedToolIds={reviewedToolIds}
+					status={order.status}
+				/>
+				<OrderTotals
+					couponApplied={Boolean(order.couponId)}
+					discountAmount={order.discountAmount}
+					itemCount={itemCount}
+					paymentMethod={order.paymentMethod}
+					shippingAmount={order.shippingAmount}
+					shippingMethod={order.shippingMethod}
+					subtotalAmount={order.subtotalAmount}
+					totalAmount={order.totalAmount}
+				/>
+				<OrderTracking history={history} order={order} />
+				<BuyerInfo buyer={buyer} />
+				<ShippingAddress address={order.shippingAddress} />
+				<OrderDocuments
+					nfeNumber={order.nfeNumber}
+					nfeStatus={order.nfeStatus}
+					nfeUrl={order.nfeUrl}
+					nfeXmlUrl={order.nfeXmlUrl}
+					paymentReceiptUrl={order.paymentReceiptUrl}
+				/>
+				{refund ? (
+					<div className="mt-6 border border-black bg-near-black text-white">
+						<div className="flex items-center gap-x-3.5 border-white/12 border-b px-5 py-3">
+							<span className="font-display font-semibold text-[11px] text-gray-50 uppercase tracking-[0.14em]">
+								Devolução
+							</span>
+							<span className="font-semibold text-[13px] text-white">
+								#{refund.id.slice(0, 8)}
+							</span>
 						</div>
-					) : null}
-					{canRequestRefund ? (
-						<div className="mt-6 flex justify-end">
-							<RequestRefundButton
-								orderId={order.id}
-								orderNumber={order.number}
-								totalAmount={order.totalAmount}
-							/>
-						</div>
-					) : null}
-					<OrderActions orderId={order.id} status={order.status} />
-				</div>
+						<OrderRefundBlock
+							refund={{
+								status: refund.status,
+								rejectionReason: refund.rejectionReason,
+								resolvedAt: refund.resolvedAt,
+							}}
+							variant="page"
+						/>
+					</div>
+				) : null}
+				{canRequestRefund ? (
+					<div className="mt-6 flex justify-end">
+						<RequestRefundButton
+							orderId={order.id}
+							orderNumber={order.number}
+							totalAmount={order.totalAmount}
+						/>
+					</div>
+				) : null}
+				<OrderActions orderId={order.id} status={order.status} />
 			</div>
 		</>
 	);

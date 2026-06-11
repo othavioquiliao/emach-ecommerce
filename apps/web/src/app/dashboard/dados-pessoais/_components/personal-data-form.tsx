@@ -78,10 +78,10 @@ function CardShell({ accent = "default", children }: CardShellProps) {
 	return (
 		<div
 			className={cn(
-				"flex items-start justify-between gap-4 border-border p-5",
+				"flex items-start justify-between gap-4 border-white/10 p-5",
 				"border-b sm:[&:nth-child(odd)]:border-r",
 				"sm:[&:nth-child(3)]:border-b-0 [&:nth-child(4)]:border-b-0",
-				accent === "danger" && "bg-emach-red/5"
+				accent === "danger" && "bg-emach-red/15"
 			)}
 		>
 			{children}
@@ -99,8 +99,8 @@ function FieldLabel({
 	return (
 		<div
 			className={cn(
-				"font-display font-semibold text-[11px] uppercase tracking-[0.14em]",
-				tone === "danger" ? "text-emach-red" : "text-gray-50"
+				"font-display font-semibold text-[12px] uppercase tracking-[0.14em]",
+				tone === "danger" ? "text-emach-red-on-dark" : "text-gray-50"
 			)}
 		>
 			{children}
@@ -120,8 +120,8 @@ function EditTrigger({
 	return (
 		<button
 			className={cn(
-				"shrink-0 font-display font-semibold text-[11px] uppercase tracking-[0.08em] hover:underline",
-				tone === "danger" ? "text-emach-red" : "text-near-black"
+				"shrink-0 font-display font-semibold text-[12px] uppercase tracking-[0.08em] hover:underline",
+				tone === "danger" ? "text-emach-red-on-dark" : "text-white"
 			)}
 			onClick={onClick}
 			type="button"
@@ -141,7 +141,7 @@ function FormActions({
 	return (
 		<div className="mt-4 flex justify-end gap-2">
 			<Button
-				className="rounded-none"
+				className="rounded-none border-white/30 bg-transparent text-white hover:bg-white/10 hover:text-white"
 				onClick={onCancel}
 				type="button"
 				variant="outline"
@@ -163,7 +163,7 @@ function FieldError({ message }: { message: string | null }) {
 	if (!message) {
 		return null;
 	}
-	return <p className="mt-1 text-[12px] text-destructive">{message}</p>;
+	return <p className="mt-1 text-[12px] text-emach-red-on-dark">{message}</p>;
 }
 
 const nameSchema = z.string().min(2, "Informe seu nome");
@@ -186,7 +186,7 @@ function NameCard({
 			<CardShell>
 				<div className="min-w-0 flex-1">
 					<FieldLabel>Nome</FieldLabel>
-					<div className="mt-1 truncate text-[17px] text-near-black">
+					<div className="mt-1 truncate text-[18px] text-white">
 						{initialValue}
 					</div>
 				</div>
@@ -237,7 +237,7 @@ function NameCard({
 				</Label>
 				<Input
 					autoFocus
-					className="mt-2 rounded-none"
+					className="mt-2 rounded-none border-white/20 bg-white/5 text-[15px] text-white placeholder:text-gray-50"
 					id="name-input"
 					onChange={(e) => setValue(e.target.value)}
 					value={value}
@@ -280,16 +280,16 @@ function EmailCard({ email, verified }: { email: string; verified: boolean }) {
 						{verified ? "Verificado" : "Não verificado"}
 					</AccountBadge>
 				</div>
-				<div className="mt-2 truncate text-[17px] text-near-black">{email}</div>
+				<div className="mt-2 truncate text-[18px] text-white">{email}</div>
 				{verified ? (
 					<div className="mt-1 text-[12px] text-gray-50">Somente leitura</div>
 				) : (
-					<div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-border border-t border-dashed pt-3">
-						<span className="text-[13px] text-gray-60">
+					<div className="mt-3 flex flex-wrap items-center justify-between gap-3 border-white/15 border-t border-dashed pt-3">
+						<span className="text-[13px] text-white/65">
 							Confirme seu e-mail para receber atualizações de pedido.
 						</span>
 						<Button
-							className="shrink-0 rounded-none border-amber-text text-amber-text"
+							className="shrink-0 rounded-none border-amber-on-dark/55 bg-transparent text-amber-on-dark hover:bg-amber-on-dark/10 hover:text-amber-on-dark"
 							disabled={sending}
 							onClick={handleVerify}
 							type="button"
@@ -332,7 +332,7 @@ function PhoneCard({
 				<div className="min-w-0 flex-1">
 					<FieldLabel>Telefone</FieldLabel>
 					{initialValue ? (
-						<div className="mt-1 text-[17px] text-near-black">
+						<div className="mt-1 text-[18px] text-white">
 							{maskPhone(initialValue)}
 						</div>
 					) : (
@@ -394,7 +394,7 @@ function PhoneCard({
 				</Label>
 				<Input
 					autoFocus
-					className="mt-2 rounded-none"
+					className="mt-2 rounded-none border-white/20 bg-white/5 text-[15px] text-white placeholder:text-gray-50"
 					id="phone-input"
 					onChange={(e) => setValue(maskPhone(e.target.value))}
 					placeholder="(00) 00000-0000"
@@ -440,7 +440,7 @@ function DocumentCard({
 						CPF / CNPJ
 					</FieldLabel>
 					{initialValue ? (
-						<div className="mt-1 text-[17px] text-near-black">
+						<div className="mt-1 text-[18px] text-white">
 							{maskCpfCnpj(initialValue)}
 						</div>
 					) : (
@@ -517,7 +517,7 @@ function DocumentCard({
 			<form className="w-full" onSubmit={handleSubmit}>
 				<FieldLabel>Documento</FieldLabel>
 				<ToggleGroup
-					className="mt-2 mb-3 inline-flex rounded-none border border-near-black"
+					className="mt-2 mb-3 inline-flex rounded-none border border-white/30 text-white"
 					onValueChange={handleAccountTypeChange}
 					value={[accountType]}
 				>
@@ -536,7 +536,7 @@ function DocumentCard({
 				</ToggleGroup>
 				<Input
 					autoFocus
-					className="rounded-none"
+					className="rounded-none border-white/20 bg-white/5 text-[15px] text-white placeholder:text-gray-50"
 					onChange={(e) => setValue(maskCpfCnpj(e.target.value))}
 					placeholder={
 						accountType === "PJ" ? "00.000.000/0000-00" : "000.000.000-00"

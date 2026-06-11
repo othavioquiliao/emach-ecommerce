@@ -9,7 +9,6 @@ import { OrderCard } from "./pedidos/_components/order-card";
 export default async function DashboardPage() {
 	const session = await requireCurrentClient();
 	const orders = await listClientOrders(session.user.id);
-	const firstName = session.user.name.trim().split(/\s+/)[0] ?? "";
 	const toPay = orders.filter(
 		(o) => o.status === "pending_payment" || o.status === "payment_failed"
 	);
@@ -19,7 +18,7 @@ export default async function DashboardPage() {
 		<>
 			<AccountHero
 				subtitle="Acompanhe seus pedidos, devoluções e dados de cadastro num só lugar."
-				title={`Olá, ${firstName}`}
+				title="Visão geral"
 			/>
 			<div className="space-y-8 px-6 py-8 md:px-10">
 				{highlight ? (
@@ -42,7 +41,7 @@ export default async function DashboardPage() {
 							description="Acompanhe e pague seus pedidos."
 							flag={
 								toPay.length > 0 ? (
-									<AccountBadge family="amber">
+									<AccountBadge family="amber" tone="dark">
 										{toPay.length} a pagar
 									</AccountBadge>
 								) : null

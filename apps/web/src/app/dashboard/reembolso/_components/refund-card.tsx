@@ -18,117 +18,73 @@ const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
 	year: "numeric",
 });
 
+function totalLabelFor(isRejected: boolean, isRefunded: boolean): string {
+	if (isRejected) {
+		return "Valor solicitado";
+	}
+	if (isRefunded) {
+		return "Reembolsado";
+	}
+	return "A reembolsar";
+}
+
 export function RefundCard({ refund }: { refund: RefundListItem }) {
 	const detailsHref = `/dashboard/pedidos/${refund.orderId}` as Route;
 	const isRefunded = refund.status === "refunded";
 	const isRejected = refund.status === "rejected";
-	// Todos os cards escuros, menos o recusado — que fica claro por causa do
-	// bloco de recusa (OrderRefundBlock) em fundo claro.
-	const dark = !isRejected;
 
-	const totalLabel = isRejected
-		? "Valor solicitado"
-		: isRefunded
-			? "Reembolsado"
-			: "A reembolsar";
+	const totalLabel = totalLabelFor(isRejected, isRefunded);
 	const reasonText =
 		refund.reasonText || REFUND_REASON_LABEL[refund.reasonCategory];
 
 	return (
 		<article
 			className={cn(
-				"mb-3.5 border",
-				dark
-					? "border-black bg-near-black text-white"
-					: "border-border bg-gray-10",
+				"mb-3.5 border border-black bg-near-black text-white",
 				isRejected && "opacity-85"
 			)}
 		>
-			<header
-				className={cn(
-					"flex flex-wrap items-center gap-x-3.5 gap-y-2 border-b px-[18px] py-3.5",
-					dark ? "border-white/12" : "border-border"
-				)}
-			>
+			<header className="flex flex-wrap items-center gap-x-3.5 gap-y-2 border-white/12 border-b px-[18px] py-3.5">
+				<MetaPair label="Devolução" value={`#${refund.id.slice(0, 8)}`} />
+				<MetaPair label="Pedido" value={`#${refund.orderNumber}`} />
 				<MetaPair
-					dark={dark}
-					label="Devolução"
-					value={`#${refund.id.slice(0, 8)}`}
-				/>
-				<MetaPair dark={dark} label="Pedido" value={`#${refund.orderNumber}`} />
-				<MetaPair
-					dark={dark}
 					label="Solicitada em"
 					value={DATE_FMT.format(refund.requestedAt)}
 				/>
 				<div className="flex-1" />
-				<RefundStatusBadge
-					status={refund.status}
-					tone={dark ? "dark" : "light"}
-				/>
+				<RefundStatusBadge status={refund.status} tone="dark" />
 			</header>
 
 			{refund.preview.map((item, idx) => (
 				<div
 					className={cn(
 						"flex items-center gap-3.5 px-[18px] py-3.5",
-						idx > 0 &&
-							(dark ? "border-white/10 border-t" : "border-border/50 border-t")
+						idx > 0 && "border-white/10 border-t"
 					)}
 					key={item.id}
 				>
 					<ItemThumb alt={item.name} url={item.imageUrl} />
 					<div className="min-w-0 flex-1">
-						<div
-							className={cn(
-								"truncate font-semibold text-[15px]",
-								dark ? "text-white" : "text-near-black"
-							)}
-						>
+						<div className="truncate font-semibold text-[15px] text-white">
 							{item.name}
 						</div>
-						<div
-							className={cn(
-								"mt-1 text-[13px]",
-								dark ? "text-white/55" : "text-gray-50"
-							)}
-						>
+						<div className="mt-1 text-[13px] text-white/55">
 							{[item.voltage, `Qtd: ${item.quantity}`]
 								.filter(Boolean)
 								.join(" · ")}
 						</div>
 					</div>
-					<div
-						className={cn(
-							"min-w-[90px] text-right font-semibold text-[15px]",
-							dark ? "text-white" : "text-near-black"
-						)}
-					>
+					<div className="min-w-[90px] text-right font-semibold text-[15px] text-white">
 						{fmtNumericBRL(item.unitPrice)}
 					</div>
 				</div>
 			))}
 
-			<div
-				className={cn(
-					"flex flex-wrap items-baseline gap-x-6 gap-y-1 border-t px-[18px] py-3",
-					dark ? "border-white/12" : "border-border"
-				)}
-			>
-				<span
-					className={cn(
-						"font-display font-semibold text-[12px] uppercase tracking-[0.12em]",
-						dark ? "text-white/55" : "text-gray-60"
-					)}
-				>
+			<div className="flex flex-wrap items-baseline gap-x-6 gap-y-1 border-white/12 border-t px-[18px] py-3">
+				<span className="font-display font-semibold text-[12px] text-white/55 uppercase tracking-[0.12em]">
 					Motivo
 				</span>
-				<span
-					className={cn(
-						"text-[14px] leading-relaxed",
-						dark ? "text-white/80" : "text-gray-60"
-					)}
-				>
+				<span className="text-[14px] text-white/80 leading-relaxed">
 					{reasonText}
 				</span>
 			</div>
@@ -143,48 +99,29 @@ export function RefundCard({ refund }: { refund: RefundListItem }) {
 					variant="card"
 				/>
 			) : (
-				<StatusStepper
-					steps={buildRefundSteps(refund.status)}
-					tone={dark ? "dark" : "light"}
-				/>
+				<StatusStepper steps={buildRefundSteps(refund.status)} tone="dark" />
 			)}
 
-			<div
-				className={cn(
-					"flex items-center justify-between border-t px-[18px] py-3.5",
-					dark ? "border-white/12" : "border-border"
-				)}
-			>
-				<span
-					className={cn(
-						"font-display font-semibold text-[12px] uppercase tracking-[0.12em]",
-						dark ? "text-white/55" : "text-gray-60"
-					)}
-				>
+			<div className="flex items-center justify-between border-white/12 border-t px-[18px] py-3.5">
+				<span className="font-display font-semibold text-[12px] text-white/55 uppercase tracking-[0.12em]">
 					{totalLabel}
 				</span>
 				<span
 					className={cn(
 						"font-bold text-[20px]",
-						isRefunded && "text-success",
-						isRejected && "text-gray-60 line-through",
-						!(isRefunded || isRejected) &&
-							(dark ? "text-white" : "text-near-black")
+						isRefunded && "text-success-on-dark",
+						isRejected && "text-white/40 line-through",
+						!(isRefunded || isRejected) && "text-white"
 					)}
 				>
 					{fmtNumericBRL(refund.amount)}
 				</span>
 			</div>
 
-			<footer
-				className={cn(
-					"flex justify-end gap-2 border-t px-[18px] py-2.5",
-					dark ? "border-white/12" : "border-border"
-				)}
-			>
+			<footer className="flex justify-end gap-2 border-white/12 border-t px-[18px] py-2.5">
 				<Link
 					className={emachButtonVariants({
-						variant: dark ? "outline-light" : "outline",
+						variant: "outline-light",
 						size: "sm",
 					})}
 					href={detailsHref}
@@ -196,33 +133,13 @@ export function RefundCard({ refund }: { refund: RefundListItem }) {
 	);
 }
 
-function MetaPair({
-	dark,
-	label,
-	value,
-}: {
-	dark: boolean;
-	label: string;
-	value: string;
-}) {
+function MetaPair({ label, value }: { label: string; value: string }) {
 	return (
 		<>
-			<span
-				className={cn(
-					"font-display font-semibold text-[12px] uppercase tracking-[0.12em]",
-					dark ? "text-gray-50" : "text-gray-60"
-				)}
-			>
+			<span className="font-display font-semibold text-[12px] text-gray-50 uppercase tracking-[0.12em]">
 				{label}
 			</span>
-			<span
-				className={cn(
-					"font-semibold text-[13px]",
-					dark ? "text-white" : "text-near-black"
-				)}
-			>
-				{value}
-			</span>
+			<span className="font-semibold text-[13px] text-white">{value}</span>
 		</>
 	);
 }
