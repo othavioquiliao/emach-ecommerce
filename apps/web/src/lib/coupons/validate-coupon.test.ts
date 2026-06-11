@@ -121,7 +121,11 @@ describe("validateCoupon", () => {
 		await withRollback(async (tx) => {
 			const toolId = await seedTool(tx);
 			const result = await validateCoupon(tx, "NOPE", [line(toolId, 10_000)]);
-			expect(result).toEqual({ ok: false, error: "Cupom inválido" });
+			expect(result).toEqual({
+				ok: false,
+				error: "Cupom inválido",
+				reason: "invalid",
+			});
 		});
 	});
 
@@ -130,7 +134,11 @@ describe("validateCoupon", () => {
 			const toolId = await seedTool(tx);
 			await seedPromotion(tx, "VELHO", { endsAt: new Date(Date.now() - 1000) });
 			const result = await validateCoupon(tx, "VELHO", [line(toolId, 10_000)]);
-			expect(result).toEqual({ ok: false, error: "Cupom expirado" });
+			expect(result).toEqual({
+				ok: false,
+				error: "Cupom expirado",
+				reason: "expired",
+			});
 		});
 	});
 
@@ -142,7 +150,11 @@ describe("validateCoupon", () => {
 				redemptionCount: 5,
 			});
 			const result = await validateCoupon(tx, "CHEIO", [line(toolId, 10_000)]);
-			expect(result).toEqual({ ok: false, error: "Cupom esgotado" });
+			expect(result).toEqual({
+				ok: false,
+				error: "Cupom esgotado",
+				reason: "exhausted",
+			});
 		});
 	});
 
@@ -153,6 +165,7 @@ describe("validateCoupon", () => {
 			const result = await validateCoupon(tx, "MIN", [line(toolId, 10_000)]);
 			expect(result.ok).toBe(false);
 			expect((result as { error: string }).error).toMatch(/Pedido mínimo/);
+			expect((result as { reason: string }).reason).toBe("min_order");
 		});
 	});
 
@@ -191,6 +204,7 @@ describe("validateCoupon", () => {
 			expect(result).toEqual({
 				ok: false,
 				error: "Cupom não cobre nenhum item do carrinho",
+				reason: "not_eligible",
 			});
 		});
 	});
@@ -229,6 +243,7 @@ describe("validateCoupon", () => {
 			expect(result).toEqual({
 				ok: false,
 				error: "Cupom não cobre nenhum item do carrinho",
+				reason: "not_eligible",
 			});
 		});
 	});
