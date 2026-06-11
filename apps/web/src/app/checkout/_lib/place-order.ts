@@ -12,7 +12,11 @@ import {
 	autoPromoToolIdsFromMap,
 	fetchAutoPromosByToolId,
 } from "@/lib/auto-promo";
-import { validateCoupon } from "@/lib/coupons/validate-coupon";
+import {
+	ENUMERABLE_REASONS,
+	publicCouponError,
+	validateCoupon,
+} from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
@@ -411,7 +415,13 @@ export async function placeOrder(
 			autoPromoToolIds
 		);
 		if (!coupon.ok) {
-			throw new OrderError(coupon.error);
+			// Anti-enumeração também neste caminho: createOrderAction valida o cupom
+			// direto (sem passar pelo apply-coupon), então a mensagem precisa ser
+			// colapsada aqui também, senão o controle do apply-coupon é contornável.
+			if (ENUMERABLE_REASONS.has(coupon.reason)) {
+				log.warn({ action: "coupon_rejected", reason: coupon.reason });
+			}
+			throw new OrderError(publicCouponError(coupon.reason, coupon.error));
 		}
 
 		// Trava a linha da promoção e re-checa o limite na mesma transação

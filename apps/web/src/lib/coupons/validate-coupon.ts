@@ -34,6 +34,26 @@ export type CouponValidation =
 	| { ok: true; discountCents: number; promotionId: string }
 	| { ok: false; error: string; reason: CouponFailReason };
 
+/**
+ * Mensagem de falha de cupom segura para exibir ao cliente.
+ *
+ * Reasons enumeráveis (existência do código) → mensagem genérica
+ * (anti-enumeração). Reasons que dependem do carrinho (`not_eligible`,
+ * `min_order`) preservam o `error` original (UX legítima, não revela código).
+ *
+ * Fonte ÚNICA do colapso — usar em TODO caller que expõe falha de cupom ao
+ * cliente (apply-coupon, place-order) para não vazar a mensagem detalhada por
+ * um caminho alternativo.
+ */
+export function publicCouponError(
+	reason: CouponFailReason,
+	fallbackError: string
+): string {
+	return ENUMERABLE_REASONS.has(reason)
+		? "Cupom inválido ou indisponível"
+		: fallbackError;
+}
+
 /** Desconto do cupom em centavos, com clamp na base elegível e em zero. */
 function couponDiscountCents(
 	discountType: string,

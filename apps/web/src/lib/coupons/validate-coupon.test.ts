@@ -2,7 +2,11 @@ import { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
 import { tool } from "@emach/db/schema/tools";
 import { describe, expect, it } from "vitest";
-import { type CouponLine, validateCoupon } from "./validate-coupon";
+import {
+	type CouponLine,
+	publicCouponError,
+	validateCoupon,
+} from "./validate-coupon";
 
 const ROLLBACK = Symbol("rollback");
 
@@ -262,5 +266,34 @@ describe("validateCoupon", () => {
 				expect.objectContaining({ ok: true, discountCents: 1000 })
 			);
 		});
+	});
+});
+
+describe("publicCouponError", () => {
+	it("colapsa reasons enumeráveis numa mensagem genérica", () => {
+		expect(publicCouponError("invalid", "Cupom inválido")).toBe(
+			"Cupom inválido ou indisponível"
+		);
+		expect(publicCouponError("expired", "Cupom expirado")).toBe(
+			"Cupom inválido ou indisponível"
+		);
+		expect(publicCouponError("exhausted", "Cupom esgotado")).toBe(
+			"Cupom inválido ou indisponível"
+		);
+		expect(publicCouponError("empty", "Cupom inválido")).toBe(
+			"Cupom inválido ou indisponível"
+		);
+	});
+
+	it("preserva a mensagem de reasons não-enumeráveis (UX legítima)", () => {
+		expect(
+			publicCouponError(
+				"not_eligible",
+				"Cupom não cobre nenhum item do carrinho"
+			)
+		).toBe("Cupom não cobre nenhum item do carrinho");
+		expect(publicCouponError("min_order", "Pedido mínimo de R$ 150,00")).toBe(
+			"Pedido mínimo de R$ 150,00"
+		);
 	});
 });

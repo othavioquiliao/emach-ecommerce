@@ -9,6 +9,7 @@ import { couponCartItemSchema } from "@/app/checkout/_lib/coupon-schema";
 import {
 	type CouponLine,
 	ENUMERABLE_REASONS,
+	publicCouponError,
 	validateCoupon,
 } from "@/lib/coupons/validate-coupon";
 import { log } from "@/lib/evlog";
@@ -71,9 +72,11 @@ export async function applyCouponAction(
 			if (ENUMERABLE_REASONS.has(result.reason)) {
 				// Anti-enumeração: motivo real só no evlog; usuário vê msg genérica.
 				log.warn({ action: "coupon_rejected", reason: result.reason });
-				return { ok: false, error: "Cupom inválido ou indisponível" };
 			}
-			return { ok: false, error: result.error };
+			return {
+				ok: false,
+				error: publicCouponError(result.reason, result.error),
+			};
 		}
 		return { ok: true, discountCents: result.discountCents };
 	} catch (err) {
