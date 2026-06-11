@@ -164,6 +164,15 @@ export const authEcommerce = betterAuth({
 		ipAddress: {
 			ipAddressHeaders: ["x-forwarded-for"],
 		},
+		// Cookie de sessão (#96B): flags fixadas explicitamente em vez de depender
+		// dos defaults implícitos do Better Auth. `secure` só em prod (https) —
+		// em dev (http localhost) o cookie não setaria com secure. Sem `domain`:
+		// subdomínios isolam por host (invariante P0 — não vazar sessão entre apps).
+		defaultCookieAttributes: {
+			httpOnly: true,
+			sameSite: "lax",
+			secure: isProd,
+		},
 	},
 	plugins: [nextCookies()],
 });
