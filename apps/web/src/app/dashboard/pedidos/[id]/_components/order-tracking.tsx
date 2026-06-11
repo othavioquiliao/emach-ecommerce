@@ -10,6 +10,7 @@ import type { OrderDetailData } from "@/lib/orders/queries";
 import { isTerminalNegative, ORDER_STATUS_BADGE } from "@/lib/orders/status";
 
 const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
+	timeZone: "America/Sao_Paulo",
 	day: "2-digit",
 	month: "2-digit",
 	year: "2-digit",

@@ -7,12 +7,14 @@ import { OrderStatusBadge } from "../../_components/order-status-badge";
 import { buildOrderSteps } from "../../_components/order-steps";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
+	timeZone: "America/Sao_Paulo",
 	day: "2-digit",
 	month: "2-digit",
 	year: "numeric",
 });
 
 const DATETIME_FMT = new Intl.DateTimeFormat("pt-BR", {
+	timeZone: "America/Sao_Paulo",
 	day: "2-digit",
 	month: "2-digit",
 	year: "numeric",

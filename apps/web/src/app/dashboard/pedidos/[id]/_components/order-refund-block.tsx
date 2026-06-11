@@ -2,6 +2,7 @@ import type { RefundStatus } from "@emach/db/schema/orders";
 import { cn } from "@emach/ui/lib/utils";
 
 const DATE_FMT = new Intl.DateTimeFormat("pt-BR", {
+	timeZone: "America/Sao_Paulo",
 	day: "2-digit",
 	month: "2-digit",
 	year: "numeric",

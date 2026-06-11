@@ -92,6 +92,7 @@ export default async function OrderConfirmationPage({
 							<span>
 								Criado em{" "}
 								{orderRow.createdAt.toLocaleString("pt-BR", {
+									timeZone: "America/Sao_Paulo",
 									dateStyle: "short",
 									timeStyle: "short",
 								})}
