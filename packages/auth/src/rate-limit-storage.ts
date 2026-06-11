@@ -1,4 +1,4 @@
-import { getRedis } from "@emach/redis";
+import { getRedis, RATE_LIMIT_WINDOW_SECONDS } from "@emach/redis";
 import { log } from "evlog";
 
 /**
@@ -25,8 +25,11 @@ const RATE_LIMIT_PREFIX = "auth:";
  * ({@link RATE_LIMIT_WINDOW_SECONDS}), então um TTL fixo cobre todas as regras.
  * A chave é renovada a cada request e expira após esse tempo de inatividade —
  * que é exatamente quando o Better Auth também reseta o contador.
+ *
+ * Fonte canônica em `@emach/redis` (compartilhada com o rate limit do checkout
+ * #94); re-exportada aqui para os consumidores de auth (ecommerce.ts).
  */
-export const RATE_LIMIT_WINDOW_SECONDS = 60;
+export { RATE_LIMIT_WINDOW_SECONDS };
 
 /** Formato interno do contador do Better Auth (`api/rate-limiter`). */
 type RateLimitData = {

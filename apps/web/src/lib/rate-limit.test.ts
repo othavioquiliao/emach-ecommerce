@@ -1,7 +1,10 @@
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 // Sem Redis → o limiter cai no fallback in-memory.
-vi.mock("@emach/redis", () => ({ getRedis: () => null }));
+vi.mock("@emach/redis", () => ({
+	getRedis: () => null,
+	RATE_LIMIT_WINDOW_SECONDS: 60,
+}));
 
 describe("rate-limit (fallback in-memory)", () => {
 	beforeEach(() => {

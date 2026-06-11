@@ -4,6 +4,13 @@ import { Redis } from "@upstash/redis";
 let cached: Redis | null | undefined;
 
 /**
+ * Janela (segundos) compartilhada por todos os rate limits do monorepo — auth
+ * (Better Auth customStorage, #91) e checkout (@upstash/ratelimit, #94). Fonte
+ * ÚNICA para as duas pontas não divergirem ao ajustar a janela.
+ */
+export const RATE_LIMIT_WINDOW_SECONDS = 60;
+
+/**
  * Cliente Upstash Redis compartilhado (REST/HTTP — serverless-native).
  *
  * Fonte única do client para todo o monorepo: rate limit do Better Auth
