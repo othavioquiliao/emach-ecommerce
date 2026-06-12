@@ -39,6 +39,7 @@ export default async function CheckoutPage() {
 			clientEmail={profile?.email ?? ""}
 			clientName={profile?.name ?? ""}
 			clientPhone={profile?.phone ?? ""}
+			emailVerified={session.user.emailVerified}
 		/>
 	);
 }

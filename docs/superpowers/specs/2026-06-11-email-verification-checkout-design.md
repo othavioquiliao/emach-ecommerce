@@ -103,7 +103,8 @@ Nenhuma ação de dados necessária.
 ## Acceptance criteria (issue #93)
 
 - [x] Decisão registrada: **B** (este doc).
-- [ ] Cliente não-verificado não finaliza pedido, com mensagem clara (server +
-      banner).
-- [ ] CTA de reenvio funcional.
+- [x] Cliente não-verificado não finaliza pedido, com mensagem clara (gate
+      server-side em `create-order.ts` + banner + botão desabilitado).
+      Verificado: teste `create-order.test.ts` + smoke visual.
+- [x] CTA de reenvio funcional (smoke: toast de sucesso ao reenviar).
 - [x] Plano para contas existentes documentado (nenhuma ação — 1 conta teste).
