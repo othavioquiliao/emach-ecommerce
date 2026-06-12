@@ -315,8 +315,10 @@ export async function resolveDestinationCep(
  * Anti-fraude: re-cota o frete no servidor e exige que o `shippingCents`
  * enviado pelo cliente bata com alguma opção (tolerância de 1 centavo).
  *
- * Indisponibilidade da API de frete **não** bloqueia a venda (degrada com
- * `log.warn`); só um valor adulterado (mismatch) lança `OrderError`.
+ * Indisponibilidade da API de frete **não** bloqueia a venda (fail-open), mas
+ * retorna `shippingUnverified: true` — o pedido é marcado para revisão do staff
+ * no dashboard antes de faturar (#97 / dashboard#143). Só um valor adulterado
+ * (mismatch) ou frete a combinar lança `OrderError`.
  *
  * Deve rodar **fora** da transação do pedido — a chamada externa não pode
  * segurar a transação aberta durante a latência da rede.
@@ -326,7 +328,7 @@ export async function assertShippingQuoted(params: {
 	destinationCep: string;
 	items: Array<{ toolId: string; quantity: number }>;
 	declaredValueCents?: number;
-}): Promise<void> {
+}): Promise<{ shippingUnverified: boolean }> {
 	let quote: Awaited<ReturnType<typeof quoteShipping>>;
 	try {
 		quote = await quoteShipping({
@@ -335,18 +337,18 @@ export async function assertShippingQuoted(params: {
 			declaredValueCents: params.declaredValueCents,
 		});
 	} catch (err) {
-		// Trade-off consciente (decisão de produto): indisponibilidade da API de
-		// frete NÃO bloqueia a venda. Risco: atacante força a queda da API e passa
-		// frete adulterado. Mitigação atual = log.error com contexto para detecção.
-		// Endurecimento futuro: persistir `shippingUnverified` no pedido p/ revisão
-		// manual (exige coluna nova no schema dashboard — ADR-0009).
+		// Fail-open consciente: indisponibilidade da API de frete NÃO bloqueia a
+		// venda (não punir o cliente por instabilidade externa). Em vez de aceitar
+		// o frete às cegas, sinalizamos `shippingUnverified` — o pedido grava a flag
+		// e o staff revisa no dashboard antes de faturar (limpa via
+		// markShippingReviewed). Fecha o vetor "derruba a API → frete grátis".
 		log.error({
 			action: "shipping_revalidation_skipped",
 			destinationCep: params.destinationCep,
 			shippingCents: params.shippingCents,
 			error: err instanceof Error ? err.message : "erro inesperado",
 		});
-		return;
+		return { shippingUnverified: true };
 	}
 	// Item pesado sem valor fixo → frete a combinar; não há opção válida a casar.
 	if (quote.negotiate) {
@@ -359,6 +361,7 @@ export async function assertShippingQuoted(params: {
 	if (!ok) {
 		throw new OrderError("Frete inválido, refaça o checkout");
 	}
+	return { shippingUnverified: false };
 }
 
 async function checkAggregateStock(
@@ -391,9 +394,18 @@ export async function placeOrder(
 		input: CreateOrderInput;
 		ipAddress: string | null;
 		userAgent: string | null;
+		// #97: frete não pôde ser revalidado server-side (API de frete fora) →
+		// pedido marcado para revisão do staff. Default false (frete verificado).
+		shippingUnverified?: boolean;
 	}
 ): Promise<{ orderId: string; orderNumber: string }> {
-	const { clientId, input, ipAddress, userAgent } = params;
+	const {
+		clientId,
+		input,
+		ipAddress,
+		userAgent,
+		shippingUnverified = false,
+	} = params;
 
 	const { lines, autoPromoToolIds } = await prepareLines(tx, input);
 	await checkAggregateStock(tx, lines);
@@ -538,6 +550,7 @@ export async function placeOrder(
 		shippingAmount: input.shippingAmount,
 		totalAmount,
 		shippingAddress: snapshot,
+		shippingUnverified,
 	});
 
 	for (const line of lines) {

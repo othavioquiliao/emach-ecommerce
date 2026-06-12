@@ -6,7 +6,7 @@ import { quoteShipping } from "@/lib/superfrete/quote";
 import { assertShippingQuoted } from "./place-order";
 
 describe("assertShippingQuoted", () => {
-	it("aceita shipping que bate com uma opção cotada", async () => {
+	it("aceita shipping que bate com uma opção cotada (verificado)", async () => {
 		vi.mocked(quoteShipping).mockResolvedValue({
 			negotiate: false,
 			options: [
@@ -25,7 +25,18 @@ describe("assertShippingQuoted", () => {
 				destinationCep: "01310100",
 				items: [{ toolId: "t1", quantity: 1 }],
 			})
-		).resolves.toBeUndefined();
+		).resolves.toEqual({ shippingUnverified: false });
+	});
+
+	it("fail-open: API indisponível não bloqueia, marca shippingUnverified (#97)", async () => {
+		vi.mocked(quoteShipping).mockRejectedValue(new Error("SuperFrete 503"));
+		await expect(
+			assertShippingQuoted({
+				shippingCents: 9999,
+				destinationCep: "01310100",
+				items: [{ toolId: "t1", quantity: 1 }],
+			})
+		).resolves.toEqual({ shippingUnverified: true });
 	});
 
 	it("rejeita shipping que não bate com nenhuma opção", async () => {

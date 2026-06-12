@@ -30,6 +30,8 @@ const ROLLBACK = Symbol("rollback");
 const RE_ESTOQUE = /estoque/i;
 const RE_DOC_DUP = /cadastrado em outra conta/i;
 const RE_SQL_LEAK = /Failed query|update "client"/i;
+const RE_COUPON_INVALID = /inválido ou indisponível/i;
+const RE_COUPON_NOT_COVER = /não cobre/i;
 
 /** Roda `fn` numa transação e sempre dá ROLLBACK — zero resíduo no banco. */
 async function withRollback(
@@ -182,6 +184,8 @@ describe("placeOrder (multi-filial)", () => {
 			expect(ord?.status).toBe("pending_payment");
 			expect(ord?.subtotalAmount).toBe("200.00");
 			expect(ord?.totalAmount).toBe("220.00");
+			// Default: frete verificado (não veio shippingUnverified nos params).
+			expect(ord?.shippingUnverified).toBe(false);
 
 			const items = await tx
 				.select()
@@ -207,6 +211,27 @@ describe("placeOrder (multi-filial)", () => {
 				.from(consentLog)
 				.where(eq(consentLog.clientId, clientId));
 			expect(consents).toHaveLength(3);
+		});
+	});
+
+	it("grava shippingUnverified=true quando o frete não foi revalidado (#97)", async () => {
+		await withRollback(async (tx) => {
+			const { clientId, toolId, variantId } = await seedMultiBranch(tx, [10]);
+			const input = buildInput([{ toolId, variantId, quantity: 1 }]);
+
+			const result = await placeOrder(tx, {
+				clientId,
+				input,
+				ipAddress: null,
+				userAgent: null,
+				shippingUnverified: true,
+			});
+
+			const [ord] = await tx
+				.select()
+				.from(order)
+				.where(eq(order.id, result.orderId));
+			expect(ord?.shippingUnverified).toBe(true);
 		});
 	});
 
@@ -441,7 +466,7 @@ describe("placeOrder (cupom)", () => {
 			// o controle do apply-coupon.
 			await expect(
 				placeOrder(tx, { clientId, input, ipAddress: null, userAgent: null })
-			).rejects.toThrow(/inválido ou indisponível/i);
+			).rejects.toThrow(RE_COUPON_INVALID);
 		});
 	});
 
@@ -482,7 +507,7 @@ describe("placeOrder (cupom)", () => {
 			const input = { ...base, couponCode: "CUPOM" };
 			await expect(
 				placeOrder(tx, { clientId, input, ipAddress: null, userAgent: null })
-			).rejects.toThrow(/não cobre/i);
+			).rejects.toThrow(RE_COUPON_NOT_COVER);
 		});
 	});
 });

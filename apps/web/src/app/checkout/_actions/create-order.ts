@@ -47,7 +47,9 @@ export async function createOrderAction(
 
 	try {
 		// Anti-fraude do frete roda FORA da transação (chamada externa não pode
-		// segurar a transação aberta). Mismatch lança OrderError; API fora não bloqueia.
+		// segurar a transação aberta). Mismatch lança OrderError; API fora não
+		// bloqueia, mas marca o pedido como `shippingUnverified` p/ revisão (#97).
+		let shippingUnverified = false;
 		const destinationCep = await resolveDestinationCep(db, input);
 		if (destinationCep) {
 			// Valor declarado p/ o seguro de frete = subtotal dos itens submetidos
@@ -57,7 +59,7 @@ export async function createOrderAction(
 				(sum, i) => sum + numericToCents(i.priceAmount) * i.quantity,
 				0
 			);
-			await assertShippingQuoted({
+			const shippingCheck = await assertShippingQuoted({
 				shippingCents: numericToCents(input.shippingAmount),
 				destinationCep,
 				items: input.cartItems.map((i) => ({
@@ -66,6 +68,7 @@ export async function createOrderAction(
 				})),
 				declaredValueCents,
 			});
+			shippingUnverified = shippingCheck.shippingUnverified;
 		}
 
 		const result = await db.transaction((tx) =>
@@ -74,6 +77,7 @@ export async function createOrderAction(
 				input,
 				ipAddress,
 				userAgent,
+				shippingUnverified,
 			})
 		);
 		return { ok: true, ...result };
