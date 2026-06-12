@@ -7,9 +7,9 @@
 -- (rolbypassrls = true), que ignora RLS. Habilitar RLS sem criar policies fecha
 -- a porta REST (deny-all para anon/authenticated) sem afetar o app.
 --
--- Ownership: infra DB é owned-by-dashboard (ADR-0009; precedente: triggers.sql).
--- Este arquivo é cópia versionada no ecommerce — o canônico deve ser avaliado no
--- emach-dashboard (issue aberta no #90).
+-- Ownership: infra DB é owned-by-dashboard (ADR-0009/0014; precedente:
+-- triggers.sql). Este é o arquivo canônico (fonte de verdade); o CI espelha pro
+-- emach-ecommerce via PR automático. Não editar a cópia do ecommerce direto.
 --
 -- Idempotente: ENABLE ROW LEVEL SECURITY é no-op se já habilitado.
 ALTER TABLE public.tool ENABLE ROW LEVEL SECURITY;
