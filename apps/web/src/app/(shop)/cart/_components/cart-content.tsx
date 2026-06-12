@@ -25,6 +25,7 @@ export function CartContent() {
 		}, 220);
 	}
 
+	const itemCount = items.reduce((s, i) => s + i.quantity, 0);
 	const subtotal = items.reduce(
 		(s, i) => s + numericToCents(i.priceAmount) * i.quantity,
 		0
@@ -55,15 +56,15 @@ export function CartContent() {
 	}
 
 	return (
-		<PageContainer as="main" className="pt-10 pb-20">
+		<PageContainer as="main" className="max-w-[1080px] pt-10 pb-20">
 			<h1 className="mb-2 font-display font-medium text-[40px] tracking-[-0.01em]">
 				Carrinho
 			</h1>
 			<div className="mb-8 text-[14px] text-gray-60">
-				{items.reduce((s, i) => s + i.quantity, 0)} itens
+				{itemCount} {itemCount === 1 ? "item" : "itens"}
 			</div>
 
-			<div className="grid grid-cols-[1fr_400px] gap-12">
+			<div className="grid grid-cols-1 items-start gap-10 lg:grid-cols-[1fr_360px]">
 				{/* Items */}
 				<div>
 					{items.map((item) => (
@@ -78,7 +79,7 @@ export function CartContent() {
 				</div>
 
 				{/* Summary */}
-				<div className="sticky top-24 self-start">
+				<div className="self-start lg:sticky lg:top-24">
 					<div className="bg-near-black p-7 text-white">
 						<SectionLabel tone="accent">Resumo do pedido</SectionLabel>
 

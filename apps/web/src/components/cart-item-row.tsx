@@ -42,7 +42,7 @@ export function CartItemRow({
 	return (
 		<div
 			className={cn(
-				"emach-cart-item border-gray-10 border-b",
+				"emach-cart-item border-border border-b last:border-b-0",
 				isCompact
 					? "grid grid-cols-[80px_1fr_auto] items-start gap-3.5 py-4"
 					: "grid grid-cols-[120px_1fr_auto] items-center gap-5 py-5"
