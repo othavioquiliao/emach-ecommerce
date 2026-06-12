@@ -721,8 +721,12 @@
    o gutter reservado deixa ~15px à direita que elementos `position: fixed`
    (backdrop, drawer do carrinho) não cobrem — aparecia como faixa clara colada
    à drawer. Anula o gutter enquanto o lock está ativo (`body` recebe
-   `overflow: hidden` inline) p/ overlay e drawer encostarem na borda real.
-   `!important` é necessário pra vencer o style inline aplicado pela lib. */
-html:has(body[style*="overflow: hidden"]) {
+   `overflow` inline) p/ overlay e drawer encostarem na borda real.
+   `!important` é necessário pra vencer o style inline aplicado pela lib.
+   Casa tanto o shorthand (`overflow: hidden`) quanto o longhand
+   (`overflow-y: hidden`, code-path do Base UI quando o browser suporta gutter)
+   — sem isso o fix falharia em silêncio num desses caminhos. */
+html:has(body[style*="overflow: hidden"]),
+html:has(body[style*="overflow-y: hidden"]) {
 	scrollbar-gutter: auto !important;
 }

@@ -98,7 +98,11 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 									key={item.variantId}
 									leaving={removing === item.variantId}
 									onLinkClick={close}
-									onQuantityChange={(next) => setQty(item.variantId, next)}
+									onQuantityChange={(next) =>
+										next < 1
+											? handleRemove(item.variantId)
+											: setQty(item.variantId, next)
+									}
 									onRemove={() => handleRemove(item.variantId)}
 									variant="compact"
 								/>

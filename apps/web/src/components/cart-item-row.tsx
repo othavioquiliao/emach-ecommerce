@@ -27,17 +27,12 @@ export function CartItemRow({
 }: CartItemRowProps) {
 	const isCompact = variant === "compact";
 	const lineTotalCents = numericToCents(item.priceAmount) * item.quantity;
-	const labelText = item.categoryName ?? "";
+	// Label: categoria, ou a voltagem como fallback p/ produtos sem categoria.
+	// A voltagem só aparece na linha meta quando NÃO é o próprio label (evita
+	// duplicar quando o produto não tem categoria).
+	const labelText = item.categoryName ?? item.voltage ?? "";
+	const showVoltageMeta = item.categoryName != null && item.voltage != null;
 	const priceLabel = fmtNumericBRL((lineTotalCents / 100).toFixed(2));
-
-	// No carrinho compacto (drawer), decrementar abaixo de 1 remove o item.
-	function handleCompactQuantity(next: number) {
-		if (next < 1) {
-			onRemove();
-			return;
-		}
-		onQuantityChange(next);
-	}
 
 	return (
 		<div
@@ -81,7 +76,7 @@ export function CartItemRow({
 				) : (
 					<div className="mt-1 font-medium text-[16px]">{item.name}</div>
 				)}
-				{item.voltage && (
+				{showVoltageMeta && (
 					<div
 						className={cn(
 							"text-gray-60",
@@ -110,7 +105,7 @@ export function CartItemRow({
 					<div className="font-bold text-[14px] tabular-nums">{priceLabel}</div>
 					<QuantityPicker
 						min={0}
-						onChange={handleCompactQuantity}
+						onChange={onQuantityChange}
 						size="sm"
 						value={item.quantity}
 					/>

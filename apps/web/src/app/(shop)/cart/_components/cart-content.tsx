@@ -1,5 +1,6 @@
 "use client";
 
+import { Separator } from "@emach/ui/components/separator";
 import { Lock, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
@@ -95,7 +96,7 @@ export function CartContent() {
 							</div>
 						</div>
 
-						<div className="mt-4 h-px bg-white/12" />
+						<Separator className="mt-4 bg-white/12" />
 						<div className="mt-4 flex items-baseline justify-between">
 							<span className="font-bold font-display text-[14px] uppercase tracking-[0.1em]">
 								TOTAL
