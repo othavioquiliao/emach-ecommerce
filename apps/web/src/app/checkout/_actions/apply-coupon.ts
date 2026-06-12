@@ -49,6 +49,7 @@ export async function applyCouponAction(
 				id: toolVariant.id,
 				toolId: toolVariant.toolId,
 				priceAmount: toolVariant.priceAmount,
+				visibleOnSite: toolVariant.visibleOnSite,
 			})
 			.from(toolVariant)
 			.where(inArray(toolVariant.id, variantIds));
@@ -59,6 +60,12 @@ export async function applyCouponAction(
 			const variant = byId.get(item.variantId);
 			if (!variant || variant.toolId !== item.toolId) {
 				return { ok: false, error: "Carrinho inválido" };
+			}
+			// Variante virou hidden depois de adicionada: bloqueia o cupom (mesma
+			// barreira que o place-order vai aplicar). Mensagem genérica pra não
+			// vazar estado interno.
+			if (!variant.visibleOnSite) {
+				return { ok: false, error: "Item indisponível no carrinho" };
 			}
 			lines.push({
 				toolId: item.toolId,

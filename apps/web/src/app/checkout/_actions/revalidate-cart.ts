@@ -48,6 +48,7 @@ export async function computeFinalPrices(
 				id: toolVariant.id,
 				toolId: toolVariant.toolId,
 				priceAmount: toolVariant.priceAmount,
+				visibleOnSite: toolVariant.visibleOnSite,
 			})
 			.from(toolVariant)
 			.where(inArray(toolVariant.id, variantIds)),
@@ -58,7 +59,10 @@ export async function computeFinalPrices(
 	const prices: RevalidatedPrice[] = [];
 	for (const item of items) {
 		const variant = byId.get(item.variantId);
-		if (!variant || variant.toolId !== item.toolId) {
+		// Variante removida ou virou hidden: pula daqui. O preço antigo do snapshot
+		// segue exibido no carrinho, mas place-order vai rejeitar com OrderError
+		// específica — barreira final de bloqueio.
+		if (!variant || variant.toolId !== item.toolId || !variant.visibleOnSite) {
 			continue;
 		}
 		const base = numericToCents(variant.priceAmount);
