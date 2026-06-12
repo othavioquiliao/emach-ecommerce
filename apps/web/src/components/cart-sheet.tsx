@@ -43,7 +43,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 	return (
 		<Sheet onOpenChange={onOpenChange} open={open}>
 			<SheetContent
-				className="flex w-full flex-col p-0 sm:max-w-md"
+				className="flex w-full flex-col p-0 data-[side=right]:border-l-0 sm:max-w-md"
 				showCloseButton={false}
 				side="right"
 			>
@@ -107,16 +107,13 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 
 						{/* Footer escuro — fecha a drawer com o CTA vermelho em destaque */}
 						<div className="bg-near-black px-5 pt-4 pb-5 text-white">
-							<div className="flex items-baseline justify-between">
+							<div className="mb-4 flex items-baseline justify-between">
 								<span className="font-bold font-display text-[13px] uppercase tracking-[0.12em]">
 									Subtotal
 								</span>
 								<span className="font-bold font-display text-[24px] tabular-nums">
 									{fmtBRL(subtotal)}
 								</span>
-							</div>
-							<div className="mb-3.5 text-right text-[11px] text-white/55">
-								ou 12× de {fmtBRL(subtotal / 12)} sem juros
 							</div>
 
 							<Link className="mb-2 block" href="/checkout" onClick={close}>
