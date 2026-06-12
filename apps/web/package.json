@@ -25,7 +25,7 @@
     "class-variance-authority": "^0.7.1",
     "dotenv": "catalog:",
     "drizzle-orm": "^0.45.1",
-    "evlog": "^2.14.1",
+    "evlog": "2.19.1",
     "framer-motion": "^12.39.0",
     "lucide-react": "catalog:",
     "next": "^16.2.0",

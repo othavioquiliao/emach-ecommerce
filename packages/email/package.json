@@ -19,7 +19,7 @@
     "@emach/env": "workspace:*",
     "@react-email/components": "catalog:",
     "@react-email/render": "catalog:",
-    "evlog": "^2.14.1",
+    "evlog": "2.19.1",
     "react": "catalog:",
     "resend": "catalog:"
   },
