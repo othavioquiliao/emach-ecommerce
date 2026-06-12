@@ -1,13 +1,13 @@
 "use client";
 
-import { Separator } from "@emach/ui/components/separator";
-import { Lock, RotateCcw, ShoppingBag } from "lucide-react";
+import { Lock, ShoppingBag } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
 import { PageContainer } from "@/components/page-container";
+import { SectionLabel } from "@/components/section-label";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
 
@@ -79,24 +79,22 @@ export function CartContent() {
 
 				{/* Summary */}
 				<div className="sticky top-24 self-start">
-					<div className="bg-gray-10 p-7">
-						<div className="mb-5 font-bold font-display text-[14px] uppercase tracking-[0.14em]">
-							RESUMO DO PEDIDO
-						</div>
+					<div className="bg-near-black p-7 text-white">
+						<SectionLabel tone="accent">Resumo do pedido</SectionLabel>
 
 						{/* Totals */}
-						<div className="flex flex-col gap-2.5 text-[14px]">
+						<div className="mt-5 flex flex-col gap-2.5 text-[14px]">
 							<div className="flex justify-between">
 								<span>Subtotal</span>
 								<span className="tabular-nums">{fmtBRL(subtotal)}</span>
 							</div>
-							<div className="flex justify-between text-gray-60">
+							<div className="flex justify-between text-white/60">
 								<span>Frete</span>
 								<span>Calculado no checkout</span>
 							</div>
 						</div>
 
-						<Separator className="mt-4" />
+						<div className="mt-4 h-px bg-white/12" />
 						<div className="mt-4 flex items-baseline justify-between">
 							<span className="font-bold font-display text-[14px] uppercase tracking-[0.1em]">
 								TOTAL
@@ -105,7 +103,7 @@ export function CartContent() {
 								{fmtBRL(total)}
 							</span>
 						</div>
-						<div className="mt-0.5 text-right text-[12px] text-gray-60">
+						<div className="mt-0.5 text-right text-[12px] text-white/55">
 							ou {INSTALLMENTS}× de {fmtBRL(total / INSTALLMENTS)} sem juros
 						</div>
 
@@ -115,21 +113,15 @@ export function CartContent() {
 							</EmachButton>
 						</Link>
 						<Link className="mt-2 block" href="/catalog">
-							<EmachButton full size="md" variant="ghost">
+							<EmachButton full size="md" variant="ghost-light">
 								Continuar comprando
 							</EmachButton>
 						</Link>
 					</div>
 
-					<div className="mt-5 flex flex-col gap-2.5 text-[12px] text-gray-60">
-						<div className="flex items-center gap-2">
-							<Lock size={14} />
-							Pagamento 100% seguro
-						</div>
-						<div className="flex items-center gap-2">
-							<RotateCcw size={14} />
-							30 dias para troca ou devolução
-						</div>
+					<div className="mt-5 flex items-center gap-2 text-[12px] text-gray-60">
+						<Lock size={14} />
+						Pagamento 100% seguro
 					</div>
 				</div>
 			</div>
