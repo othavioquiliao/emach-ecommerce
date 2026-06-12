@@ -71,6 +71,8 @@ Schema TS aqui é **cópia versionada** do dashboard, sincronizada via **CI PR a
 
 `bun check-types` não detecta SQL inválido em template strings nem queries com colunas removidas. Após mexer em schema/queries SSR: `bun dev:web` + visitar rotas afetadas. Stack trace via `nextjs_call <port> get_errors` (MCP `next-devtools`).
 
+**Testes de integração contra o DB real são flaky sob concorrência — não é regressão.** `place-order.test.ts` (e afins que usam `withRollback` + Supabase compartilhado) passam isolados (`bun run --filter=web test src/app/checkout/_lib/place-order.test.ts`), mas 1-3 podem falhar na suíte completa (`bun run --filter=web test`) por contenção de estoque/conexões — o vitest roda arquivos em paralelo contra o mesmo banco. Sintoma: falha em "estoque agregado multi-filial" que **some ao re-rodar**. Antes de culpar uma mudança: re-rodar isolado **e** a suíte de novo. Fix de fundo (pendente): isolar dados por worker ou `sequential`.
+
 ## Lacunas conhecidas
 
 - **Pagamento real ausente — pendente (roadmap #4, keystone):** `/dashboard/pedidos/[id]/pagar` é stub (Asaas Pix/Boleto/Cartão); `order.status` carrega o estado de pagamento. Sem a transição `pending_payment → paid` não roda **nem o débito de estoque** (ADR-0003) **nem o ciclo de vida pós-pago**. Praticamente todo o resto do roadmap depende disto.

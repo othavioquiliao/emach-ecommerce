@@ -22,6 +22,14 @@ import {
 const GENERIC_ORDER_ERROR =
 	"Não foi possível concluir o pedido. Tente novamente.";
 
+// Gate de verificação de e-mail (#93, opção B): só o checkout exige e-mail
+// verificado — login e navegação seguem livres. Server actions não herdam
+// layout, então o gate vai no topo da própria action (invariante do CLAUDE.md).
+// Clientes via Google OAuth já chegam com emailVerified=true. A UI do checkout
+// (banner + CTA reenviar) é só UX; este é o gate autoritativo.
+const EMAIL_NOT_VERIFIED_ERROR =
+	"Confirme seu e-mail antes de finalizar o pedido.";
+
 export type { CreateOrderInput, CreateOrderResult } from "../_lib/place-order";
 
 export async function createOrderAction(
@@ -36,6 +44,10 @@ export async function createOrderAction(
 	const session = await requireCurrentClient();
 	const clientId = session.user.id;
 
+	if (!session.user.emailVerified) {
+		return { ok: false, error: EMAIL_NOT_VERIFIED_ERROR };
+	}
+
 	const { success } = await orderLimiter.limit(`order:${clientId}`);
 	if (!success) {
 		return { ok: false, error: RATE_LIMIT_MESSAGE };
@@ -47,7 +59,13 @@ export async function createOrderAction(
 
 	try {
 		// Anti-fraude do frete roda FORA da transação (chamada externa não pode
-		// segurar a transação aberta). Mismatch lança OrderError; API fora não bloqueia.
+		// segurar a transação aberta). Mismatch lança OrderError; API fora não
+		// bloqueia, mas marca o pedido como `shippingUnverified` p/ revisão (#97).
+		// Default `true` = "não verificado até prova em contrário": só vira false
+		// quando assertShippingQuoted confirma o match. Assim, qualquer caminho que
+		// chegue ao placeOrder sem revalidar o frete (ex.: destino sem CEP) fica
+		// marcado p/ revisão, em vez de aceito às cegas (defesa em profundidade).
+		let shippingUnverified = true;
 		const destinationCep = await resolveDestinationCep(db, input);
 		if (destinationCep) {
 			// Valor declarado p/ o seguro de frete = subtotal dos itens submetidos
@@ -57,7 +75,7 @@ export async function createOrderAction(
 				(sum, i) => sum + numericToCents(i.priceAmount) * i.quantity,
 				0
 			);
-			await assertShippingQuoted({
+			const shippingCheck = await assertShippingQuoted({
 				shippingCents: numericToCents(input.shippingAmount),
 				destinationCep,
 				items: input.cartItems.map((i) => ({
@@ -66,6 +84,7 @@ export async function createOrderAction(
 				})),
 				declaredValueCents,
 			});
+			shippingUnverified = shippingCheck.shippingUnverified;
 		}
 
 		const result = await db.transaction((tx) =>
@@ -74,6 +93,7 @@ export async function createOrderAction(
 				input,
 				ipAddress,
 				userAgent,
+				shippingUnverified,
 			})
 		);
 		return { ok: true, ...result };
