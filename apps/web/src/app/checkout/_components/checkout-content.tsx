@@ -27,6 +27,7 @@ import {
 	type ShippingStatus,
 } from "@/app/checkout/_components/shipping-options";
 import { EmachButton, emachButtonVariants } from "@/components/emach-button";
+import { authClient } from "@/lib/auth-client";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
 import type { ShippingOption } from "@/lib/superfrete/types";
@@ -90,6 +91,7 @@ interface CheckoutContentProps {
 	clientEmail: string;
 	clientName: string;
 	clientPhone: string;
+	emailVerified: boolean;
 }
 
 export function CheckoutContent({
@@ -98,11 +100,13 @@ export function CheckoutContent({
 	clientEmail,
 	clientName,
 	clientPhone,
+	emailVerified,
 }: CheckoutContentProps) {
 	const router = useRouter();
 	const { items, clear, reconcile, hydrated } = useCart();
 	const submittedRef = useRef(false);
 	const revalidatedRef = useRef(false);
+	const [resendingVerification, setResendingVerification] = useState(false);
 
 	const [shippingStatus, setShippingStatus] = useState<ShippingStatus>("idle");
 	const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
@@ -293,6 +297,27 @@ export function CheckoutContent({
 		};
 	}, [destinationCep, items, quoteNonce]);
 
+	// Reenvia o e-mail de verificação (#93). Replica o fluxo do cadastro; o
+	// callbackURL traz o cliente de volta ao checkout após confirmar.
+	const handleResendVerification = async () => {
+		if (resendingVerification) {
+			return;
+		}
+		setResendingVerification(true);
+		const { error } = await authClient.sendVerificationEmail({
+			email: clientEmail,
+			callbackURL: "/checkout",
+		});
+		setResendingVerification(false);
+		if (error) {
+			toast.error("Não foi possível reenviar agora. Tente novamente.");
+			return;
+		}
+		toast.success(
+			"E-mail de confirmação reenviado. Verifique sua caixa de entrada."
+		);
+	};
+
 	return (
 		<div className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-10 lg:py-12">
 			<div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_380px] lg:gap-12">
@@ -303,6 +328,29 @@ export function CheckoutContent({
 					<p className="mt-1 text-gray-60 text-sm">
 						Confira seus dados e endereço de entrega
 					</p>
+
+					{emailVerified ? null : (
+						<div className="mt-6 flex flex-col gap-3 border border-gray-20 p-4 sm:flex-row sm:items-center sm:justify-between">
+							<div>
+								<p className="font-semibold text-near-black text-sm">
+									Confirme seu e-mail para finalizar o pedido
+								</p>
+								<p className="mt-0.5 text-gray-60 text-sm">
+									Enviamos um link de confirmação para {clientEmail}.
+								</p>
+							</div>
+							<EmachButton
+								className="shrink-0"
+								disabled={resendingVerification}
+								onClick={handleResendVerification}
+								size="sm"
+								type="button"
+								variant="outline"
+							>
+								{resendingVerification ? "Enviando…" : "Reenviar e-mail"}
+							</EmachButton>
+						</div>
+					)}
 
 					<form
 						className="mt-8 space-y-6"
@@ -541,7 +589,7 @@ export function CheckoutContent({
 							>
 								{({ canSubmit, isSubmitting }) => (
 									<EmachButton
-										disabled={!canSubmit || isSubmitting}
+										disabled={!canSubmit || isSubmitting || !emailVerified}
 										size="lg"
 										type="submit"
 										variant="primary"

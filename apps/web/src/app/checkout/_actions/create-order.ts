@@ -22,6 +22,14 @@ import {
 const GENERIC_ORDER_ERROR =
 	"Não foi possível concluir o pedido. Tente novamente.";
 
+// Gate de verificação de e-mail (#93, opção B): só o checkout exige e-mail
+// verificado — login e navegação seguem livres. Server actions não herdam
+// layout, então o gate vai no topo da própria action (invariante do CLAUDE.md).
+// Clientes via Google OAuth já chegam com emailVerified=true. A UI do checkout
+// (banner + CTA reenviar) é só UX; este é o gate autoritativo.
+const EMAIL_NOT_VERIFIED_ERROR =
+	"Confirme seu e-mail antes de finalizar o pedido.";
+
 export type { CreateOrderInput, CreateOrderResult } from "../_lib/place-order";
 
 export async function createOrderAction(
@@ -35,6 +43,10 @@ export async function createOrderAction(
 
 	const session = await requireCurrentClient();
 	const clientId = session.user.id;
+
+	if (!session.user.emailVerified) {
+		return { ok: false, error: EMAIL_NOT_VERIFIED_ERROR };
+	}
 
 	const { success } = await orderLimiter.limit(`order:${clientId}`);
 	if (!success) {
