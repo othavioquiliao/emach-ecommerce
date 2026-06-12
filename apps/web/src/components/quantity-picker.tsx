@@ -9,6 +9,7 @@ interface QuantityPickerProps {
 	max?: number;
 	min?: number;
 	onChange: (next: number) => void;
+	size?: "default" | "sm";
 	value: number;
 }
 
@@ -17,16 +18,18 @@ export const QuantityPicker = ({
 	onChange,
 	min = 1,
 	max = 99,
+	size = "default",
 	className,
 }: QuantityPickerProps) => {
 	const decrement = () => onChange(Math.max(min, value - 1));
 	const increment = () => onChange(Math.min(max, value + 1));
+	const cell = size === "sm" ? "h-8 w-7" : "h-10 w-8";
 
 	return (
 		<div className={cn("flex items-center", className)}>
 			<Button
 				aria-label="Diminuir quantidade"
-				className="h-10 w-8"
+				className={cell}
 				disabled={value <= min}
 				onClick={decrement}
 				size="sm"
@@ -36,13 +39,16 @@ export const QuantityPicker = ({
 			</Button>
 			<div
 				aria-live="polite"
-				className="flex h-10 w-8 items-center justify-center border-y"
+				className={cn(
+					"flex items-center justify-center border-y tabular-nums",
+					cell
+				)}
 			>
 				{value}
 			</div>
 			<Button
 				aria-label="Aumentar quantidade"
-				className="h-10 bg-emach-red hover:bg-emach-red-hover"
+				className={cn(cell, "bg-emach-red hover:bg-emach-red-hover")}
 				disabled={value >= max}
 				onClick={increment}
 				size="sm"

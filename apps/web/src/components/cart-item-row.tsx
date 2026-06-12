@@ -28,6 +28,16 @@ export function CartItemRow({
 	const isCompact = variant === "compact";
 	const lineTotalCents = numericToCents(item.priceAmount) * item.quantity;
 	const labelText = item.categoryName ?? "";
+	const priceLabel = fmtNumericBRL((lineTotalCents / 100).toFixed(2));
+
+	// No carrinho compacto (drawer), decrementar abaixo de 1 remove o item.
+	function handleCompactQuantity(next: number) {
+		if (next < 1) {
+			onRemove();
+			return;
+		}
+		onQuantityChange(next);
+	}
 
 	return (
 		<div
@@ -54,7 +64,11 @@ export function CartItemRow({
 			</div>
 
 			<div className="min-w-0">
-				{labelText && <SectionLabel>{labelText}</SectionLabel>}
+				{labelText && (
+					<SectionLabel className={isCompact ? "block truncate" : undefined}>
+						{labelText}
+					</SectionLabel>
+				)}
 				{isCompact ? (
 					<Link
 						className="mt-0.5 block overflow-hidden text-ellipsis whitespace-nowrap font-medium text-[14px] hover:underline"
@@ -77,33 +91,33 @@ export function CartItemRow({
 						{item.voltage}
 					</div>
 				)}
-				<div
-					className={cn(
-						"flex",
-						isCompact
-							? "mt-2 flex-col items-start gap-1"
-							: "mt-3 flex-wrap items-center gap-4"
-					)}
-				>
-					<QuantityPicker onChange={onQuantityChange} value={item.quantity} />
-					<button
-						className="cursor-pointer border-none bg-transparent text-[12px] text-gray-60 underline hover:text-near-black"
-						onClick={onRemove}
-						type="button"
-					>
-						Remover
-					</button>
-				</div>
+				{!isCompact && (
+					<div className="mt-3 flex flex-wrap items-center gap-4">
+						<QuantityPicker onChange={onQuantityChange} value={item.quantity} />
+						<button
+							className="cursor-pointer border-none bg-transparent text-[12px] text-gray-60 underline hover:text-near-black"
+							onClick={onRemove}
+							type="button"
+						>
+							Remover
+						</button>
+					</div>
+				)}
 			</div>
 
-			<div
-				className={cn(
-					"font-bold tabular-nums",
-					isCompact ? "pt-0.5 text-[14px]" : "text-[16px]"
-				)}
-			>
-				{fmtNumericBRL((lineTotalCents / 100).toFixed(2))}
-			</div>
+			{isCompact ? (
+				<div className="flex flex-col items-end gap-2.5">
+					<div className="font-bold text-[14px] tabular-nums">{priceLabel}</div>
+					<QuantityPicker
+						min={0}
+						onChange={handleCompactQuantity}
+						size="sm"
+						value={item.quantity}
+					/>
+				</div>
+			) : (
+				<div className="font-bold text-[16px] tabular-nums">{priceLabel}</div>
+			)}
 		</div>
 	);
 }
