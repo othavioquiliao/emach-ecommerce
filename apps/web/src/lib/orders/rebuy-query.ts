@@ -60,6 +60,7 @@ export async function getRebuyItems(
 				sku: toolVariant.sku,
 				voltage: toolVariant.voltage,
 				priceAmount: toolVariant.priceAmount,
+				visibleOnSite: toolVariant.visibleOnSite,
 			})
 			.from(toolVariant)
 			.where(inArray(toolVariant.id, variantIds)),
@@ -124,7 +125,10 @@ export async function getRebuyItems(
 			categoryName: cat?.name ?? null,
 			categorySlug: cat?.slug ?? null,
 			quantity: i.quantity,
-			available: Boolean(v) && total >= i.quantity,
+			// Variante hidden = bloqueia compra (place-order rejeitará); botão
+			// "Comprar de novo" não deve oferecê-la como disponível.
+			available:
+				Boolean(v) && (v?.visibleOnSite ?? false) && total >= i.quantity,
 		};
 	});
 }

@@ -204,6 +204,7 @@ interface PreparedLine {
 		voltage: "127V" | "220V" | "Bivolt" | "380V" | null;
 		priceAmount: string;
 		costAmount: string | null;
+		visibleOnSite: boolean;
 	};
 }
 
@@ -223,6 +224,7 @@ async function prepareLines(
 				voltage: toolVariant.voltage,
 				priceAmount: toolVariant.priceAmount,
 				costAmount: toolVariant.costAmount,
+				visibleOnSite: toolVariant.visibleOnSite,
 			})
 			.from(toolVariant)
 			.where(inArray(toolVariant.id, variantIds)),
@@ -257,6 +259,13 @@ async function prepareLines(
 		const toolRow = toolById.get(cartItem.toolId);
 		if (!(variant && toolRow) || variant.toolId !== cartItem.toolId) {
 			throw new OrderError("Inconsistência cart/DB");
+		}
+		// Defesa final: bloqueia variante hidden mesmo se o cliente manipular o
+		// frontend ou se a variante virou hidden depois de adicionada ao carrinho.
+		// O catálogo e o PDP já filtram variantes hidden, então em fluxo normal
+		// isso é inalcançável — mas é a única barreira contra payload adulterado.
+		if (!variant.visibleOnSite) {
+			throw new OrderError(`Variante indisponível para venda: ${toolRow.name}`);
 		}
 		const promos = autoPromosByToolId.get(cartItem.toolId) ?? [];
 		const basePriceCents = numericToCents(variant.priceAmount);
