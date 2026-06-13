@@ -12,7 +12,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmachButton } from "@/components/emach-button";
 import { FreightCalculator } from "@/components/freight-calculator";
@@ -23,6 +23,7 @@ import { useCart } from "@/lib/cart-context";
 import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtBRL, fmtNumericBRL, numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
+import { StickyBuyBar } from "./sticky-buy-bar";
 
 interface ProductInfoProps {
 	activePromotion: ToolDetail["activePromotion"];
@@ -81,8 +82,29 @@ export function ProductInfo({
 	);
 	const [qty, setQty] = useState(1);
 	const [shared, setShared] = useState(false);
+	const [showSticky, setShowSticky] = useState(false);
+	const buyActionsRef = useRef<HTMLDivElement>(null);
 	const { add, clear } = useCart();
 	const router = useRouter();
+
+	// Mostra a barra sticky só depois que a buy box inline foi rolada pra cima
+	// (acima do viewport) — não aparece no load nem enquanto ela está à vista.
+	useEffect(() => {
+		const el = buyActionsRef.current;
+		if (!el) {
+			return;
+		}
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				setShowSticky(
+					!entry.isIntersecting && entry.boundingClientRect.top < 0
+				);
+			},
+			{ threshold: 0 }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, []);
 
 	const selected =
 		orderedVariants.find((v) => v.id === selectedVariantId) ?? initialVariant;
@@ -272,7 +294,7 @@ export function ProductInfo({
 				</div>
 			)}
 
-			<div className="space-y-3">
+			<div className="space-y-3" ref={buyActionsRef}>
 				<div className="flex items-stretch gap-3">
 					<QuantityPicker onChange={setQty} value={qty} />
 					<EmachButton
@@ -346,6 +368,17 @@ export function ProductInfo({
 					</div>
 				</div>
 			</div>
+
+			<StickyBuyBar
+				categorySlug={primaryCategorySlug ?? undefined}
+				imageUrl={primaryImageUrl}
+				inStock={inStock}
+				onAdd={handleAddToCart}
+				priceLabel={fmtNumericBRL(finalAmount)}
+				productName={tool.name}
+				variantLabel={selected.voltage ?? "Padrão"}
+				visible={showSticky}
+			/>
 		</div>
 	);
 }
