@@ -148,9 +148,9 @@ export function LoginForm() {
 	const isSignIn = mode === "sign-in";
 
 	return (
-		<main className="grid min-h-svh grid-cols-[6fr_4fr]">
-			{/* Left — cinematic dark panel */}
-			<div className="relative isolate flex flex-col justify-between overflow-hidden bg-[#0d0d0d] px-[80px] py-20 text-white">
+		<main className="grid min-h-svh grid-cols-1 lg:grid-cols-[6fr_4fr]">
+			{/* Left — cinematic dark panel (oculto no mobile; só decorativo) */}
+			<div className="relative isolate hidden flex-col justify-between overflow-hidden bg-[#0d0d0d] px-[80px] py-20 text-white lg:flex">
 				{/* Key light — Ferrari Red, bottom-left */}
 				<div
 					aria-hidden="true"
@@ -198,7 +198,7 @@ export function LoginForm() {
 			</div>
 
 			{/* Right — form panel (gray-10, padrão de superfície do sistema) */}
-			<div className="flex items-center justify-center bg-gray-10 px-[60px] py-20">
+			<div className="flex items-center justify-center bg-gray-10 px-6 py-12 sm:px-10 sm:py-16 lg:px-[60px] lg:py-20">
 				<div className="w-full max-w-[400px]">
 					<Tabs
 						className="mb-8 gap-0"
