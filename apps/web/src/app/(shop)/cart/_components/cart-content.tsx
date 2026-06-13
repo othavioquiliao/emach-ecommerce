@@ -3,8 +3,6 @@
 import { Separator } from "@emach/ui/components/separator";
 import { Lock, ShoppingBag } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
-import { toast } from "sonner";
 
 import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
@@ -12,30 +10,13 @@ import { PageContainer } from "@/components/page-container";
 import { SectionLabel } from "@/components/section-label";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
+import { useRemoveWithUndo } from "@/lib/use-remove-with-undo";
 
 const INSTALLMENTS = 12;
 
 export function CartContent() {
-	const { items, setQty, remove, add } = useCart();
-	const [removing, setRemoving] = useState<string | null>(null);
-
-	function handleRemove(id: string) {
-		const item = items.find((i) => i.variantId === id);
-		setRemoving(id);
-		window.setTimeout(() => {
-			remove(id);
-			setRemoving(null);
-			if (item) {
-				const { quantity, ...snapshot } = item;
-				toast("Item removido do carrinho", {
-					action: {
-						label: "Desfazer",
-						onClick: () => add(snapshot, quantity),
-					},
-				});
-			}
-		}, 220);
-	}
+	const { items, setQty } = useCart();
+	const { removing, handleRemove } = useRemoveWithUndo();
 
 	const itemCount = items.reduce((s, i) => s + i.quantity, 0);
 	const subtotal = items.reduce(

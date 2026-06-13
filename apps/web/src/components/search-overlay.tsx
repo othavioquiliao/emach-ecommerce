@@ -5,11 +5,12 @@ import { cn } from "@emach/ui/lib/utils";
 import { Search } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { ProductImage } from "@/components/product-image";
 import { SectionLabel } from "@/components/section-label";
 import { searchToolsAction } from "@/lib/actions/search";
 import { fmtNumericBRL } from "@/lib/format";
+import { useOverlay } from "@/lib/use-overlay";
 
 interface SearchOverlayProps {
 	onClose: () => void;
@@ -68,31 +69,6 @@ function highlightMatch(text: string, query: string) {
 	);
 }
 
-const FOCUSABLE_SELECTOR =
-	'a[href], button:not([disabled]), input:not([disabled]), [tabindex]:not([tabindex="-1"])';
-
-function cycleFocus(container: HTMLElement, e: KeyboardEvent) {
-	const focusables = Array.from(
-		container.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR)
-	);
-	if (focusables.length === 0) {
-		return;
-	}
-	const first = focusables[0];
-	const last = focusables.at(-1);
-	if (!(first && last)) {
-		return;
-	}
-	const active = document.activeElement as HTMLElement | null;
-	if (e.shiftKey && active === first) {
-		e.preventDefault();
-		last.focus();
-	} else if (!e.shiftKey && active === last) {
-		e.preventDefault();
-		first.focus();
-	}
-}
-
 export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 	const router = useRouter();
 	const [query, setQuery] = useState("");
@@ -100,8 +76,9 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 	const [recent, setRecent] = useState<string[]>([]);
 	const [results, setResults] = useState<ToolSearchResult[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
-	const dialogRef = useRef<HTMLDivElement>(null);
-	const previouslyFocused = useRef<HTMLElement | null>(null);
+	// Esc, focus-trap, scroll-lock e restauração de foco vêm do hook. O foco
+	// inicial fica com o `<input autoFocus>`, então `autoFocus: false` aqui.
+	const dialogRef = useOverlay(open, onClose, { autoFocus: false });
 
 	useEffect(() => {
 		if (open) {
@@ -126,31 +103,6 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 		setRecent([]);
 		saveRecent([]);
 	}
-
-	useEffect(() => {
-		if (!open) {
-			return;
-		}
-		previouslyFocused.current = document.activeElement as HTMLElement | null;
-		const onKey = (e: KeyboardEvent) => {
-			if (e.key === "Escape") {
-				onClose();
-				return;
-			}
-			if (e.key === "Tab" && dialogRef.current) {
-				cycleFocus(dialogRef.current, e);
-			}
-		};
-		document.addEventListener("keydown", onKey);
-		const prevOverflow = document.body.style.overflow;
-		document.body.style.overflow = "hidden";
-		const toRestore = previouslyFocused.current;
-		return () => {
-			document.removeEventListener("keydown", onKey);
-			document.body.style.overflow = prevOverflow;
-			toRestore?.focus?.();
-		};
-	}, [open, onClose]);
 
 	useEffect(() => {
 		if (!open) {
