@@ -2,9 +2,8 @@
 
 import type { CategoryNode, ToolListItem } from "@emach/db/queries/catalog";
 import type { Voltage } from "@emach/db/schema/tools";
-import { Checkbox } from "@emach/ui/components/checkbox";
 import { cn } from "@emach/ui/lib/utils";
-import { Grid3x3, List } from "lucide-react";
+import { Grid3x3, List, SlidersHorizontal } from "lucide-react";
 import type { Route } from "next";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
@@ -23,9 +22,8 @@ import {
 	type VoltageKey,
 } from "../_lib/catalog-filters";
 import { ActiveFilters } from "./active-filters";
-import { CategoryTree } from "./category-tree";
-
-const VOLTAGE_OPTIONS: VoltageKey[] = ["127V", "220V", "Bivolt", "380V"];
+import { FilterDrawer } from "./filter-drawer";
+import { FilterPanel } from "./filter-panel";
 
 interface CatalogContentProps {
 	categoryTree: CategoryNode[];
@@ -66,6 +64,7 @@ export function CatalogContent({
 	const pathname = usePathname();
 	const [isPending, startTransition] = useTransition();
 	const [view, setView] = useState<"grid" | "list">("grid");
+	const [filterOpen, setFilterOpen] = useState(false);
 	const [pminLocal, setPminLocal] = useState<string>(
 		priceMin == null ? "" : String(priceMin)
 	);
@@ -162,91 +161,26 @@ export function CatalogContent({
 				</PageContainer>
 			</section>
 
-			<PageContainer className="grid grid-cols-[260px_1fr] gap-10 py-8">
-				<aside>
+			<PageContainer className="grid grid-cols-1 gap-0 py-8 lg:grid-cols-[260px_1fr] lg:gap-10">
+				<aside className="hidden lg:block">
 					<div className="pb-4 font-bold font-display text-[12px] uppercase tracking-[0.14em]">
 						FILTROS
 					</div>
-
-					<div className="mb-6">
-						<CategoryTree
-							activeSlug={currentCategorySlug}
-							onSelect={(slug) => navigate({ cat: slug })}
-							tree={categoryTree}
-						/>
-					</div>
-
-					<div className="mb-6">
-						<div className="mb-2.5 font-semibold text-[13px]">
-							Faixa de preço
-						</div>
-						<div className="flex items-center gap-2">
-							<input
-								className="emach-input emach-input--sm w-full"
-								inputMode="numeric"
-								onBlur={applyPriceFilters}
-								onChange={(e) => setPminLocal(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										applyPriceFilters();
-									}
-								}}
-								placeholder="Mín"
-								type="number"
-								value={pminLocal}
-							/>
-							<span className="text-[13px] text-gray-60">—</span>
-							<input
-								className="emach-input emach-input--sm w-full"
-								inputMode="numeric"
-								onBlur={applyPriceFilters}
-								onChange={(e) => setPmaxLocal(e.target.value)}
-								onKeyDown={(e) => {
-									if (e.key === "Enter") {
-										applyPriceFilters();
-									}
-								}}
-								placeholder="Máx"
-								type="number"
-								value={pmaxLocal}
-							/>
-						</div>
-						<div className="mt-1.5 text-[11px] text-gray-60">Em reais</div>
-					</div>
-
-					<div className="mb-6">
-						<label
-							className="flex cursor-pointer items-center gap-2"
-							htmlFor="filter-promo"
-						>
-							<Checkbox
-								checked={onlyPromo}
-								id="filter-promo"
-								onCheckedChange={(v) =>
-									navigate({ promo: v === true ? true : null })
-								}
-							/>
-							Apenas em promoção
-						</label>
-					</div>
-
-					<div className="mb-6 flex flex-col gap-1">
-						<div className="mb-2.5 font-semibold text-[13px]">Voltagem</div>
-						{VOLTAGE_OPTIONS.map((v) => (
-							<label
-								className="flex cursor-pointer items-center gap-2"
-								htmlFor={`filter-voltage-${v}`}
-								key={v}
-							>
-								<Checkbox
-									checked={voltages.includes(v)}
-									id={`filter-voltage-${v}`}
-									onCheckedChange={() => toggleVoltage(v)}
-								/>
-								{v}
-							</label>
-						))}
-					</div>
+					<FilterPanel
+						activeSlug={currentCategorySlug}
+						idPrefix="desktop"
+						onApplyPrice={applyPriceFilters}
+						onlyPromo={onlyPromo}
+						onPmaxChange={setPmaxLocal}
+						onPminChange={setPminLocal}
+						onSelectCategory={(slug) => navigate({ cat: slug })}
+						onTogglePromo={(v) => navigate({ promo: v ? true : null })}
+						onToggleVoltage={toggleVoltage}
+						pmaxValue={pmaxLocal}
+						pminValue={pminLocal}
+						tree={categoryTree}
+						voltages={voltages}
+					/>
 				</aside>
 
 				<div>
@@ -255,7 +189,20 @@ export function CatalogContent({
 						onClearAll={clearAll}
 						onRemove={(update) => navigate(update)}
 					/>
-					<div className="mb-5 flex flex-wrap items-center justify-between gap-3 border-border border-b pb-3">
+					<div className="mb-5 flex flex-wrap items-center gap-3 border-border border-b pb-3">
+						<button
+							className="flex h-9 cursor-pointer items-center gap-2 border border-border bg-white px-3 font-display font-semibold text-[12px] text-near-black uppercase tracking-[0.08em] lg:hidden"
+							onClick={() => setFilterOpen(true)}
+							type="button"
+						>
+							<SlidersHorizontal size={15} />
+							Filtros
+							{activeFilters.length > 0 && (
+								<span className="flex h-4 min-w-4 items-center justify-center bg-emach-red px-1 font-bold text-[10px] text-white">
+									{activeFilters.length}
+								</span>
+							)}
+						</button>
 						<div className="text-[13px] text-gray-60">
 							<strong className="text-near-black">{total}</strong> produto
 							{total === 1 ? "" : "s"}
@@ -266,7 +213,7 @@ export function CatalogContent({
 							)}
 						</div>
 
-						<div className="flex items-center gap-4">
+						<div className="ml-auto flex items-center gap-2 sm:gap-4">
 							<select
 								className="emach-select emach-select--sm w-45"
 								onChange={(e) => navigate({ sort: e.target.value as SortKey })}
@@ -315,7 +262,7 @@ export function CatalogContent({
 						className={cn(isPending && "pointer-events-none opacity-60")}
 					>
 						{view === "grid" ? (
-							<div className="grid grid-cols-3 gap-6">
+							<div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
 								{tools.map((t) => (
 									<ProductCard
 										key={t.id}
@@ -328,45 +275,47 @@ export function CatalogContent({
 							<div className="flex flex-col">
 								{tools.map((t) => (
 									<Link
-										className="-mx-3 grid cursor-pointer grid-cols-[140px_1fr_auto] items-center gap-6 border-gray-20 border-b px-3 py-5 transition-colors duration-200 hover:bg-image-bg motion-reduce:transition-none"
+										className="-mx-3 flex cursor-pointer items-center gap-4 border-gray-20 border-b px-3 py-4 transition-colors duration-200 hover:bg-image-bg motion-reduce:transition-none sm:gap-6 sm:py-5"
 										href={`/product/${t.slug}`}
 										key={t.id}
 									>
-										<div className="relative aspect-square w-35 overflow-hidden bg-image-bg">
+										<div className="relative aspect-square w-24 shrink-0 overflow-hidden bg-image-bg sm:w-35">
 											<ProductImage
 												alt={t.name}
 												categorySlug={t.primaryCategory?.slug ?? ""}
-												sizes="140px"
+												sizes="(max-width: 640px) 96px, 140px"
 												src={t.primaryImage?.url}
 											/>
 										</div>
-										<div>
-											<SectionLabel>
-												{t.primaryCategory?.name ?? ""}
-											</SectionLabel>
-											<div className="mt-1 font-medium text-[18px]">
-												{t.name}
+										<div className="flex min-w-0 flex-1 flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-6">
+											<div className="min-w-0">
+												<SectionLabel>
+													{t.primaryCategory?.name ?? ""}
+												</SectionLabel>
+												<div className="mt-1 font-medium text-[15px] sm:text-[18px]">
+													{t.name}
+												</div>
+												<div className="mt-1.5 text-[12px] text-gray-60 sm:text-[13px]">
+													SKU {t.defaultVariant.sku}
+													{t.defaultVariant.voltage
+														? ` · ${t.defaultVariant.voltage}`
+														: ""}
+													{t.hasOtherVariants ? " · mais opções" : ""}
+												</div>
 											</div>
-											<div className="mt-1.5 text-[13px] text-gray-60">
-												SKU {t.defaultVariant.sku}
-												{t.defaultVariant.voltage
-													? ` · ${t.defaultVariant.voltage}`
-													: ""}
-												{t.hasOtherVariants ? " · mais opções" : ""}
-											</div>
-										</div>
-										<div className="text-right">
-											<div className="font-bold text-[20px] tabular-nums">
-												{fmtNumericBRL(
-													t.defaultVariant.discountedAmount ??
-														t.defaultVariant.priceAmount
+											<div className="shrink-0 sm:text-right">
+												<div className="font-bold text-[18px] tabular-nums sm:text-[20px]">
+													{fmtNumericBRL(
+														t.defaultVariant.discountedAmount ??
+															t.defaultVariant.priceAmount
+													)}
+												</div>
+												{t.defaultVariant.discountedAmount && (
+													<div className="text-[12px] text-gray-50 tabular-nums line-through">
+														{fmtNumericBRL(t.defaultVariant.priceAmount)}
+													</div>
 												)}
 											</div>
-											{t.defaultVariant.discountedAmount && (
-												<div className="text-[12px] text-gray-50 tabular-nums line-through">
-													{fmtNumericBRL(t.defaultVariant.priceAmount)}
-												</div>
-											)}
 										</div>
 									</Link>
 								))}
@@ -410,6 +359,30 @@ export function CatalogContent({
 					)}
 				</div>
 			</PageContainer>
+
+			<FilterDrawer
+				activeCount={activeFilters.length}
+				onClearAll={clearAll}
+				onClose={() => setFilterOpen(false)}
+				open={filterOpen}
+				total={total}
+			>
+				<FilterPanel
+					activeSlug={currentCategorySlug}
+					idPrefix="mobile"
+					onApplyPrice={applyPriceFilters}
+					onlyPromo={onlyPromo}
+					onPmaxChange={setPmaxLocal}
+					onPminChange={setPminLocal}
+					onSelectCategory={(slug) => navigate({ cat: slug })}
+					onTogglePromo={(v) => navigate({ promo: v ? true : null })}
+					onToggleVoltage={toggleVoltage}
+					pmaxValue={pmaxLocal}
+					pminValue={pminLocal}
+					tree={categoryTree}
+					voltages={voltages}
+				/>
+			</FilterDrawer>
 		</div>
 	);
 }
