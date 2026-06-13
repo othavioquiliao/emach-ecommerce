@@ -18,11 +18,11 @@ export function PromoHighlight({
 }: PromoHighlightProps) {
 	return (
 		<section className="bg-black text-white">
-			<PageContainer className="px-14 py-18">
+			<PageContainer className="px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
 				<div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
 					<div className="flex flex-col gap-3">
 						<SectionLabel tone="accent">Ofertas</SectionLabel>
-						<h2 className="font-display font-medium text-[44px] text-white leading-[1.02] tracking-[-0.01em]">
+						<h2 className="font-display font-medium text-[clamp(30px,6vw,44px)] text-white leading-[1.02] tracking-[-0.01em]">
 							{promotion.title}
 						</h2>
 					</div>

@@ -124,7 +124,7 @@ export default async function HomePage() {
 
 				{rootCategories.length > 0 && (
 					<section className="bg-gray-10">
-						<PageContainer className="px-14 py-18">
+						<PageContainer className="px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
 							<SectionHeader
 								label="Categorias"
 								link={{
@@ -147,7 +147,7 @@ export default async function HomePage() {
 				)}
 
 				{recentTools.length > 0 && (
-					<section className="bg-gray-10 px-14 py-18">
+					<section className="bg-gray-10 px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
 						<PageContainer>
 							<ProductCarousel
 								label="Novidades"
