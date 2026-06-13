@@ -89,7 +89,7 @@ export function ProductInfo({
 
 	if (!selected) {
 		return (
-			<div className="w-[480px] space-y-6">
+			<div className="w-full space-y-6 lg:w-[480px]">
 				<h1 className="font-display font-medium text-[36px] leading-[1.1] tracking-[-0.01em]">
 					{tool.name}
 				</h1>
@@ -177,7 +177,7 @@ export function ProductInfo({
 	}
 
 	return (
-		<div className="w-[480px] space-y-6">
+		<div className="w-full space-y-6 lg:w-[480px]">
 			{primaryCategoryName && (
 				<SectionLabel tone="accent">{primaryCategoryName}</SectionLabel>
 			)}
@@ -323,15 +323,15 @@ export function ProductInfo({
 				toolId={tool.id}
 			/>
 
-			<div className="flex border border-border">
-				<div className="flex flex-1 items-center gap-2.5 border-border border-r px-4 py-3">
+			<div className="flex flex-col border border-border sm:flex-row">
+				<div className="flex flex-1 items-center gap-2.5 border-border border-b px-4 py-3 sm:border-r sm:border-b-0">
 					<Truck size={16} />
 					<div>
 						<div className="font-semibold text-[12px]">Frete Brasil</div>
 						<div className="text-[10.5px] text-gray-60">pelo seu CEP</div>
 					</div>
 				</div>
-				<div className="flex flex-1 items-center gap-2.5 border-border border-r px-4 py-3">
+				<div className="flex flex-1 items-center gap-2.5 border-border border-b px-4 py-3 sm:border-r sm:border-b-0">
 					<CheckCircle size={16} />
 					<div>
 						<div className="font-semibold text-[12px]">Garantia 2 anos</div>

@@ -68,7 +68,7 @@ export async function RelatedProducts({
 				<h2 className="mb-6 font-display font-medium text-[28px]">
 					Você também pode gostar
 				</h2>
-				<div className="grid grid-cols-5 gap-6">
+				<div className="grid grid-cols-2 gap-4 sm:grid-cols-3 sm:gap-6 lg:grid-cols-5">
 					{picked.map((tool) => (
 						<ProductCard key={tool.id} tool={tool} />
 					))}
