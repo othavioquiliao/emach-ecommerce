@@ -36,7 +36,9 @@ export function StickyBuyBar({
 		<div
 			aria-hidden={!visible}
 			className={cn(
-				"fixed inset-x-0 bottom-0 z-30 border-border border-t bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_rgba(0,0,0,0.06)] transition-transform duration-300 ease-out lg:hidden",
+				// z-20: acima do conteúdo, abaixo do menu mobile (z-25) — senão a barra
+				// aparece sobre o menu fullscreen aberto no produto.
+				"fixed inset-x-0 bottom-0 z-20 border-border border-t bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_rgba(0,0,0,0.06)] transition-transform duration-300 ease-out lg:hidden",
 				visible ? "translate-y-0" : "pointer-events-none translate-y-full"
 			)}
 			// `inert` quando oculta tira o botão do tab-order/a11y-tree — sem ele o

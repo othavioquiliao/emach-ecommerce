@@ -127,6 +127,20 @@ export function CatalogContent({
 	const showFrom = total === 0 ? 0 : (page - 1) * pageSize + 1;
 	const showTo = Math.min(page * pageSize, total);
 
+	// Contagem reutilizada na toolbar (desktop) e numa linha própria (mobile),
+	// onde a toolbar não tem largura pra exibi-la sem quebrar.
+	const productCount = (
+		<>
+			<strong className="text-near-black">{total}</strong> produto
+			{total === 1 ? "" : "s"}
+			{total > 0 && (
+				<span className="ml-2">
+					({showFrom}–{showTo})
+				</span>
+			)}
+		</>
+	);
+
 	return (
 		<div className="bg-gray-10">
 			<section className="bg-near-black py-12 text-white">
@@ -207,13 +221,7 @@ export function CatalogContent({
 							)}
 						</button>
 						<div className="hidden text-[13px] text-gray-60 sm:block">
-							<strong className="text-near-black">{total}</strong> produto
-							{total === 1 ? "" : "s"}
-							{total > 0 && (
-								<span className="ml-2">
-									({showFrom}–{showTo})
-								</span>
-							)}
+							{productCount}
 						</div>
 
 						<div className="ml-auto flex items-center gap-2 sm:gap-4">
@@ -258,6 +266,10 @@ export function CatalogContent({
 								</button>
 							</div>
 						</div>
+					</div>
+
+					<div className="mb-4 text-[13px] text-gray-60 sm:hidden">
+						{productCount}
 					</div>
 
 					<div
