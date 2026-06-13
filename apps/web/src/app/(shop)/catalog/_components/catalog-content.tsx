@@ -203,7 +203,7 @@ export function CatalogContent({
 								</span>
 							)}
 						</button>
-						<div className="text-[13px] text-gray-60">
+						<div className="hidden text-[13px] text-gray-60 sm:block">
 							<strong className="text-near-black">{total}</strong> produto
 							{total === 1 ? "" : "s"}
 							{total > 0 && (
@@ -215,7 +215,7 @@ export function CatalogContent({
 
 						<div className="ml-auto flex items-center gap-2 sm:gap-4">
 							<select
-								className="emach-select emach-select--sm w-45"
+								className="emach-select emach-select--sm w-40 sm:w-45"
 								onChange={(e) => navigate({ sort: e.target.value as SortKey })}
 								value={sort}
 							>
