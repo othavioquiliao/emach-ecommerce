@@ -62,9 +62,9 @@ export async function BranchMapSection() {
 	return (
 		<section className="overflow-hidden border-emach-red border-y-2 bg-cinema-3 text-white [color-scheme:dark]">
 			<PageContainer className="grid min-h-110 grid-cols-1 px-0 md:grid-cols-[36%_1fr]">
-				<div className="flex flex-col justify-center gap-4 px-10 py-16 md:px-16">
+				<div className="flex flex-col justify-center gap-4 px-5 py-12 sm:px-10 sm:py-16 md:px-16">
 					<SectionLabel tone="accent">Onde estamos</SectionLabel>
-					<h2 className="font-display font-semibold text-[42px] leading-[1.0] tracking-[-0.01em]">
+					<h2 className="font-display font-semibold text-[clamp(30px,6vw,42px)] leading-[1.0] tracking-[-0.01em]">
 						Encontre a filial
 						<br />
 						mais perto

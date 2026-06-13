@@ -27,8 +27,8 @@ const TITLE_SIZE: Record<
 	NonNullable<SectionHeaderProps["titleSize"]>,
 	string
 > = {
-	md: "text-[28px]",
-	lg: "text-[44px] tracking-[-0.01em]",
+	md: "text-[clamp(22px,5vw,28px)]",
+	lg: "text-[clamp(30px,6vw,44px)] tracking-[-0.01em]",
 };
 
 /**
@@ -76,7 +76,12 @@ export function SectionHeader({
 		));
 
 	return (
-		<div className={cn("mb-8 flex items-end justify-between", className)}>
+		<div
+			className={cn(
+				"mb-8 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between",
+				className
+			)}
+		>
 			<div>
 				{label && <SectionLabel tone={tone}>{label}</SectionLabel>}
 				<h2

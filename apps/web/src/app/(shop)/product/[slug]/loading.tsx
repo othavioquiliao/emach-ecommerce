@@ -7,7 +7,7 @@ export default function Loading() {
 			<SiteHeader />
 			<PageContainer className="animate-pulse py-10">
 				<div className="mb-6 h-3 w-64 bg-gray-10" />
-				<div className="grid grid-cols-2 gap-16">
+				<div className="grid grid-cols-1 gap-8 lg:grid-cols-2 lg:gap-16">
 					<div>
 						<div className="mb-3 aspect-square w-full bg-gray-10" />
 						<div className="grid grid-cols-4 gap-2">

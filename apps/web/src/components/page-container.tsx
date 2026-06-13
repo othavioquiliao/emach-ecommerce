@@ -19,7 +19,7 @@ export function PageContainer({
 	return (
 		<Tag
 			className={cn(
-				"mx-auto w-full px-10",
+				"mx-auto w-full px-5 sm:px-8 lg:px-10",
 				!bleed && "max-w-[1440px]",
 				className
 			)}

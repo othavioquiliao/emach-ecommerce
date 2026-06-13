@@ -12,7 +12,7 @@ import {
 	Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmachButton } from "@/components/emach-button";
 import { FreightCalculator } from "@/components/freight-calculator";
@@ -23,6 +23,7 @@ import { useCart } from "@/lib/cart-context";
 import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtBRL, fmtNumericBRL, numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
+import { StickyBuyBar } from "./sticky-buy-bar";
 
 interface ProductInfoProps {
 	activePromotion: ToolDetail["activePromotion"];
@@ -81,15 +82,36 @@ export function ProductInfo({
 	);
 	const [qty, setQty] = useState(1);
 	const [shared, setShared] = useState(false);
+	const [showSticky, setShowSticky] = useState(false);
+	const buyActionsRef = useRef<HTMLDivElement>(null);
 	const { add, clear } = useCart();
 	const router = useRouter();
+
+	// Mostra a barra sticky só depois que a buy box inline foi rolada pra cima
+	// (acima do viewport) — não aparece no load nem enquanto ela está à vista.
+	useEffect(() => {
+		const el = buyActionsRef.current;
+		if (!el) {
+			return;
+		}
+		const observer = new IntersectionObserver(
+			([entry]) => {
+				setShowSticky(
+					!entry.isIntersecting && entry.boundingClientRect.top < 0
+				);
+			},
+			{ threshold: 0 }
+		);
+		observer.observe(el);
+		return () => observer.disconnect();
+	}, []);
 
 	const selected =
 		orderedVariants.find((v) => v.id === selectedVariantId) ?? initialVariant;
 
 	if (!selected) {
 		return (
-			<div className="w-[480px] space-y-6">
+			<div className="w-full space-y-6 lg:w-[480px]">
 				<h1 className="font-display font-medium text-[36px] leading-[1.1] tracking-[-0.01em]">
 					{tool.name}
 				</h1>
@@ -177,7 +199,7 @@ export function ProductInfo({
 	}
 
 	return (
-		<div className="w-[480px] space-y-6">
+		<div className="w-full space-y-6 lg:w-[480px]">
 			{primaryCategoryName && (
 				<SectionLabel tone="accent">{primaryCategoryName}</SectionLabel>
 			)}
@@ -272,7 +294,7 @@ export function ProductInfo({
 				</div>
 			)}
 
-			<div className="space-y-3">
+			<div className="space-y-3" ref={buyActionsRef}>
 				<div className="flex items-stretch gap-3">
 					<QuantityPicker onChange={setQty} value={qty} />
 					<EmachButton
@@ -323,15 +345,15 @@ export function ProductInfo({
 				toolId={tool.id}
 			/>
 
-			<div className="flex border border-border">
-				<div className="flex flex-1 items-center gap-2.5 border-border border-r px-4 py-3">
+			<div className="flex flex-col border border-border sm:flex-row">
+				<div className="flex flex-1 items-center gap-2.5 border-border border-b px-4 py-3 sm:border-r sm:border-b-0">
 					<Truck size={16} />
 					<div>
 						<div className="font-semibold text-[12px]">Frete Brasil</div>
 						<div className="text-[10.5px] text-gray-60">pelo seu CEP</div>
 					</div>
 				</div>
-				<div className="flex flex-1 items-center gap-2.5 border-border border-r px-4 py-3">
+				<div className="flex flex-1 items-center gap-2.5 border-border border-b px-4 py-3 sm:border-r sm:border-b-0">
 					<CheckCircle size={16} />
 					<div>
 						<div className="font-semibold text-[12px]">Garantia 2 anos</div>
@@ -346,6 +368,17 @@ export function ProductInfo({
 					</div>
 				</div>
 			</div>
+
+			<StickyBuyBar
+				categorySlug={primaryCategorySlug ?? undefined}
+				imageUrl={primaryImageUrl}
+				inStock={inStock}
+				onAdd={handleAddToCart}
+				priceLabel={fmtNumericBRL(finalAmount)}
+				productName={tool.name}
+				variantLabel={selected.voltage ?? "Padrão"}
+				visible={showSticky}
+			/>
 		</div>
 	);
 }

@@ -1,20 +1,14 @@
 "use client";
 
-import {
-	Sheet,
-	SheetClose,
-	SheetContent,
-	SheetHeader,
-	SheetTitle,
-} from "@emach/ui/components/sheet";
 import { ShoppingBag, X } from "lucide-react";
 import Link from "next/link";
-import { useState } from "react";
 
 import { CartItemRow } from "@/components/cart-item-row";
 import { EmachButton } from "@/components/emach-button";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
+import { useOverlay } from "@/lib/use-overlay";
+import { useRemoveWithUndo } from "@/lib/use-remove-with-undo";
 
 interface CartSheetProps {
 	onOpenChange: (open: boolean) => void;
@@ -22,50 +16,60 @@ interface CartSheetProps {
 }
 
 export function CartSheet({ open, onOpenChange }: CartSheetProps) {
-	const { items, setQty, remove } = useCart();
-	const [removing, setRemoving] = useState<string | null>(null);
-
-	function handleRemove(id: string) {
-		setRemoving(id);
-		window.setTimeout(() => {
-			remove(id);
-			setRemoving(null);
-		}, 220);
-	}
+	const { items, setQty } = useCart();
+	const { removing, handleRemove } = useRemoveWithUndo();
+	const close = () => onOpenChange(false);
+	// Overlay próprio (não Base UI Sheet): a transição/unmount da Base UI conflita
+	// com o React Compiler — o sheet abria em opacity:0 sem desmontar, capturando
+	// cliques invisíveis na direita da tela. Mesmo padrão de mobile-menu/filter.
+	const panelRef = useOverlay(open, close);
 
 	const totalItems = items.reduce((s, i) => s + i.quantity, 0);
 	const subtotal = items.reduce(
 		(s, i) => s + numericToCents(i.priceAmount) * i.quantity,
 		0
 	);
-	const close = () => onOpenChange(false);
+
+	if (!open) {
+		return null;
+	}
 
 	return (
-		<Sheet onOpenChange={onOpenChange} open={open}>
-			<SheetContent
-				className="flex w-full flex-col p-0 data-[side=right]:border-l-0 sm:max-w-md"
-				showCloseButton={false}
-				side="right"
+		<div className="fade-in fixed inset-0 z-50 animate-in duration-150">
+			<button
+				aria-label="Fechar carrinho"
+				className="absolute inset-0 cursor-default border-none bg-black/50"
+				onClick={close}
+				type="button"
+			/>
+			<div
+				aria-label="Carrinho"
+				aria-modal="true"
+				className="absolute inset-y-0 right-0 flex w-full max-w-md flex-col bg-popover text-popover-foreground"
+				ref={panelRef}
+				role="dialog"
 			>
 				{/* Header escuro com régua vermelha — assinatura do chiaroscuro EMACH */}
-				<SheetHeader className="gap-0 border-emach-red border-b-2 bg-near-black px-5 py-4">
+				<div className="gap-0 border-emach-red border-b-2 bg-near-black px-5 py-4">
 					<div className="flex items-center justify-between gap-2">
-						<SheetTitle className="flex items-center gap-2 font-bold font-display text-[15px] text-white uppercase tracking-[0.14em]">
+						<div className="flex items-center gap-2 font-bold font-display text-[15px] text-white uppercase tracking-[0.14em]">
 							Carrinho
 							{totalItems > 0 && (
 								<span className="font-medium text-[13px] text-white/55 tracking-[0.08em]">
 									· {totalItems} {totalItems === 1 ? "item" : "itens"}
 								</span>
 							)}
-						</SheetTitle>
-						<SheetClose
+						</div>
+						<button
 							aria-label="Fechar carrinho"
 							className="-mr-1 flex size-8 cursor-pointer items-center justify-center text-white/60 transition-colors hover:text-white"
+							onClick={close}
+							type="button"
 						>
 							<X size={18} />
-						</SheetClose>
+						</button>
 					</div>
-				</SheetHeader>
+				</div>
 
 				{items.length === 0 ? (
 					<div className="flex flex-1 flex-col items-center justify-center px-6 py-10 text-center">
@@ -133,7 +137,7 @@ export function CartSheet({ open, onOpenChange }: CartSheetProps) {
 						</div>
 					</>
 				)}
-			</SheetContent>
-		</Sheet>
+			</div>
+		</div>
 	);
 }

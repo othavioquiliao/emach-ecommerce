@@ -206,8 +206,10 @@ export function HeroCarousel() {
 	};
 
 	return (
+		// biome-ignore lint/a11y/noStaticElementInteractions: parallax decorativo (mouse-only), sem semântica interativa
+		// biome-ignore lint/a11y/noNoninteractiveElementInteractions: idem — efeito visual, teclado/toque não dependem disto
 		<section
-			className="relative h-svh w-full overflow-hidden bg-black"
+			className="relative h-[88svh] w-full overflow-hidden bg-black lg:h-svh"
 			onMouseLeave={handleMouseLeave}
 			onMouseMove={handleMouseMove}
 		>
@@ -216,9 +218,12 @@ export function HeroCarousel() {
 				opts={{ loop: true, align: "start" }}
 				setApi={setApi}
 			>
-				<CarouselContent className="ml-0 h-svh">
+				<CarouselContent className="ml-0 h-[88svh] lg:h-svh">
 					{HERO_SLIDES.map((slide, index) => (
-						<CarouselItem className="relative h-svh pl-0" key={slide.bg}>
+						<CarouselItem
+							className="relative h-[88svh] pl-0 lg:h-svh"
+							key={slide.bg}
+						>
 							<HeroSlideContent
 								isActive={index === selectedIndex}
 								parallaxX={parallaxX}
@@ -236,7 +241,7 @@ export function HeroCarousel() {
 					<button
 						aria-label={`Ir para slide ${index + 1}`}
 						className={cn(
-							"h-[4px] w-8 cursor-pointer transition-colors duration-200 sm:w-10",
+							"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-3 after:right-0 after:left-0 after:content-[''] sm:w-10",
 							index === selectedIndex ? "bg-emach-red" : "bg-white/30"
 						)}
 						key={slide.bg}

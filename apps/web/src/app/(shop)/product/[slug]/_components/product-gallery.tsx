@@ -82,7 +82,7 @@ export function ProductGallery({
 	);
 
 	return (
-		<div className="flex w-1/2 flex-col justify-center lg:flex-row lg:gap-3">
+		<div className="flex w-full flex-col justify-center lg:w-1/2 lg:flex-row lg:gap-3">
 			{slots.length > 1 && (
 				<aside className="order-2 mt-3 md:order-1 md:mt-0 md:w-24">
 					{/* Mobile: grid horizontal */}
@@ -118,7 +118,7 @@ export function ProductGallery({
 			)}
 
 			<div className="order-1 lg:order-2 lg:flex-1">
-				<div className="relative aspect-square w-5/6 overflow-hidden bg-image-bg">
+				<div className="relative aspect-square w-full overflow-hidden bg-image-bg lg:w-5/6">
 					{activeSrc ? (
 						<InnerImageZoom
 							imgAttributes={{ alt: name }}

@@ -102,7 +102,7 @@ export default async function ProductPage({
 			<ProductJsonLd detail={detail} />
 			<SiteHeader />
 
-			<div className="flex flex-row justify-center py-8">
+			<div className="flex flex-col items-center gap-8 px-5 py-8 sm:px-8 lg:flex-row lg:items-start lg:justify-center lg:gap-10 lg:px-10">
 				<ProductGallery
 					categorySlug={primaryCategorySlug ?? ""}
 					images={detail.images}

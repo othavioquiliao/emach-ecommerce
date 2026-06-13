@@ -100,7 +100,7 @@ export default async function OrderConfirmationPage({
 						</div>
 					</div>
 
-					<div className="grid grid-cols-[1fr_360px] gap-10">
+					<div className="grid grid-cols-1 gap-10 lg:grid-cols-[1fr_360px]">
 						<section>
 							<h2 className="font-display font-semibold text-xs uppercase tracking-wider">
 								Itens
