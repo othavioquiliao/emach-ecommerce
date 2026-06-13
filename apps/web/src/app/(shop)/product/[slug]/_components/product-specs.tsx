@@ -17,8 +17,12 @@ function fmtAttr(item: ToolDetail["attributes"][number]): string {
 	const { definition, value } = item;
 	const unit = definition.unit ?? "";
 	switch (definition.inputType) {
-		case "boolean":
-			return value.valueBool == null ? "—" : value.valueBool ? "Sim" : "Não";
+		case "boolean": {
+			if (value.valueBool == null) {
+				return "—";
+			}
+			return value.valueBool ? "Sim" : "Não";
+		}
 		case "numeric_range":
 			return fmtSpecRange(value.valueNumeric, value.valueNumericMax, unit);
 		case "number":
@@ -75,21 +79,27 @@ export function ProductSpecs({
 				) : (
 					<>
 						{hero.length > 0 && (
-							<div className="grid grid-cols-1 gap-3.5 sm:grid-cols-3">
-								{hero.map((attr) => {
+							<div className="grid grid-cols-2 gap-2.5 sm:grid-cols-3 sm:gap-3.5">
+								{hero.map((attr, i) => {
 									const { num, unit } = heroParts(fmtAttr(attr));
+									// Total ímpar: o último card ocupa a linha inteira no
+									// mobile 2-up, evitando o "meio-card" órfão.
+									const spanLast =
+										hero.length % 2 === 1 && i === hero.length - 1;
 									return (
 										<div
-											className="bg-near-black px-6 py-5 text-white"
+											className={`bg-near-black px-4 py-4 text-white sm:px-6 sm:py-5${
+												spanLast ? "col-span-2 sm:col-span-1" : ""
+											}`}
 											key={attr.definition.id}
 										>
 											<span className="font-display font-semibold text-[10px] text-white/55 uppercase tracking-[0.12em]">
 												{attr.definition.label}
 											</span>
-											<div className="mt-2 font-bold font-display text-[38px] leading-none">
+											<div className="mt-2 font-bold font-display text-[30px] leading-none sm:text-[38px]">
 												{num}
 												{unit && (
-													<span className="ml-1 font-semibold text-[20px] text-white/60">
+													<span className="ml-1 font-semibold text-[16px] text-white/60 sm:text-[20px]">
 														{unit}
 													</span>
 												)}
