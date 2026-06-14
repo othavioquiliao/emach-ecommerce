@@ -73,7 +73,7 @@ export function BranchMap({
 	return (
 		<div className="flex flex-1 flex-col gap-0 border-white/10 border-l max-md:border-t max-md:border-l-0 md:flex-row">
 			{/* MAPA — base como <img> (imune ao force-dark), pins como overlay HTML */}
-			<div className="flex flex-[0_0_50%] items-center justify-center p-6">
+			<div className="flex flex-none items-center justify-center p-6 md:flex-[0_0_50%]">
 				<div
 					className="relative w-full max-w-[420px]"
 					style={{ aspectRatio: `${mapWidth} / ${mapHeight}` }}
@@ -134,11 +134,11 @@ export function BranchMap({
 			</div>
 
 			{/* LISTA */}
-			<div className="flex flex-1 flex-col p-6">
+			<div className="flex flex-1 flex-col p-6 max-md:pb-10">
 				<p className="mb-2 font-display font-medium text-[12px] text-white/60 uppercase tracking-[0.16em]">
 					{pins.length} {pins.length === 1 ? "filial" : "filiais"}
 				</p>
-				<div className="emach-scrollbar-dark max-h-[440px] flex-1 overflow-y-auto pr-1 [scroll-behavior:smooth] motion-reduce:[scroll-behavior:auto]">
+				<div className="emach-scrollbar-dark flex-1 pr-1 [scroll-behavior:smooth] motion-reduce:[scroll-behavior:auto] md:max-h-[440px] md:overflow-y-auto">
 					{pins.map((p) => (
 						<a
 							className={cn(
