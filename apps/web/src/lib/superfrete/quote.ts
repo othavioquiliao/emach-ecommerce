@@ -9,7 +9,7 @@ import { getOriginBranchCep } from "@/lib/origin-branch";
 import { fetchSuperFreteQuote } from "./client";
 import type { QuoteItem, ShippingOption } from "./types";
 
-const SERVICES = "1,2,3,17,31"; // PAC, SEDEX, Jadlog, Mini Envios, Loggi
+const SERVICES = "1,2"; // PAC, SEDEX (Correios)
 
 // Teto do SuperFrete/Correios: acima disso o item sai da cotação automática e
 // usa o frete fixo `tool.overweightShippingAmount` (ou "a combinar" se nulo).
