@@ -38,11 +38,6 @@ const HERO_SLIDES: HeroSlide[] = [
 		product: "/images/hero-imagens/emach_hero_02_product.png",
 		alt: "EMACH — Linha profissional",
 	},
-	{
-		bg: "/images/hero-imagens/emach_hero_03_bg.png",
-		product: "/images/hero-imagens/emach_hero_03_product.png",
-		alt: "EMACH — Engenharia EMACH",
-	},
 ];
 
 const AUTOPLAY_INTERVAL = 9000;
