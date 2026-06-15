@@ -3,6 +3,7 @@ import {
 	getFeaturedPromotion,
 	getRecentTools,
 } from "@emach/db/queries/catalog";
+import { banner } from "@emach/db/schema/banner";
 import { category } from "@emach/db/schema/categories";
 import { and, asc, eq, isNull, sql } from "drizzle-orm";
 import { BranchMapSection } from "@/components/branch-map-section";
@@ -16,6 +17,16 @@ import { SiteHeader } from "@/components/site-header";
 import { getVoltagesByTool } from "@/lib/variant-voltages";
 
 export const revalidate = 600;
+
+// Banners ativos do hero. Query inline (não owned-by-dashboard): leitura trivial,
+// decisão registrada no #122 (ADR-0009 dispensa virar query sincronizada).
+function getActiveBanners() {
+	return db
+		.select()
+		.from(banner)
+		.where(eq(banner.isActive, true))
+		.orderBy(asc(banner.sortOrder));
+}
 
 async function getRootCategories() {
 	return db
@@ -96,11 +107,13 @@ async function getCategoryImages(
 }
 
 export default async function HomePage() {
-	const [rootCategories, featuredPromotion, recentTools] = await Promise.all([
-		getRootCategories(),
-		getFeaturedPromotion(db),
-		getRecentTools(db, 8),
-	]);
+	const [rootCategories, featuredPromotion, recentTools, banners] =
+		await Promise.all([
+			getRootCategories(),
+			getFeaturedPromotion(db),
+			getRecentTools(db, 8),
+			getActiveBanners(),
+		]);
 
 	const categoryImages = await getCategoryImages(
 		rootCategories.map((c) => c.slug)
@@ -120,7 +133,7 @@ export default async function HomePage() {
 			<SiteHeader overlay />
 
 			<main>
-				<HeroCarousel />
+				<HeroCarousel banners={banners} />
 
 				{rootCategories.length > 0 && (
 					<section className="bg-gray-10">
