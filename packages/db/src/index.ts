@@ -65,7 +65,6 @@ import {
 } from "./schema/stock-movements";
 import {
 	supplier,
-	supplierRelations,
 	tool,
 	toolImage,
 	toolImageRelations,
@@ -115,7 +114,6 @@ const schema = {
 	stockMovement,
 	stockMovementRelations,
 	supplier,
-	supplierRelations,
 	tool,
 	toolAttributeAssignment,
 	toolAttributeAssignmentRelations,

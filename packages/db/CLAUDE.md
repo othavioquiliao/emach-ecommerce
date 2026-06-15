@@ -8,6 +8,7 @@ Drizzle 0.45 + node-postgres + Supabase Postgres. Schema TS aqui é **cópia ver
 - **Não editar `schema/*.ts` em isolamento.** Toda mudança vem por PR de sync.
 - **`db:generate` / `db:migrate` são legacy** — scripts ainda no `package.json` mas não usar. Pasta `migrations/` foi removida.
 - **Pós-merge do PR sync (ou pós-`db:push` em dev local):** rodar `bun db:apply-triggers`.
+- **`src/index.ts` (barrel singleton) está FORA do escopo do sync** (o glob só cobre `schema/`/`queries/`/`triggers.sql`). Quando o dashboard **adiciona/remove uma relation ou tabela** (ex.: #118 removeu `supplierRelations` de `tools.ts`), o `index.ts` continua importando/registrando o símbolo antigo e **quebra o build** (`error TS2305: no exported member`) — o sync não pega isso. **Sempre rodar `bun check-types` pós-merge de PR sync** e ajustar o import/objeto `schema` em `src/index.ts` à mão.
 
 **Drop & recreate em dev** (renames ambíguos sem TTY): `DROP SCHEMA public CASCADE; CREATE SCHEMA public; GRANT ALL ON SCHEMA public TO postgres, public;` via pg client → `bunx drizzle-kit push && bun db:apply-triggers && bun db:seed-categories && bun db:seed-attributes`. Só em dev.
 
