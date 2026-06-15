@@ -138,7 +138,7 @@ export function BranchMap({
 				<p className="mb-2 font-display font-medium text-[12px] text-white/60 uppercase tracking-[0.16em]">
 					{pins.length} {pins.length === 1 ? "filial" : "filiais"}
 				</p>
-				<div className="emach-scrollbar-dark flex-1 pr-1 [scroll-behavior:smooth] motion-reduce:[scroll-behavior:auto] md:max-h-[440px] md:overflow-y-auto">
+				<div className="emach-scrollbar-dark flex-1 pr-1 [scroll-behavior:smooth] md:max-h-[440px] md:overflow-y-auto motion-reduce:[scroll-behavior:auto]">
 					{pins.map((p) => (
 						<a
 							className={cn(
