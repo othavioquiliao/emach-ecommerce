@@ -301,10 +301,10 @@ export function LoginForm() {
         <Image
           alt="EMACH"
           className="relative z-20"
-          height={37}
+          height={40}
           priority
           src="/emach-logo.svg"
-          width={200}
+          width={220}
         />
 
         <div className="relative z-20">
@@ -319,10 +319,19 @@ export function LoginForm() {
         </div>
       </div>
 
-      <div className="flex items-center justify-center bg-gray-10 px-6 py-12 sm:px-10 sm:py-16 lg:px-15 lg:py-20">
-        <div className="w-full max-w-100">
+      <div className="flex items-center justify-center bg-gray-10 px-6 py-12 sm:px-10 sm:py-16 lg:py-20">
+        <div className="w-full md:w-2/3 flex flex-col justify-center items-center ">
+          {/* Logo vermelho acima do form — só no mobile (no desktop o logo vive no painel esquerdo) */}
+          <Image
+            alt="EMACH"
+            className="mb-8 lg:hidden "
+            height={36}
+            priority
+            src="/emach-logo-red.svg"
+            width={196}
+          />
           <Tabs
-            className="mb-8 gap-0"
+            className=" gap-0 w-full"
             onValueChange={(v) => setMode(v as "sign-in" | "sign-up")}
             value={mode}
           >
@@ -570,14 +579,14 @@ export function LoginForm() {
           </Tabs>
 
           {/* Divider */}
-          <div className="my-7 flex items-center gap-3 text-[12px] text-gray-50">
+          <div className="my-5 flex items-center gap-3 text-[12px] text-gray-50">
             <Separator className="flex-1" />
             ou
             <Separator className="flex-1" />
           </div>
 
           {/* Social login */}
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col gap-2 w-full">
             <Button
               className="h-12 w-full"
               disabled={isGooglePending}
