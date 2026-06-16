@@ -168,6 +168,7 @@ function HeroCta({
 interface HeroSlideContentProps {
 	banner: HeroBanner;
 	isActive: boolean;
+	isFirst: boolean;
 	isH1: boolean;
 	parallaxX: MotionValue<number>;
 	parallaxY: MotionValue<number>;
@@ -177,6 +178,7 @@ interface HeroSlideContentProps {
 function HeroSlideContent({
 	banner,
 	isActive,
+	isFirst,
 	isH1,
 	parallaxX,
 	parallaxY,
@@ -214,9 +216,10 @@ function HeroSlideContent({
 							"object-cover",
 							hasSeparateMobileBg && "hidden lg:block"
 						)}
+						fetchPriority={isFirst ? "high" : "auto"}
 						fill
-						priority
-						quality={100}
+						priority={isFirst}
+						quality={75}
 						sizes="100vw"
 						src={desktopBg}
 					/>
@@ -224,9 +227,10 @@ function HeroSlideContent({
 						<Image
 							alt={banner.altText ?? ""}
 							className="object-cover lg:hidden"
+							fetchPriority={isFirst ? "high" : "auto"}
 							fill
-							priority
-							quality={100}
+							priority={isFirst}
+							quality={75}
 							sizes="100vw"
 							src={banner.backgroundImageMobileUrl ?? desktopBg}
 						/>
@@ -291,12 +295,12 @@ function HeroSlideContent({
 						<Image
 							alt=""
 							className="object-contain"
+							fetchPriority={isFirst ? "high" : "auto"}
 							fill
-							priority
-							quality={100}
+							priority={isFirst}
+							quality={85}
 							sizes="(max-width: 1024px) 82vw, 42vw"
 							src={mobileProduct as string}
-							unoptimized
 						/>
 					</motion.div>
 				</motion.div>
@@ -416,6 +420,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 							<HeroSlideContent
 								banner={banner}
 								isActive={index === selectedIndex}
+								isFirst={index === 0}
 								isH1={index === h1Index}
 								parallaxX={parallaxX}
 								parallaxY={parallaxY}
