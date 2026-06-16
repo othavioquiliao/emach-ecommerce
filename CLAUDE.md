@@ -78,7 +78,6 @@ Schema TS aqui é **cópia versionada** do dashboard, sincronizada via **CI PR a
 - **Pagamento real ausente — pendente (roadmap #4, keystone):** `/dashboard/pedidos/[id]/pagar` é stub (Asaas Pix/Boleto/Cartão); `order.status` carrega o estado de pagamento. Sem a transição `pending_payment → paid` não roda **nem o débito de estoque** (ADR-0003) **nem o ciclo de vida pós-pago**. Praticamente todo o resto do roadmap depende disto.
 - **Hardening — pendente (roadmap #5, após o pagamento):**
   - **Frete fail-open:** queda da API SuperFrete não bloqueia a venda (só `log.error` em `place-order.ts > assertShippingQuoted`) → frete adulterável. Endurecer (persistir `shippingUnverified` p/ revisão) exige **coluna nova no schema** — nasce no dashboard (ADR-0009).
-  - Rate limit em endpoints auth (sem proteção brute-force em `signin`/`signup`/`reset`).
   - evlog sem drain externo (Axiom/Datadog/Sentry) — output só em console.
 - Sem Docker config. CI mínimo: `.github/workflows/ci.yml` roda só `check-types` em PR/push na `main` (sem testes nem deploy).
 
