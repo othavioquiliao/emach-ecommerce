@@ -12,7 +12,13 @@ import {
 import { cn } from "@emach/ui/lib/utils";
 import { maskPhone, onlyDigits } from "@emach/validators";
 import { useForm } from "@tanstack/react-form";
-import { motion, useReducedMotion } from "framer-motion";
+import {
+  AnimatePresence,
+  motion,
+  type TargetAndTransition,
+  type Transition,
+  useReducedMotion,
+} from "framer-motion";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -27,10 +33,6 @@ import { PasswordInput } from "./password-input";
 const TRIGGER_CLASS =
   "h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
 
-/**
- * Sanitiza o destino pós-login lido de `?redirect=`. Guarda anti-open-redirect:
- * só aceita caminho interno. Rejeita externo/protocol-relative → fallback `/dashboard`.
- */
 function sanitizeRedirect(raw: string | null): string {
   if (!raw?.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) {
     return "/dashboard";
@@ -38,9 +40,67 @@ function sanitizeRedirect(raw: string | null): string {
   return raw;
 }
 
+const PRODUCTS = [
+  "/images/hero-imagens/emach_hero_01_product.png",
+  "/images/hero-imagens/emach_hero_02_product.png",
+  "/images/hero-imagens/emach_hero_03_product.png",
+] as const;
+
+function FloatingTool({
+  float,
+  priority,
+  reduceMotion,
+  sizes,
+  slotClassName,
+  src,
+  transition,
+}: {
+  float: TargetAndTransition | undefined;
+  priority?: boolean;
+  reduceMotion: boolean;
+  sizes: string;
+  slotClassName: string;
+  src: string;
+  transition: Transition | undefined;
+}) {
+  return (
+    <motion.div
+      animate={float}
+      aria-hidden="true"
+      className={slotClassName}
+      transition={transition}
+    >
+      <AnimatePresence initial={false}>
+        <motion.div
+          animate={{ opacity: 1, scale: 1 }}
+          className="absolute inset-0"
+          exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.96 }}
+          initial={{ opacity: 0, scale: reduceMotion ? 1 : 1.08 }}
+          key={src}
+          transition={{
+            duration: reduceMotion ? 0 : 0.8,
+            ease: [0.16, 1, 0.3, 1],
+          }}
+        >
+          <Image
+            alt=""
+            className="object-contain"
+            fill
+            priority={priority}
+            sizes={sizes}
+            src={src}
+            unoptimized
+          />
+        </motion.div>
+      </AnimatePresence>
+    </motion.div>
+  );
+}
+
 export function LoginForm() {
   const [mode, setMode] = useState<"sign-in" | "sign-up">("sign-in");
   const [isGooglePending, setIsGooglePending] = useState(false);
+  const [toolIndex, setToolIndex] = useState(0);
   const router = useRouter();
   const reduceMotion = useReducedMotion() ?? false;
   const searchParams = useSearchParams();
@@ -52,6 +112,16 @@ export function LoginForm() {
       router.replace(redirectTo as Route);
     }
   }, [session, router, redirectTo]);
+
+  useEffect(() => {
+    if (reduceMotion) {
+      return;
+    }
+    const id = setInterval(() => {
+      setToolIndex((i) => (i + 1) % PRODUCTS.length);
+    }, 3800);
+    return () => clearInterval(id);
+  }, [reduceMotion]);
 
   const handleGoogleSignIn = async () => {
     setIsGooglePending(true);
@@ -200,54 +270,33 @@ export function LoginForm() {
           transition={glowTransition}
         />
 
-        <motion.div
-          animate={satelliteFloat}
-          aria-hidden="true"
-          className="pointer-events-none absolute top-[12%] left-[4%] z-5 h-[26%] w-[36%] -rotate-12 opacity-55 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
+        <FloatingTool
+          float={satelliteFloat}
+          reduceMotion={reduceMotion}
+          sizes="22vw"
+          slotClassName="pointer-events-none absolute top-[12%] left-[4%] z-5 h-[26%] w-[36%] -rotate-12 opacity-55 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
+          src={PRODUCTS[(toolIndex + 1) % PRODUCTS.length]}
           transition={floatTransition(7, 0.6)}
-        >
-          <Image
-            alt=""
-            className="object-contain"
-            fill
-            sizes="22vw"
-            src="/images/hero-imagens/emach_hero_02_product.png"
-            unoptimized
-          />
-        </motion.div>
+        />
 
-        <motion.div
-          animate={satelliteFloat}
-          aria-hidden="true"
-          className="pointer-events-none absolute top-[16%] right-[2%] z-5 h-[24%] w-[34%] rotate-14 opacity-50 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
+        <FloatingTool
+          float={satelliteFloat}
+          reduceMotion={reduceMotion}
+          sizes="22vw"
+          slotClassName="pointer-events-none absolute top-[16%] right-[2%] z-5 h-[24%] w-[34%] rotate-14 opacity-50 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
+          src={PRODUCTS[(toolIndex + 2) % PRODUCTS.length]}
           transition={floatTransition(5.5, 1.1)}
-        >
-          <Image
-            alt=""
-            className="object-contain"
-            fill
-            sizes="22vw"
-            src="/images/hero-imagens/emach_hero_03_product.png"
-            unoptimized
-          />
-        </motion.div>
+        />
 
-        <motion.div
-          animate={heroFloat}
-          aria-hidden="true"
-          className="pointer-events-none absolute top-[32%] left-1/2 z-10 h-[44%] w-[66%] -translate-x-1/2 -rotate-3 drop-shadow-[0_60px_40px_rgba(0,0,0,0.6)]"
+        <FloatingTool
+          float={heroFloat}
+          priority
+          reduceMotion={reduceMotion}
+          sizes="46vw"
+          slotClassName="pointer-events-none absolute top-[30%] left-1/2 z-10 h-[50%] w-[76%] -translate-x-1/2 -rotate-3 drop-shadow-[0_60px_40px_rgba(0,0,0,0.6)]"
+          src={PRODUCTS[toolIndex]}
           transition={floatTransition(6, 0)}
-        >
-          <Image
-            alt=""
-            className="object-contain"
-            fill
-            priority
-            sizes="40vw"
-            src="/images/hero-imagens/emach_hero_01_product.png"
-            unoptimized
-          />
-        </motion.div>
+        />
 
         <Image
           alt="EMACH"
