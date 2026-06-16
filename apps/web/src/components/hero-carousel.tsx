@@ -44,6 +44,8 @@ export type HeroBanner = Pick<
 	| "ctaHref"
 	| "ctaVariant"
 	| "layout"
+	| "productScale"
+	| "ctaScale"
 >;
 
 const AUTOPLAY_INTERVAL = 9000;
@@ -65,6 +67,8 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		ctaHref: "/catalog",
 		ctaVariant: "red",
 		layout: "split",
+		productScale: 100,
+		ctaScale: 100,
 	},
 	{
 		id: "fallback-02",
@@ -79,6 +83,8 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		ctaHref: "/catalog",
 		ctaVariant: "red",
 		layout: "split",
+		productScale: 100,
+		ctaScale: 100,
 	},
 ];
 
@@ -104,35 +110,92 @@ type LayoutConfig = {
 	content: string;
 	/** Posição/tamanho do produto no desktop (lg); null = layout sem produto. */
 	product: string | null;
-	/** CTA dentro do bloco (true) ou separado no canto inferior direito (split). */
-	ctaInline: boolean;
+	/**
+	 * "inline" = CTA renderizado dentro do bloco de conteúdo; caso contrário, a
+	 * classe `lg:` que posiciona o CTA separado no canto (mobile é sempre a base
+	 * full-width). Estendido em #130: `mirror_split` põe o CTA à esquerda.
+	 */
+	cta: "inline" | string;
+	/** Lado do texto no desktop — orienta a direção do gradiente de legibilidade. */
+	textSide: "left" | "right" | "center";
 };
 
+// Posições do CTA separado no desktop (a base mobile full-width é comum a todos).
+const CTA_CORNER_RIGHT = "lg:right-[4%] lg:bottom-[12%] lg:left-auto lg:w-auto";
+const CTA_CORNER_LEFT = "lg:left-[4%] lg:right-auto lg:bottom-[12%] lg:w-auto";
+const CTA_CENTER =
+	"lg:left-1/2 lg:right-auto lg:bottom-[10%] lg:-translate-x-1/2 lg:w-auto";
+
+// Mapa de posições por preset. Os 4 primeiros são os originais; os 4 últimos
+// espelham `banner-layout-pos.ts` do dashboard (issue #130 / Hero Builder v2).
 const LAYOUT_CONFIG: Record<HeroBanner["layout"], LayoutConfig> = {
 	split: {
 		content:
 			"lg:left-[4%] lg:right-auto lg:bottom-[18%] lg:max-w-[44%] lg:items-start lg:text-left",
 		product: "lg:left-[66%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
-		ctaInline: false,
+		cta: CTA_CORNER_RIGHT,
+		textSide: "left",
 	},
 	stack_left: {
 		content:
 			"lg:left-[4%] lg:right-auto lg:bottom-[15%] lg:max-w-[48%] lg:items-start lg:text-left",
 		product: "lg:left-[69%] lg:top-1/2 lg:h-[64%] lg:w-[42%]",
-		ctaInline: true,
+		cta: "inline",
+		textSide: "left",
 	},
 	center_bottom: {
 		content:
 			"lg:left-1/2 lg:right-auto lg:-translate-x-1/2 lg:bottom-[13%] lg:max-w-[70%] lg:items-center lg:text-center",
 		product: "lg:left-1/2 lg:top-[34%] lg:h-[52%] lg:w-[40%]",
-		ctaInline: true,
+		cta: "inline",
+		textSide: "center",
 	},
 	center_mid: {
 		content:
 			"lg:left-1/2 lg:right-auto lg:top-1/2 lg:bottom-auto lg:-translate-x-1/2 lg:-translate-y-1/2 lg:max-w-[72%] lg:items-center lg:text-center",
 		product: null,
-		ctaInline: true,
+		cta: "inline",
+		textSide: "center",
 	},
+	// produto topo-centro · texto esquerda-meio · CTA direita-baixo
+	center_cta_right: {
+		content:
+			"lg:left-[4%] lg:right-auto lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:max-w-[44%] lg:items-start lg:text-left",
+		product: "lg:left-1/2 lg:top-[34%] lg:h-[52%] lg:w-[42%]",
+		cta: CTA_CORNER_RIGHT,
+		textSide: "left",
+	},
+	// espelho do split: produto esquerda-meio · texto direita-meio · CTA esquerda-baixo
+	mirror_split: {
+		content:
+			"lg:right-[4%] lg:left-auto lg:bottom-[18%] lg:max-w-[44%] lg:items-end lg:text-right",
+		product: "lg:left-[34%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
+		cta: CTA_CORNER_LEFT,
+		textSide: "right",
+	},
+	// produto dominante centro · texto topo-centro · CTA centro-baixo
+	hero_center: {
+		content:
+			"lg:left-1/2 lg:right-auto lg:top-[8%] lg:bottom-auto lg:-translate-x-1/2 lg:max-w-[70%] lg:items-center lg:text-center",
+		product: "lg:left-1/2 lg:top-1/2 lg:h-[68%] lg:w-[46%]",
+		cta: CTA_CENTER,
+		textSide: "center",
+	},
+	// produto esquerda-meio · texto + CTA agrupados à direita
+	text_right: {
+		content:
+			"lg:right-[4%] lg:left-auto lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:max-w-[44%] lg:items-end lg:text-right",
+		product: "lg:left-[34%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
+		cta: "inline",
+		textSide: "right",
+	},
+};
+
+// Direção do gradiente de legibilidade conforme o lado do texto no desktop.
+const GRADIENT_BY_SIDE: Record<LayoutConfig["textSide"], string> = {
+	left: "lg:bg-gradient-to-r",
+	right: "lg:bg-gradient-to-l",
+	center: "lg:bg-gradient-to-t",
 };
 
 function HeroCta({
@@ -151,6 +214,9 @@ function HeroCta({
 		<Link
 			className={cn("inline-flex", className)}
 			href={banner.ctaHref as Route}
+			// Escala do CTA (#130): propriedade CSS `scale` (longhand), independente
+			// do transform. Default 100 = scale(1), no-op.
+			style={{ scale: String(banner.ctaScale / 100) }}
 		>
 			<EmachButton
 				className={style.className}
@@ -193,6 +259,10 @@ function HeroSlideContent({
 	const showProduct = cfg.product !== null && banner.productImageUrl != null;
 	const desktopProduct = banner.productImageUrl;
 	const mobileProduct = banner.productImageMobileUrl ?? desktopProduct;
+
+	// Escala do produto (#130): composta no `scale` do framer (mesmo transform do
+	// parallax x/y e do realce de slide ativo). Default 100 = baseline (×1).
+	const productScaleFactor = banner.productScale / 100;
 
 	const HeadingTag = isH1 ? "h1" : "h2";
 
@@ -268,7 +338,10 @@ function HeroSlideContent({
 			{(banner.title || banner.subtitle) && (
 				<div
 					aria-hidden="true"
-					className="absolute inset-0 z-10 bg-gradient-to-t from-black/85 via-black/30 to-transparent lg:bg-gradient-to-r lg:from-black/80 lg:via-black/20 lg:to-transparent"
+					className={cn(
+						"absolute inset-0 z-10 bg-gradient-to-t from-black/85 via-black/30 to-transparent lg:from-black/80 lg:via-black/20 lg:to-transparent",
+						GRADIENT_BY_SIDE[cfg.textSide]
+					)}
 				/>
 			)}
 
@@ -277,8 +350,11 @@ function HeroSlideContent({
 				<motion.div
 					animate={
 						reduceMotion
-							? { opacity: 1 }
-							: { opacity: isActive ? 1 : 0.35, scale: isActive ? 1 : 0.94 }
+							? { opacity: 1, scale: productScaleFactor }
+							: {
+									opacity: isActive ? 1 : 0.35,
+									scale: (isActive ? 1 : 0.94) * productScaleFactor,
+								}
 					}
 					className={cn(
 						"absolute top-[30%] left-1/2 z-15 h-[40%] w-[82%] -translate-x-1/2 -translate-y-1/2",
@@ -330,16 +406,20 @@ function HeroSlideContent({
 						{banner.subtitle}
 					</p>
 				)}
-				{cfg.ctaInline && (
+				{cfg.cta === "inline" && (
 					<HeroCta banner={banner} className="mt-6 w-full lg:w-auto" />
 				)}
 			</div>
 
-			{/* CTA separado no canto (apenas layout split, desktop); mobile vira full-width na base */}
-			{!cfg.ctaInline && (
+			{/* CTA separado no canto (split, mirror_split, center_cta_right, hero_center);
+				 a posição lg: vem de cfg.cta. Mobile vira full-width na base. */}
+			{cfg.cta !== "inline" && (
 				<HeroCta
 					banner={banner}
-					className="absolute right-[5%] bottom-[6%] left-[5%] z-20 lg:right-[4%] lg:bottom-[12%] lg:left-auto lg:w-auto"
+					className={cn(
+						"absolute right-[5%] bottom-[6%] left-[5%] z-20",
+						cfg.cta
+					)}
 				/>
 			)}
 		</div>
