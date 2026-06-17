@@ -3,7 +3,7 @@ export type GallerySlot =
 	| { kind: "video"; url: string; poster: string | null };
 
 export function slotKey(slot: GallerySlot): string {
-	return slot.kind === "video" ? `video-${slot.url}` : slot.url;
+	return slot.kind === "video" ? `video-${slot.url}` : `image-${slot.url}`;
 }
 
 export function buildSlots(

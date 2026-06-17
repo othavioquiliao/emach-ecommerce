@@ -50,8 +50,8 @@ describe("buildSlots", () => {
 });
 
 describe("slotKey", () => {
-	it("imagem usa a url", () => {
-		expect(slotKey({ kind: "image", url: "a.jpg" })).toBe("a.jpg");
+	it("imagem usa prefixo image-", () => {
+		expect(slotKey({ kind: "image", url: "a.jpg" })).toBe("image-a.jpg");
 	});
 	it("vídeo usa prefixo video-", () => {
 		expect(slotKey({ kind: "video", url: "v.mp4", poster: null })).toBe(
