@@ -6,6 +6,7 @@ import { onlyDigits } from "@emach/validators";
 import { and, desc, eq, ne } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
+import type { ActionResult, ActionResultWith } from "@/lib/actions/types";
 import { log } from "@/lib/evlog";
 import { requireCurrentClient } from "@/lib/session";
 import {
@@ -13,11 +14,7 @@ import {
 	addressInputSchema,
 } from "@/lib/validators/address";
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
-
-export type ActionResultWith<T> =
-	| { ok: true; data: T }
-	| { ok: false; error: string };
+export type { ActionResult, ActionResultWith };
 
 const idSchema = z.object({ id: z.string().min(1) });
 const updateSchema = addressInputSchema.extend({ id: z.string().min(1) });
@@ -142,7 +139,7 @@ export async function updateAddressAction(
 			addressId: id,
 			error: message,
 		});
-		return { ok: false, error: message };
+		return { ok: false, error: "Não foi possível atualizar o endereço" };
 	}
 }
 
@@ -205,7 +202,7 @@ export async function deleteAddressAction(raw: {
 			addressId: id,
 			error: message,
 		});
-		return { ok: false, error: message };
+		return { ok: false, error: "Não foi possível excluir o endereço" };
 	}
 }
 
@@ -257,6 +254,6 @@ export async function setDefaultAddressAction(raw: {
 			addressId: id,
 			error: message,
 		});
-		return { ok: false, error: message };
+		return { ok: false, error: "Não foi possível definir o endereço padrão" };
 	}
 }

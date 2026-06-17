@@ -11,9 +11,9 @@
   },
   "scripts": {
     "db:push": "drizzle-kit push",
-    "db:generate": "drizzle-kit generate",
+    "db:generate": "echo 'LEGACY: schema sync e via CI PR do dashboard. Em dev use db:push.' && exit 1",
     "db:studio": "drizzle-kit studio",
-    "db:migrate": "drizzle-kit migrate",
+    "db:migrate": "echo 'LEGACY: pasta migrations/ removida. Use db:push + db:apply-triggers.' && exit 1",
     "db:apply-triggers": "bun run scripts/apply-triggers.ts",
     "db:seed-categories": "bun run scripts/seed-categories.ts",
     "db:seed-attributes": "bun run scripts/seed-attributes.ts",

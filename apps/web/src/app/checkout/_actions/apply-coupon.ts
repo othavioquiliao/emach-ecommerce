@@ -89,7 +89,6 @@ export async function applyCouponAction(
 	} catch (err) {
 		log.error({
 			action: "apply_coupon_failed",
-			code,
 			error: err instanceof Error ? err.message : "erro inesperado",
 		});
 		return { ok: false, error: "Não foi possível validar o cupom" };

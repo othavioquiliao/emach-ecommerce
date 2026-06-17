@@ -6,10 +6,11 @@ import { review } from "@emach/db/schema/reviews";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
 
+import type { ActionResult } from "@/lib/actions/types";
 import { log } from "@/lib/evlog";
 import { requireCurrentClient } from "@/lib/session";
 
-export type ActionResult = { ok: true } | { ok: false; error: string };
+export type { ActionResult };
 
 const schema = z.object({
 	orderId: z.string().min(1),

@@ -1,8 +1,9 @@
 import type { ToolDetail } from "@emach/db/queries/catalog";
+import { env } from "@emach/env/web";
 import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+const BASE_URL = env.NEXT_PUBLIC_SITE_URL;
 
 function finalPriceAmount(
 	priceAmount: string,

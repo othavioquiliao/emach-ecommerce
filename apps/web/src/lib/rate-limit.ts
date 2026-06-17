@@ -56,5 +56,6 @@ function createLimiter(max: number): Limiter {
 export const couponLimiter = createLimiter(10);
 export const orderLimiter = createLimiter(5);
 export const shippingLimiter = createLimiter(20);
+export const searchLimiter = createLimiter(30);
 
 export const RATE_LIMIT_MESSAGE = "Muitas tentativas, aguarde um instante";

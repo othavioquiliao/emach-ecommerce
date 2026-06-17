@@ -5,7 +5,7 @@ import { stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
 import { promotion } from "@emach/db/schema/promotions";
 import { tool, toolVariant } from "@emach/db/schema/tools";
-import { isValidCpfCnpj } from "@emach/validators";
+import { isValidCpfCnpj, onlyDigits } from "@emach/validators";
 import { and, eq, inArray, sql } from "drizzle-orm";
 import { z } from "zod";
 import {
@@ -55,7 +55,10 @@ export const inputSchema = z.object({
 	name: z.string().min(2),
 	email: z.email(),
 	phone: z.string().min(10),
-	document: z.string().refine(isValidCpfCnpj, "Documento inválido"),
+	document: z
+		.string()
+		.transform((v) => onlyDigits(v))
+		.refine(isValidCpfCnpj, "Documento inválido"),
 	addressId: z.string().nullable(),
 	newAddress: newAddressSchema.nullable(),
 	acceptMarketing: z.boolean(),
@@ -303,14 +306,20 @@ async function prepareLines(
  */
 export async function resolveDestinationCep(
 	database: typeof db,
-	input: CreateOrderInput
+	input: CreateOrderInput,
+	clientId: string
 ): Promise<string | null> {
 	const raw = input.addressId
 		? (
 				await database
 					.select({ zipCode: clientAddress.zipCode })
 					.from(clientAddress)
-					.where(eq(clientAddress.id, input.addressId))
+					.where(
+						and(
+							eq(clientAddress.id, input.addressId),
+							eq(clientAddress.clientId, clientId)
+						)
+					)
 					.limit(1)
 			)[0]?.zipCode
 		: input.newAddress?.zipCode;
