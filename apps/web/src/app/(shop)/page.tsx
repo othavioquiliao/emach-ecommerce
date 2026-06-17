@@ -61,17 +61,21 @@ async function getCategoryImages(
 			SELECT id, slug FROM category WHERE slug = ANY(${arrayLiteral(slugs, "text[]")})
 		),
 		candidates AS (
+			-- Imagem primária (menor sort_order) da 1ª ferramenta ativa
+			-- cadastrada na categoria (menor created_at; id desempata).
 			SELECT r.slug, ti.url,
 			       ROW_NUMBER() OVER (
 			         PARTITION BY r.slug
-			         ORDER BY ti.sort_order ASC, ti.created_at DESC
+			         ORDER BY t.created_at ASC, t.id ASC, ti.sort_order ASC
 			       ) AS rn
 			FROM roots r
 			JOIN category c
 			  ON c.path = '/' || r.slug
 			  OR c.path LIKE '/' || r.slug || '/%'
 			JOIN tool_category tc ON tc.category_id = c.id
+			JOIN tool t ON t.id = tc.tool_id
 			JOIN tool_image ti ON ti.tool_id = tc.tool_id
+			WHERE t.status = 'active'
 		)
 		SELECT slug, url FROM candidates WHERE rn = 1
 	`);
@@ -79,28 +83,6 @@ async function getCategoryImages(
 	const map = new Map<string, string>();
 	for (const row of owned.rows) {
 		map.set(row.slug, row.url);
-	}
-
-	const missing = slugs.filter((s) => !map.has(s));
-	if (missing.length > 0) {
-		const usedUrls = Array.from(map.values());
-		const exclusion =
-			usedUrls.length > 0
-				? sql`WHERE url <> ALL(${arrayLiteral(usedUrls, "text[]")})`
-				: sql``;
-		const fallbacks = await db.execute<{ url: string }>(sql`
-			SELECT DISTINCT ON (url) url
-			FROM tool_image
-			${exclusion}
-			ORDER BY url, created_at DESC
-			LIMIT ${missing.length}
-		`);
-		for (const [i, slug] of missing.entries()) {
-			const fallback = fallbacks.rows[i]?.url;
-			if (fallback) {
-				map.set(slug, fallback);
-			}
-		}
 	}
 
 	return map;

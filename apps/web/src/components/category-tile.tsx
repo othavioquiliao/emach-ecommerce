@@ -1,8 +1,16 @@
 "use client";
 
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Disc3, Drill, HardHat, Wrench } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+
+// Ícone de fallback por categoria raiz (espelha CATEGORY_ICONS de product-image.tsx).
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+	acessorios: Disc3,
+	equipamentos: HardHat,
+	"ferramentas-eletricas": Drill,
+	"ferramentas-manuais": Wrench,
+};
 
 interface CategoryTileCategory {
 	description: string | null;
@@ -20,6 +28,7 @@ interface CategoryTileProps {
 
 export function CategoryTile({ active, category, index }: CategoryTileProps) {
 	const indexLabel = String(index + 1).padStart(2, "0");
+	const FallbackIcon = CATEGORY_ICONS[category.slug] ?? Wrench;
 
 	return (
 		<Link
@@ -35,8 +44,9 @@ export function CategoryTile({ active, category, index }: CategoryTileProps) {
 				{indexLabel}
 			</span>
 
-			{/* Ferramenta (PNG recortado) flutua com cor plena — sem overlay por cima */}
-			{category.imageUrl && (
+			{/* Ferramenta (PNG recortado) flutua com cor plena — sem overlay por cima.
+			    Sem imagem: ícone da categoria sobre o spotlight, acende junto do tile. */}
+			{category.imageUrl ? (
 				<div className="absolute inset-x-[10%] top-[5%] bottom-[30%] z-[2]">
 					<Image
 						alt=""
@@ -45,6 +55,14 @@ export function CategoryTile({ active, category, index }: CategoryTileProps) {
 						fill
 						sizes="(min-width: 1024px) 20vw, (min-width: 768px) 40vw, 80vw"
 						src={category.imageUrl}
+					/>
+				</div>
+			) : (
+				<div className="absolute inset-x-[10%] top-[5%] bottom-[30%] z-[2] flex items-center justify-center">
+					<FallbackIcon
+						aria-hidden="true"
+						className="h-auto w-[46%] text-white/16 transition-[color,transform] duration-[var(--card-dur)] ease-[var(--card-ease)] group-hover:scale-[1.05] group-hover:text-white/30 group-data-[active=true]:scale-[1.05] group-data-[active=true]:text-white/30 motion-reduce:transition-none"
+						strokeWidth={1.2}
 					/>
 				</div>
 			)}
