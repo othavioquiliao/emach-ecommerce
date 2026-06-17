@@ -96,6 +96,9 @@ export default async function ProductPage({
 	const primaryCategorySlug = detail.primaryCategory?.slug ?? null;
 	const primaryCategoryName = detail.primaryCategory?.name ?? null;
 	const pathname = `/product/${slug}`;
+	const video = detail.tool.videoUrl
+		? { url: detail.tool.videoUrl, poster: detail.tool.videoPosterUrl ?? null }
+		: null;
 
 	return (
 		<>
@@ -107,6 +110,7 @@ export default async function ProductPage({
 					categorySlug={primaryCategorySlug ?? ""}
 					images={detail.images}
 					name={detail.tool.name}
+					video={video}
 				/>
 				<ProductInfo
 					activePromotion={detail.activePromotion}
