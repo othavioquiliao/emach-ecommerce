@@ -1,11 +1,9 @@
 import { db } from "@emach/db";
-import {
-	getCategoryBySlug,
-	getCategoryTree,
-	getTools,
-} from "@emach/db/queries/catalog";
+import { getCategoryBySlug, getTools } from "@emach/db/queries/catalog";
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { SiteHeader } from "@/components/site-header";
+import { getCachedCategoryTree } from "@/lib/catalog-cache";
 import { getVoltagesByTool } from "@/lib/variant-voltages";
 import { CatalogContent } from "./_components/catalog-content";
 
@@ -62,30 +60,37 @@ function parsePositiveInt(value: string | undefined): number | undefined {
 	return Number.isFinite(n) && n >= 0 ? n : undefined;
 }
 
-export async function generateMetadata({
-	searchParams,
-}: CatalogPageProps): Promise<Metadata> {
-	const { cat, q } = await searchParams;
-	if (q) {
-		return {
-			title: `Busca: “${q}”`,
-			description: `Resultados para “${q}” no catálogo da EMACH.`,
-		};
-	}
-	if (cat) {
-		return {
-			title: cat,
-			description: `Produtos de ${cat} no catálogo da EMACH, com preço e estoque atualizados.`,
-		};
-	}
-	return {
-		title: "Catálogo",
-		description:
-			"Todas as ferramentas da EMACH: elétricas, manuais, medição e EPIs. Filtre por categoria, voltagem e preço.",
-	};
+// Metadata estática: sob cacheComponents, ler searchParams em generateMetadata
+// bloquearia o prerender do shell. O título/categoria da busca aparece no corpo
+// (CatalogContent), não no <title> (a rota tem filtros via query, não path).
+export const metadata: Metadata = {
+	title: "Catálogo",
+	description:
+		"Todas as ferramentas da EMACH: elétricas, manuais, medição e EPIs. Filtre por categoria, voltagem e preço.",
+};
+
+function CatalogSkeleton() {
+	return (
+		<div className="mx-auto max-w-[1440px] px-10 py-10">
+			<div className="h-[70vh] w-full animate-pulse bg-near-black/5" />
+		</div>
+	);
 }
 
-export default async function CatalogPage({ searchParams }: CatalogPageProps) {
+export default function CatalogPage({ searchParams }: CatalogPageProps) {
+	return (
+		<>
+			<SiteHeader />
+			<Suspense fallback={<CatalogSkeleton />}>
+				<CatalogResults searchParams={searchParams} />
+			</Suspense>
+		</>
+	);
+}
+
+// Buraco dinâmico do catálogo: lê searchParams (filtros/busca/paginação) — por
+// isso vive sob Suspense. A árvore de categorias vem do cache (shell).
+async function CatalogResults({ searchParams }: CatalogPageProps) {
 	const params = await searchParams;
 	const sort = parseSort(params.sort);
 	const voltages = parseVoltages(params.voltage);
@@ -94,8 +99,6 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 	const onlyPromo = params.promo === "1";
 	const page = Math.max(1, parsePositiveInt(params.page) ?? 1);
 	const search = params.q?.trim() ? params.q.trim() : undefined;
-
-	const categoryTreePromise = getCategoryTree(db);
 
 	let categoryId: string | undefined;
 	let currentCategoryName: string | null = null;
@@ -121,31 +124,28 @@ export default async function CatalogPage({ searchParams }: CatalogPageProps) {
 			limit: PAGE_SIZE,
 			offset: (page - 1) * PAGE_SIZE,
 		}),
-		categoryTreePromise,
+		getCachedCategoryTree(),
 	]);
 
 	const voltagesByTool = await getVoltagesByTool(tools.map((t) => t.id));
 
 	return (
-		<>
-			<SiteHeader />
-			<CatalogContent
-				categoryTree={categoryTree}
-				currentCategoryDescription={currentCategoryDescription}
-				currentCategoryName={currentCategoryName}
-				currentCategorySlug={params.cat ?? null}
-				onlyPromo={onlyPromo}
-				page={page}
-				pageSize={PAGE_SIZE}
-				priceMax={priceMax ?? null}
-				priceMin={priceMin ?? null}
-				query={params.q ?? ""}
-				sort={sort}
-				tools={tools}
-				total={total}
-				voltages={voltages}
-				voltagesByTool={voltagesByTool}
-			/>
-		</>
+		<CatalogContent
+			categoryTree={categoryTree}
+			currentCategoryDescription={currentCategoryDescription}
+			currentCategoryName={currentCategoryName}
+			currentCategorySlug={params.cat ?? null}
+			onlyPromo={onlyPromo}
+			page={page}
+			pageSize={PAGE_SIZE}
+			priceMax={priceMax ?? null}
+			priceMin={priceMin ?? null}
+			query={params.q ?? ""}
+			sort={sort}
+			tools={tools}
+			total={total}
+			voltages={voltages}
+			voltagesByTool={voltagesByTool}
+		/>
 	);
 }
