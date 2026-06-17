@@ -3,10 +3,11 @@ import {
 	getAllCategorySlugs,
 	getAllToolSlugs,
 } from "@emach/db/queries/catalog";
+import { env } from "@emach/env/web";
 import type { MetadataRoute } from "next";
 import { cacheLife } from "next/cache";
 
-const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
+const BASE_URL = env.NEXT_PUBLIC_SITE_URL;
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 	"use cache";

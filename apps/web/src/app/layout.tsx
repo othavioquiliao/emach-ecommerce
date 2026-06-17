@@ -1,3 +1,4 @@
+import { env } from "@emach/env/web";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import type { Metadata, Viewport } from "next";
@@ -19,9 +20,7 @@ const barlowCondensed = Barlow_Condensed({
 });
 
 export const metadata: Metadata = {
-	metadataBase: new URL(
-		process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001"
-	),
+	metadataBase: new URL(env.NEXT_PUBLIC_SITE_URL),
 	title: {
 		default: "EMACH Ferramentas — Furadeiras, Serras e EPIs",
 		template: "%s · EMACH",
