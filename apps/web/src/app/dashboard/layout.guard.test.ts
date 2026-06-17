@@ -13,9 +13,20 @@ const dashboardDir = dirname(fileURLToPath(import.meta.url));
 const GUARD = "requireCurrentClient";
 
 describe("guarda estrutural de /dashboard (#98)", () => {
-	it("o layout raiz de /dashboard chama requireCurrentClient", () => {
+	it("o DashboardChrome chama requireCurrentClient() de verdade", () => {
+		// Sob cacheComponents a guarda migrou do layout para o DashboardChrome
+		// (sob Suspense). Checamos a CHAMADA real (não só a string), senão um
+		// refactor que removesse a guarda passaria invisível pelo CI.
+		const chrome = readFileSync(
+			join(dashboardDir, "_components/dashboard-chrome.tsx"),
+			"utf8"
+		);
+		expect(chrome).toContain(`await ${GUARD}()`);
+	});
+
+	it("o layout raiz monta o DashboardChrome (guarda herdada por toda página)", () => {
 		const layout = readFileSync(join(dashboardDir, "layout.tsx"), "utf8");
-		expect(layout).toContain(GUARD);
+		expect(layout).toContain("DashboardChrome");
 	});
 
 	it("requireCurrentClient valida a sessão real (não só o cookie)", () => {
