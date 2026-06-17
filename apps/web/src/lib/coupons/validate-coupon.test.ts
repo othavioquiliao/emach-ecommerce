@@ -10,6 +10,7 @@ import {
 } from "./validate-coupon";
 
 const ROLLBACK = Symbol("rollback");
+const RE_MIN_ORDER = /Pedido mínimo/;
 
 async function withRollback(
 	fn: (tx: typeof db) => Promise<void>
@@ -170,7 +171,7 @@ describe("validateCoupon", () => {
 			await seedPromotion(tx, "MIN", { minOrderAmount: "200.00" });
 			const result = await validateCoupon(tx, "MIN", [line(toolId, 10_000)]);
 			expect(result.ok).toBe(false);
-			expect((result as { error: string }).error).toMatch(/Pedido mínimo/);
+			expect((result as { error: string }).error).toMatch(RE_MIN_ORDER);
 			expect((result as { reason: string }).reason).toBe("min_order");
 		});
 	});
@@ -193,7 +194,7 @@ describe("validateCoupon", () => {
 				line(outTool, 30_000),
 			]);
 			expect(result.ok).toBe(false);
-			expect((result as { error: string }).error).toMatch(/Pedido mínimo/);
+			expect((result as { error: string }).error).toMatch(RE_MIN_ORDER);
 		});
 	});
 
