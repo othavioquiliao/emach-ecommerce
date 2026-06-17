@@ -36,6 +36,7 @@ export type HeroBanner = Pick<
 	| "id"
 	| "backgroundImageUrl"
 	| "backgroundImageMobileUrl"
+	| "backgroundMobileMode"
 	| "productImageUrl"
 	| "productImageMobileUrl"
 	| "title"
@@ -61,6 +62,7 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		id: "fallback-01",
 		backgroundImageUrl: "/images/hero-imagens/emach_hero_01_bg.png",
 		backgroundImageMobileUrl: null,
+		backgroundMobileMode: "inherit",
 		productImageUrl: "/images/hero-imagens/emach_hero_01_product.png",
 		productImageMobileUrl: null,
 		title: null,
@@ -79,6 +81,7 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		id: "fallback-02",
 		backgroundImageUrl: "/images/hero-imagens/emach_hero_02_bg.png",
 		backgroundImageMobileUrl: null,
+		backgroundMobileMode: "inherit",
 		productImageUrl: "/images/hero-imagens/emach_hero_02_product.png",
 		productImageMobileUrl: null,
 		title: null,
@@ -238,7 +241,20 @@ function HeroCta({
 	);
 }
 
-// Fundo: imagem (desktop + mobile com fallback) ou void-black quando ausente.
+// Resolução do fundo mobile por modo (desktop nunca muda):
+//   none → sem imagem · custom → mobile url (fallback desktop) · inherit → desktop.
+function resolveMobileBg(banner: HeroBanner): string | null {
+	switch (banner.backgroundMobileMode) {
+		case "none":
+			return null;
+		case "custom":
+			return banner.backgroundImageMobileUrl ?? banner.backgroundImageUrl;
+		default:
+			return banner.backgroundImageUrl;
+	}
+}
+
+// Fundo: desktop é sempre `backgroundImageUrl`. O mobile segue o modo (acima).
 function HeroBackground({
 	banner,
 	isFirst,
@@ -247,26 +263,27 @@ function HeroBackground({
 	isFirst: boolean;
 }) {
 	const desktopBg = banner.backgroundImageUrl;
-	if (!desktopBg) {
-		return <div className="absolute inset-0 bg-black" />;
-	}
-	const hasSeparateMobileBg =
-		banner.backgroundImageMobileUrl != null &&
-		banner.backgroundImageMobileUrl !== desktopBg;
+	const mobileBg = resolveMobileBg(banner);
+
+	// Quando a mesma imagem serve desktop e mobile, um único <Image> cobre tudo.
+	const sharedBg = desktopBg != null && mobileBg === desktopBg;
 	const fetchPriority = isFirst ? "high" : "auto";
+
 	return (
-		<>
-			<Image
-				alt={banner.altText ?? ""}
-				className={cn("object-cover", hasSeparateMobileBg && "hidden lg:block")}
-				fetchPriority={fetchPriority}
-				fill
-				priority={isFirst}
-				quality={75}
-				sizes="100vw"
-				src={desktopBg}
-			/>
-			{hasSeparateMobileBg && (
+		<div className="absolute inset-0 bg-black">
+			{desktopBg != null && (
+				<Image
+					alt={banner.altText ?? ""}
+					className={cn("object-cover", !sharedBg && "hidden lg:block")}
+					fetchPriority={fetchPriority}
+					fill
+					priority={isFirst}
+					quality={75}
+					sizes="100vw"
+					src={desktopBg}
+				/>
+			)}
+			{!sharedBg && mobileBg != null && (
 				<Image
 					alt={banner.altText ?? ""}
 					className="object-cover lg:hidden"
@@ -275,10 +292,10 @@ function HeroBackground({
 					priority={isFirst}
 					quality={75}
 					sizes="100vw"
-					src={banner.backgroundImageMobileUrl ?? desktopBg}
+					src={mobileBg}
 				/>
 			)}
-		</>
+		</div>
 	);
 }
 
