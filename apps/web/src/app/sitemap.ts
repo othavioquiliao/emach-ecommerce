@@ -4,12 +4,15 @@ import {
 	getAllToolSlugs,
 } from "@emach/db/queries/catalog";
 import type { MetadataRoute } from "next";
+import { cacheLife } from "next/cache";
 
 const BASE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3001";
 
-export const revalidate = 86_400;
-
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+	"use cache";
+	cacheLife({ revalidate: 86_400 });
+	// Sob `use cache`, `new Date()` congela no momento da geração do cache
+	// (lastModified refresca a cada ~24h). Aceitável para um sitemap.
 	const now = new Date();
 	const staticRoutes: MetadataRoute.Sitemap = [
 		{ url: `${BASE_URL}/`, lastModified: now, priority: 1 },
