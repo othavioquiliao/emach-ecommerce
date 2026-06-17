@@ -1,35 +1,25 @@
+// apps/web/src/lib/countdown.test.ts
 import { describe, expect, it } from "vitest";
 import { formatCountdown } from "./countdown";
 
 describe("formatCountdown", () => {
-	it("zera quando o alvo já passou", () => {
-		expect(formatCountdown(-1000)).toEqual({
-			days: 0,
-			hours: 0,
-			minutes: 0,
-			seconds: 0,
-			done: true,
-		});
+	const now = Date.UTC(2026, 0, 1, 0, 0, 0); // 2026-01-01T00:00:00Z
+
+	it("formata dias/horas/min/seg restantes", () => {
+		const target = new Date(now + (((2 * 24 + 3) * 60 + 4) * 60 + 5) * 1000);
+		expect(formatCountdown(target, now)).toBe("2d 3h 4m 5s");
 	});
 
-	it("decompõe milissegundos em d/h/m/s", () => {
-		const ms = 2 * 86_400_000 + 3 * 3_600_000 + 4 * 60_000 + 5 * 1000; // 2d 3h 4m 5s
-		expect(formatCountdown(ms)).toEqual({
-			days: 2,
-			hours: 3,
-			minutes: 4,
-			seconds: 5,
-			done: false,
-		});
+	it("zera os segmentos quando faltam menos de 1s", () => {
+		const target = new Date(now + 500);
+		expect(formatCountdown(target, now)).toBe("0d 0h 0m 0s");
 	});
 
-	it("trata o zero exato como concluído", () => {
-		expect(formatCountdown(0)).toEqual({
-			days: 0,
-			hours: 0,
-			minutes: 0,
-			seconds: 0,
-			done: true,
-		});
+	it("retorna null quando já expirou", () => {
+		expect(formatCountdown(new Date(now - 1000), now)).toBeNull();
+	});
+
+	it("retorna null no instante exato do alvo", () => {
+		expect(formatCountdown(new Date(now), now)).toBeNull();
 	});
 });

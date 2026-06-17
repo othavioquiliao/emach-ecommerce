@@ -1,22 +1,22 @@
-export interface CountdownParts {
-	days: number;
-	done: boolean;
-	hours: number;
-	minutes: number;
-	seconds: number;
-}
+// apps/web/src/lib/countdown.ts
+const DAY = 86_400_000;
+const HOUR = 3_600_000;
+const MINUTE = 60_000;
+const SECOND = 1000;
 
-/** Decompõe um intervalo em ms (alvo - agora) em d/h/m/s. <=0 vira "done". */
-export function formatCountdown(remainingMs: number): CountdownParts {
-	if (remainingMs <= 0) {
-		return { days: 0, hours: 0, minutes: 0, seconds: 0, done: true };
+/**
+ * Tempo restante até `target` formatado como "Xd Xh Xm Ss".
+ * `null` quando já expirou (alvo <= agora) — o caller esconde o contador.
+ * `now` é injetado (ms epoch) pra manter a função pura e testável.
+ */
+export function formatCountdown(target: Date, now: number): string | null {
+	const ms = target.getTime() - now;
+	if (ms <= 0) {
+		return null;
 	}
-	const totalSeconds = Math.floor(remainingMs / 1000);
-	return {
-		days: Math.floor(totalSeconds / 86_400),
-		hours: Math.floor((totalSeconds % 86_400) / 3600),
-		minutes: Math.floor((totalSeconds % 3600) / 60),
-		seconds: totalSeconds % 60,
-		done: false,
-	};
+	const d = Math.floor(ms / DAY);
+	const h = Math.floor((ms % DAY) / HOUR);
+	const m = Math.floor((ms % HOUR) / MINUTE);
+	const s = Math.floor((ms % MINUTE) / SECOND);
+	return `${d}d ${h}h ${m}m ${s}s`;
 }
