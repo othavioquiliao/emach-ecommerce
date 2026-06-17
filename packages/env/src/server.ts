@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { createEnv } from "@t3-oss/env-core";
 import dotenv from "dotenv";
-import { z } from "zod";
+import { serverSchema } from "./schemas";
 
 const currentDir = dirname(fileURLToPath(import.meta.url));
 const dotenvPaths = [
@@ -19,32 +19,7 @@ for (const dotenvPath of new Set(dotenvPaths)) {
 }
 
 export const env = createEnv({
-	server: {
-		DATABASE_URL: z.string().min(1),
-		BETTER_AUTH_SECRET: z.string().min(32),
-		BETTER_AUTH_URL: z.url(),
-		CORS_ORIGIN: z.url(),
-		BETTER_AUTH_URL_ECOMMERCE: z.url(),
-		ECOMMERCE_ORIGIN: z.url(),
-		GOOGLE_CLIENT_ID: z.string().min(1),
-		GOOGLE_CLIENT_SECRET: z.string().min(1),
-		RESEND_API_KEY: z.string().min(1),
-		EMAIL_FROM: z.string().min(3),
-		NODE_ENV: z
-			.enum(["development", "production", "test"])
-			.default("development"),
-		SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
-		NEXT_PUBLIC_SUPABASE_URL: z.url(),
-		SUPERFRETE_TOKEN: z.string().min(1),
-		SUPERFRETE_BASE_URL: z.url(),
-		SUPERFRETE_USER_AGENT: z.string().min(1),
-		DEFAULT_BRANCH_ID: z.string().min(1),
-		// Upstash Redis (REST) — storage do rate limit serverless (#91 auth,
-		// #94 checkout). Opcionais: ausentes → fallback in-memory em dev/local;
-		// obrigatórias na prática em produção (Vercel).
-		UPSTASH_REDIS_REST_URL: z.url().optional(),
-		UPSTASH_REDIS_REST_TOKEN: z.string().min(1).optional(),
-	},
+	server: serverSchema,
 	runtimeEnv: process.env,
 	emptyStringAsUndefined: true,
 });

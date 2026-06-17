@@ -17,3 +17,23 @@ jobs:
       - run: bun check-types
       - run: bun run --filter=web test:ci
       - run: bun run --filter=@emach/validators test
+
+  check-env:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: 1.3.11
+      - run: bun install --frozen-lockfile
+      - name: Drift-check de env vars contra a Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        run: |
+          if [ -z "$VERCEL_TOKEN" ]; then
+            echo "::warning::VERCEL_TOKEN ausente — pulando drift-check. Cadastre os secrets VERCEL_TOKEN/VERCEL_ORG_ID/VERCEL_PROJECT_ID para ativar."
+            exit 0
+          fi
+          bun check:env

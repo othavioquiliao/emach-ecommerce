@@ -33,6 +33,7 @@
     "db:generate": "echo 'LEGACY: schema sync e via CI PR do dashboard. Em dev use db:push.' && exit 1",
     "db:migrate": "echo 'LEGACY: pasta migrations/ removida. Use db:push + db:apply-triggers.' && exit 1",
     "check": "ultracite check",
+    "check:env": "bun scripts/check-vercel-env.ts",
     "fix": "ultracite fix",
     "clean": "bash scripts/clean.sh",
     "clean-all": "bash scripts/clean.sh -y --cache",
