@@ -2,6 +2,7 @@ import { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
 import { tool } from "@emach/db/schema/tools";
 import { describe, expect, it } from "vitest";
+import { disableGlobalPromos } from "@/lib/test-helpers";
 import {
 	type CouponLine,
 	publicCouponError,
@@ -9,12 +10,14 @@ import {
 } from "./validate-coupon";
 
 const ROLLBACK = Symbol("rollback");
+const RE_MIN_ORDER = /Pedido mínimo/;
 
 async function withRollback(
 	fn: (tx: typeof db) => Promise<void>
 ): Promise<void> {
 	try {
 		await db.transaction(async (tx) => {
+			await disableGlobalPromos(tx as unknown as typeof db);
 			await fn(tx as unknown as typeof db);
 			throw ROLLBACK;
 		});
@@ -168,7 +171,7 @@ describe("validateCoupon", () => {
 			await seedPromotion(tx, "MIN", { minOrderAmount: "200.00" });
 			const result = await validateCoupon(tx, "MIN", [line(toolId, 10_000)]);
 			expect(result.ok).toBe(false);
-			expect((result as { error: string }).error).toMatch(/Pedido mínimo/);
+			expect((result as { error: string }).error).toMatch(RE_MIN_ORDER);
 			expect((result as { reason: string }).reason).toBe("min_order");
 		});
 	});
@@ -191,7 +194,7 @@ describe("validateCoupon", () => {
 				line(outTool, 30_000),
 			]);
 			expect(result.ok).toBe(false);
-			expect((result as { error: string }).error).toMatch(/Pedido mínimo/);
+			expect((result as { error: string }).error).toMatch(RE_MIN_ORDER);
 		});
 	});
 
