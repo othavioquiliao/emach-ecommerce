@@ -25,10 +25,11 @@ import {
 	EmachButton,
 	type emachButtonVariants,
 } from "@/components/emach-button";
+import { type CountdownParts, formatCountdown } from "@/lib/countdown";
 
 /**
- * Subconjunto de `banner` que o hero consome (slots de #122).
- * Badge e countdown chegam no #123; por isso não entram aqui ainda.
+ * Subconjunto de `banner` que o hero consome. Inclui badge e countdown
+ * (slots #123): o builder do dashboard já os oferece, então o storefront honra.
  */
 export type HeroBanner = Pick<
 	Banner,
@@ -40,12 +41,14 @@ export type HeroBanner = Pick<
 	| "title"
 	| "subtitle"
 	| "altText"
+	| "badgeText"
 	| "ctaLabel"
 	| "ctaHref"
 	| "ctaVariant"
 	| "layout"
 	| "productScale"
 	| "ctaScale"
+	| "countdownTarget"
 >;
 
 const AUTOPLAY_INTERVAL = 9000;
@@ -67,8 +70,10 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		ctaHref: "/catalog",
 		ctaVariant: "red",
 		layout: "split",
+		badgeText: null,
 		productScale: 100,
 		ctaScale: 100,
+		countdownTarget: null,
 	},
 	{
 		id: "fallback-02",
@@ -83,8 +88,10 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		ctaHref: "/catalog",
 		ctaVariant: "red",
 		layout: "split",
+		badgeText: null,
 		productScale: 100,
 		ctaScale: 100,
+		countdownTarget: null,
 	},
 ];
 
@@ -165,12 +172,12 @@ const LAYOUT_CONFIG: Record<HeroBanner["layout"], LayoutConfig> = {
 		cta: CTA_CORNER_RIGHT,
 		textSide: "left",
 	},
-	// espelho do split: produto esquerda-meio · texto direita-meio · CTA esquerda-baixo
+	// espelho do split: produto esquerda-meio · texto direita-meio · CTA direita-baixo
 	mirror_split: {
 		content:
-			"lg:right-[4%] lg:left-auto lg:bottom-[18%] lg:max-w-[44%] lg:items-end lg:text-right",
+			"lg:right-[4%] lg:left-auto lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:max-w-[44%] lg:items-end lg:text-right",
 		product: "lg:left-[34%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
-		cta: CTA_CORNER_LEFT,
+		cta: CTA_CORNER_RIGHT,
 		textSide: "right",
 	},
 	// produto dominante centro · texto topo-centro · CTA centro-baixo
@@ -181,13 +188,13 @@ const LAYOUT_CONFIG: Record<HeroBanner["layout"], LayoutConfig> = {
 		cta: CTA_CENTER,
 		textSide: "center",
 	},
-	// produto esquerda-meio · texto + CTA agrupados à direita
+	// produto dominante centro · texto topo-centro · CTA direita-baixo (variação do hero_center)
 	text_right: {
 		content:
-			"lg:right-[4%] lg:left-auto lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:max-w-[44%] lg:items-end lg:text-right",
-		product: "lg:left-[34%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
-		cta: "inline",
-		textSide: "right",
+			"lg:left-1/2 lg:right-auto lg:top-[8%] lg:bottom-auto lg:-translate-x-1/2 lg:max-w-[70%] lg:items-center lg:text-center",
+		product: "lg:left-1/2 lg:top-1/2 lg:h-[68%] lg:w-[46%]",
+		cta: CTA_CORNER_RIGHT,
+		textSide: "center",
 	},
 };
 
@@ -373,6 +380,29 @@ function HeroProduct({
 	);
 }
 
+// Contador regressivo do hero. Reusa `formatCountdown` (lib/countdown, mesmo
+// util do PromoCountdown). Calcula só pós-mount pra evitar mismatch de
+// hidratação; some quando expira. Display compacto e branco — o vermelho da
+// tela é o CTA (DESIGN.md: vermelho uma vez por tela).
+function HeroCountdown({ target }: { target: Date }) {
+	const [parts, setParts] = useState<CountdownParts | null>(null);
+	useEffect(() => {
+		const t = target.getTime();
+		const tick = () => setParts(formatCountdown(t - Date.now()));
+		tick();
+		const id = window.setInterval(tick, 1000);
+		return () => window.clearInterval(id);
+	}, [target]);
+	if (parts === null || parts.done) {
+		return null;
+	}
+	return (
+		<span className="mt-4 font-display font-semibold text-[15px] text-white tabular-nums tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]">
+			{parts.days}d {parts.hours}h {parts.minutes}m {parts.seconds}s
+		</span>
+	);
+}
+
 // Bloco de conteúdo: título + régua + subtítulo (+ CTA inline).
 function HeroContentBlock({
 	banner,
@@ -392,6 +422,11 @@ function HeroContentBlock({
 				cfg.content
 			)}
 		>
+			{banner.badgeText && (
+				<span className="mb-3 inline-block bg-white px-2.5 py-0.5 font-display font-semibold text-[11px] text-near-black uppercase tracking-[0.06em]">
+					{banner.badgeText}
+				</span>
+			)}
 			{banner.title && (
 				<>
 					<HeadingTag className="text-balance font-display font-medium text-[clamp(44px,6vw,84px)] text-white uppercase leading-[0.9] tracking-[-0.01em] drop-shadow-[0_3px_18px_rgba(0,0,0,0.7)]">
@@ -404,6 +439,9 @@ function HeroContentBlock({
 				<p className="max-w-[44ch] font-sans text-[15px] text-white/85 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]">
 					{banner.subtitle}
 				</p>
+			)}
+			{banner.countdownTarget && (
+				<HeroCountdown target={banner.countdownTarget} />
 			)}
 			{cfg.cta === "inline" && (
 				<HeroCta banner={banner} className="mt-6 w-full lg:w-auto" />
