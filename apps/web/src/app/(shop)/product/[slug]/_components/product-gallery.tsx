@@ -25,6 +25,13 @@ interface ProductGalleryProps {
 
 const MAX_STATIC_THUMBS = 5;
 
+// Serve a imagem principal otimizada (AVIF/WebP, redimensionada) pelo otimizador
+// do Next — o original em alta-res fica só no zoom. Corta o LCP do PDP, que era a
+// <img> crua do Supabase em tamanho cheio. 1080px cobre a coluna em retina.
+function optimizedSrc(url: string) {
+	return `/_next/image?url=${encodeURIComponent(url)}&w=1080&q=75`;
+}
+
 interface ThumbButtonProps {
 	categorySlug: string;
 	index: number;
@@ -116,8 +123,8 @@ export function ProductGallery({
 		}
 		return (
 			<InnerImageZoom
-				imgAttributes={{ alt: name }}
-				src={activeSlot.url}
+				imgAttributes={{ alt: name, fetchPriority: "high" }}
+				src={optimizedSrc(activeSlot.url)}
 				zoomScale={1}
 				zoomSrc={activeSlot.url}
 			/>
