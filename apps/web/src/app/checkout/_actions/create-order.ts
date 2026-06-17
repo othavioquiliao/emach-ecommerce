@@ -66,7 +66,7 @@ export async function createOrderAction(
 		// chegue ao placeOrder sem revalidar o frete (ex.: destino sem CEP) fica
 		// marcado p/ revisão, em vez de aceito às cegas (defesa em profundidade).
 		let shippingUnverified = true;
-		const destinationCep = await resolveDestinationCep(db, input);
+		const destinationCep = await resolveDestinationCep(db, input, clientId);
 		if (destinationCep) {
 			// Valor declarado p/ o seguro de frete = subtotal dos itens submetidos
 			// (consistente com a cotação do cliente). O preço em si é revalidado
