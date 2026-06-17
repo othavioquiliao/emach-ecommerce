@@ -2,14 +2,22 @@
 
 > **Superseded by [ADR-0003](./0003-estoque-multi-filial.md) em 2026-05-20.**
 
-O storefront debita o estoque de forma síncrona no momento em que o pedido é criado (`order.status = pending_payment`), dentro da mesma transação que insere o `order` e os `order_item` — não há reserva, e o débito não espera a confirmação do pagamento. O storefront só debita; o crédito de volta (cancelamento, estorno, devolução) é responsabilidade do dashboard. O ledger compartilhado é `stock_movement`, com `actor_type = 'system'` para o débito de venda (`reason = 'saida_venda'`).
+> ⚠️ **Esta decisão foi revogada. O comportamento descrito abaixo NÃO é o
+> implementado hoje.** O storefront atual apenas **valida** disponibilidade
+> agregada (`SUM(stock_level.quantity)` em todas as filiais) na criação do
+> pedido e **não** grava `stock_movement` nem debita estoque — o débito é
+> adiado para a transição `pending_payment → paid`. Ver **ADR-0003** para a
+> arquitetura vigente.
 
-## Considered Options
+## Decisão original (histórico)
 
-- **Reserva-então-confirma**: reservar estoque no checkout, debitar de fato só no `paid`, liberar a reserva por expiração. Rejeitado por exigir um modelo de reserva (coluna de quantidade reservada, job de expiração) que o volume atual não justifica.
-- **Débito no pagamento confirmado**: rejeitado porque abriria janela de oversell entre `pending_payment` e `paid`.
+Debitava-se o estoque de forma síncrona na criação do pedido
+(`order.status = pending_payment`), na mesma transação que inseria `order` e
+`order_item`, com guarda `quantity >= qty` no UPDATE condicional como anti-oversell.
 
-## Consequences
+## Por que foi revogada
 
-- Anti-oversell é forte e simples: a guarda `quantity >= qty` no `UPDATE` condicional impede venda a descoberto dentro da transação.
-- Um pedido abandonado (criado e nunca pago) mantém o estoque debitado até que o staff cancele o pedido no dashboard e credite o estoque de volta. Não há expiração automática.
+ADR-0003 (estoque multi-filial): a venda pode sair de qualquer filial, então
+debitar na criação (filial única) bagunça o `stock_movement` e viola o contrato
+compartilhado com o dashboard. O débito passou a ser responsabilidade da
+transição para `paid`, junto da integração de pagamento.

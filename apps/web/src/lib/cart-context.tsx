@@ -1,12 +1,6 @@
 "use client";
 
-import {
-	createContext,
-	useCallback,
-	useContext,
-	useEffect,
-	useState,
-} from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 
 import {
 	addToCart,
@@ -51,26 +45,26 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 		setHydrated(true);
 	}, []);
 
-	const add = useCallback((item: CartItemSnapshot, qty = 1) => {
+	const add = (item: CartItemSnapshot, qty = 1) => {
 		setItems((prev) => addToCart(prev, item, qty));
-	}, []);
+	};
 
-	const setQty = useCallback((variantId: string, qty: number) => {
+	const setQty = (variantId: string, qty: number) => {
 		setItems((prev) => updateQty(prev, variantId, qty));
-	}, []);
+	};
 
-	const remove = useCallback((variantId: string) => {
+	const remove = (variantId: string) => {
 		setItems((prev) => removeFromCart(prev, variantId));
-	}, []);
+	};
 
-	const clear = useCallback(() => {
+	const clear = () => {
 		setItems([]);
 		saveCart([]);
-	}, []);
+	};
 
-	const reconcile = useCallback((priceByVariantId: Map<string, string>) => {
+	const reconcile = (priceByVariantId: Map<string, string>) => {
 		setItems((prev) => reconcilePrices(prev, priceByVariantId));
-	}, []);
+	};
 
 	const totalCount = items.reduce((acc, i) => acc + i.quantity, 0);
 
