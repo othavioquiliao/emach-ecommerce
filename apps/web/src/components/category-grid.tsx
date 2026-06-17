@@ -1,7 +1,6 @@
 "use client";
 
-import { motion, useReducedMotion, type Variants } from "framer-motion";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CategoryTile } from "@/components/category-tile";
 
 interface CategoryGridCategory {
@@ -16,14 +15,23 @@ interface CategoryGridProps {
 	categories: CategoryGridCategory[];
 }
 
-const EASE = [0.16, 1, 0.3, 1] as const;
 // Intervalo do auto-cycle do destaque (revela a interação sem o usuário agir).
 const CYCLE_MS = 2600;
 
 export function CategoryGrid({ categories }: CategoryGridProps) {
-	const reduceMotion = useReducedMotion() ?? false;
 	const [activeIndex, setActiveIndex] = useState(0);
 	const [paused, setPaused] = useState(false);
+	const gridRef = useRef<HTMLDivElement>(null);
+
+	// Detecta prefers-reduced-motion via media query (substitui useReducedMotion do framer).
+	const [reduceMotion, setReduceMotion] = useState(false);
+	useEffect(() => {
+		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+		setReduceMotion(mq.matches);
+		const handler = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
+		mq.addEventListener("change", handler);
+		return () => mq.removeEventListener("change", handler);
+	}, []);
 
 	// Auto-cycle: avança o destaque enquanto não pausado nem reduced-motion.
 	useEffect(() => {
@@ -36,46 +44,41 @@ export function CategoryGrid({ categories }: CategoryGridProps) {
 		return () => clearInterval(id);
 	}, [reduceMotion, paused, categories.length]);
 
-	const containerVariants: Variants = {
-		hidden: {},
-		visible: {
-			transition: { staggerChildren: reduceMotion ? 0 : 0.1 },
-		},
-	};
-
-	const itemVariants: Variants = {
-		hidden: {
-			opacity: 0,
-			scale: reduceMotion ? 1 : 0.95,
-			y: reduceMotion ? 0 : 16,
-		},
-		visible: {
-			opacity: 1,
-			scale: 1,
-			y: 0,
-			transition: { duration: 0.55, ease: EASE },
-		},
-	};
+	// Pausa o auto-cycle no hover via listeners (não handlers JSX num div estático,
+	// que violariam a11y) — o :hover real assume enquanto o mouse está sobre o grid.
+	useEffect(() => {
+		const el = gridRef.current;
+		if (!el) {
+			return;
+		}
+		const enter = () => setPaused(true);
+		const leave = () => setPaused(false);
+		el.addEventListener("mouseenter", enter);
+		el.addEventListener("mouseleave", leave);
+		return () => {
+			el.removeEventListener("mouseenter", enter);
+			el.removeEventListener("mouseleave", leave);
+		};
+	}, []);
 
 	return (
-		<motion.div
+		<div
 			className="grid grid-cols-1 gap-5 md:grid-cols-2 lg:grid-cols-4"
-			initial="hidden"
-			onMouseEnter={() => setPaused(true)}
-			onMouseLeave={() => setPaused(false)}
-			variants={containerVariants}
-			viewport={{ once: true, amount: 0.2 }}
-			whileInView="visible"
+			ref={gridRef}
 		>
 			{categories.map((cat, idx) => (
-				<motion.div key={cat.id} variants={itemVariants}>
+				<div
+					className="emach-reveal-item"
+					key={cat.id}
+					style={{ "--i": idx } as React.CSSProperties}
+				>
 					<CategoryTile
 						active={!(reduceMotion || paused) && idx === activeIndex}
 						category={cat}
 						index={idx}
 					/>
-				</motion.div>
+				</div>
 			))}
-		</motion.div>
+		</div>
 	);
 }

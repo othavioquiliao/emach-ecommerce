@@ -2,7 +2,9 @@
 
 import {
 	AnimatePresence,
-	motion,
+	domAnimation,
+	LazyMotion,
+	m,
 	type TargetAndTransition,
 	type Transition,
 	useReducedMotion,
@@ -46,14 +48,14 @@ function FloatingTool({
 	transition: Transition | undefined;
 }) {
 	return (
-		<motion.div
+		<m.div
 			animate={float}
 			aria-hidden="true"
 			className={slotClassName}
 			transition={transition}
 		>
 			<AnimatePresence initial={false}>
-				<motion.div
+				<m.div
 					animate={{ opacity: 1, scale: 1 }}
 					className="absolute inset-0"
 					exit={{ opacity: 0, scale: reduceMotion ? 1 : 0.96 }}
@@ -71,9 +73,9 @@ function FloatingTool({
 						sizes={sizes}
 						src={src}
 					/>
-				</motion.div>
+				</m.div>
 			</AnimatePresence>
-		</motion.div>
+		</m.div>
 	);
 }
 
@@ -115,93 +117,95 @@ export function LoginBrandPanel() {
 			} as const);
 
 	return (
-		<div className="relative isolate hidden flex-col justify-between overflow-hidden bg-near-black px-20 py-20 text-white lg:flex">
-			{isDesktop && (
-				<>
-					{/* Background image */}
-					<Image
-						alt=""
-						aria-hidden="true"
-						className="z-0 object-cover"
-						fill
-						priority
-						sizes="60vw"
-						src="/emach-login-bg.png"
-					/>
-					{/* Legibility vignette over the photo */}
-					<div
-						aria-hidden="true"
-						className="emach-bg-login-vignette pointer-events-none absolute inset-0 z-1"
-					/>
+		<LazyMotion features={domAnimation} strict>
+			<div className="relative isolate hidden flex-col justify-between overflow-hidden bg-near-black px-20 py-20 text-white lg:flex">
+				{isDesktop && (
+					<>
+						{/* Background image */}
+						<Image
+							alt=""
+							aria-hidden="true"
+							className="z-0 object-cover"
+							fill
+							priority
+							sizes="60vw"
+							src="/emach-login-bg.png"
+						/>
+						{/* Legibility vignette over the photo */}
+						<div
+							aria-hidden="true"
+							className="emach-bg-login-vignette pointer-events-none absolute inset-0 z-1"
+						/>
 
-					{/* Pulsing red glow behind the hero tool */}
-					<motion.div
-						animate={glowAnimate}
-						aria-hidden="true"
-						className="pointer-events-none absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
-						style={{
-							width: "clamp(320px, 38vw, 620px)",
-							height: "clamp(320px, 38vw, 620px)",
-							background:
-								"radial-gradient(circle, rgba(230,0,18,0.28) 0%, rgba(230,0,18,0.08) 42%, transparent 70%)",
-							filter: "blur(48px)",
-						}}
-						transition={glowTransition}
-					/>
+						{/* Pulsing red glow behind the hero tool */}
+						<m.div
+							animate={glowAnimate}
+							aria-hidden="true"
+							className="pointer-events-none absolute top-1/2 left-1/2 z-2 -translate-x-1/2 -translate-y-1/2 rounded-full"
+							style={{
+								width: "clamp(320px, 38vw, 620px)",
+								height: "clamp(320px, 38vw, 620px)",
+								background:
+									"radial-gradient(circle, rgba(230,0,18,0.28) 0%, rgba(230,0,18,0.08) 42%, transparent 70%)",
+								filter: "blur(48px)",
+							}}
+							transition={glowTransition}
+						/>
 
-					{/* Satellite — upper-left, behind (carrossel) */}
-					<FloatingTool
-						float={satelliteFloat}
-						reduceMotion={reduceMotion}
-						sizes="22vw"
-						slotClassName="pointer-events-none absolute top-[12%] left-[4%] z-5 h-[26%] w-[36%] -rotate-12 opacity-55 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
-						src={PRODUCTS[(toolIndex + 1) % PRODUCTS.length]}
-						transition={floatTransition(7, 0.6)}
-					/>
+						{/* Satellite — upper-left, behind (carrossel) */}
+						<FloatingTool
+							float={satelliteFloat}
+							reduceMotion={reduceMotion}
+							sizes="22vw"
+							slotClassName="pointer-events-none absolute top-[12%] left-[4%] z-5 h-[26%] w-[36%] -rotate-12 opacity-55 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
+							src={PRODUCTS[(toolIndex + 1) % PRODUCTS.length]}
+							transition={floatTransition(7, 0.6)}
+						/>
 
-					{/* Satellite — upper-right, behind (carrossel) */}
-					<FloatingTool
-						float={satelliteFloat}
-						reduceMotion={reduceMotion}
-						sizes="22vw"
-						slotClassName="pointer-events-none absolute top-[16%] right-[2%] z-5 h-[24%] w-[34%] rotate-14 opacity-50 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
-						src={PRODUCTS[(toolIndex + 2) % PRODUCTS.length]}
-						transition={floatTransition(5.5, 1.1)}
-					/>
+						{/* Satellite — upper-right, behind (carrossel) */}
+						<FloatingTool
+							float={satelliteFloat}
+							reduceMotion={reduceMotion}
+							sizes="22vw"
+							slotClassName="pointer-events-none absolute top-[16%] right-[2%] z-5 h-[24%] w-[34%] rotate-14 opacity-50 blur-[2px] brightness-75 drop-shadow-[0_30px_25px_rgba(0,0,0,0.6)]"
+							src={PRODUCTS[(toolIndex + 2) % PRODUCTS.length]}
+							transition={floatTransition(5.5, 1.1)}
+						/>
 
-					{/* Hero — centered, in front (carrossel, maior) */}
-					<FloatingTool
-						float={heroFloat}
-						reduceMotion={reduceMotion}
-						sizes="46vw"
-						slotClassName="pointer-events-none absolute top-[30%] left-1/2 z-10 h-[50%] w-[76%] -translate-x-1/2 -rotate-3 drop-shadow-[0_60px_40px_rgba(0,0,0,0.6)]"
-						src={PRODUCTS[toolIndex]}
-						transition={floatTransition(6, 0)}
-					/>
-				</>
-			)}
+						{/* Hero — centered, in front (carrossel, maior) */}
+						<FloatingTool
+							float={heroFloat}
+							reduceMotion={reduceMotion}
+							sizes="46vw"
+							slotClassName="pointer-events-none absolute top-[30%] left-1/2 z-10 h-[50%] w-[76%] -translate-x-1/2 -rotate-3 drop-shadow-[0_60px_40px_rgba(0,0,0,0.6)]"
+							src={PRODUCTS[toolIndex]}
+							transition={floatTransition(6, 0)}
+						/>
+					</>
+				)}
 
-			{/* Logo — top-left (sempre renderizado: SVG leve) */}
-			<Image
-				alt="EMACH"
-				className="relative z-20 h-10 w-auto self-start"
-				height={377}
-				priority
-				src="/emach-logo.svg"
-				width={2041}
-			/>
+				{/* Logo — top-left (sempre renderizado: SVG leve) */}
+				<Image
+					alt="EMACH"
+					className="relative z-20 h-10 w-auto self-start"
+					height={377}
+					priority
+					src="/emach-logo.svg"
+					width={2041}
+				/>
 
-			{/* Impact phrase — bottom-left */}
-			<div className="relative z-20">
-				<h2 className="font-display font-semibold text-[clamp(34px,3.6vw,52px)] uppercase leading-[0.92] tracking-[-0.01em]">
-					Ferramenta certa.
-					<br />
-					Trabalho <span className="text-emach-red">certo</span>.
-				</h2>
-				<span className="mt-4 block font-display font-semibold text-[11px] text-white/45 uppercase tracking-[0.2em]">
-					EMACH Profissional
-				</span>
+				{/* Impact phrase — bottom-left */}
+				<div className="relative z-20">
+					<h2 className="font-display font-semibold text-[clamp(34px,3.6vw,52px)] uppercase leading-[0.92] tracking-[-0.01em]">
+						Ferramenta certa.
+						<br />
+						Trabalho <span className="text-emach-red">certo</span>.
+					</h2>
+					<span className="mt-4 block font-display font-semibold text-[11px] text-white/45 uppercase tracking-[0.2em]">
+						EMACH Profissional
+					</span>
+				</div>
 			</div>
-		</div>
+		</LazyMotion>
 	);
 }

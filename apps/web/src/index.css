@@ -1,1 +1,28 @@
 @import "@emach/ui/globals.css";
+
+/* ============================================================
+   Reveal animation — substitui framer-motion nos grids
+   Estado de repouso = visível (SSR/no-JS nunca fica em branco)
+   Stagger index-driven via --i com teto em 8 (≤ 0.4 s de delay)
+   ============================================================ */
+@keyframes emach-reveal {
+	from {
+		opacity: 0;
+		transform: translateY(16px) scale(0.97);
+	}
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+.emach-reveal-item {
+	animation: emach-reveal 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation-delay: calc(min(var(--i, 0), 8) * 0.05s);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.emach-reveal-item {
+		animation: none;
+	}
+}

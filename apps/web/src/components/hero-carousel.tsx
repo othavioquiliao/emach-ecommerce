@@ -10,8 +10,10 @@ import {
 import { cn } from "@emach/ui/lib/utils";
 import type { VariantProps } from "class-variance-authority";
 import {
+	domAnimation,
+	LazyMotion,
 	type MotionValue,
-	motion,
+	m,
 	useMotionValue,
 	useReducedMotion,
 	useSpring,
@@ -129,7 +131,6 @@ interface LayoutConfig {
 
 // Posições do CTA separado no desktop (a base mobile full-width é comum a todos).
 const CTA_CORNER_RIGHT = "lg:right-[4%] lg:bottom-[12%] lg:left-auto lg:w-auto";
-const CTA_CORNER_LEFT = "lg:left-[4%] lg:right-auto lg:bottom-[12%] lg:w-auto";
 const CTA_CENTER =
 	"lg:left-1/2 lg:right-auto lg:bottom-[10%] lg:-translate-x-1/2 lg:w-auto";
 
@@ -285,7 +286,7 @@ function HeroBackground({
 // Glow vermelho — assinatura cinematográfica.
 function HeroGlow({ reduceMotion }: { reduceMotion: boolean }) {
 	return (
-		<motion.div
+		<m.div
 			animate={reduceMotion ? undefined : { opacity: [0.6, 1, 0.6] }}
 			aria-hidden="true"
 			className="pointer-events-none absolute top-1/2 left-1/2 z-5 -translate-x-1/2 -translate-y-1/2 rounded-full"
@@ -351,7 +352,7 @@ function HeroProduct({
 				scale: (isActive ? 1 : 0.94) * productScaleFactor,
 			};
 	return (
-		<motion.div
+		<m.div
 			animate={animate}
 			className={cn(
 				"absolute top-[30%] left-1/2 z-15 h-[40%] w-[82%] -translate-x-1/2 -translate-y-1/2",
@@ -360,7 +361,7 @@ function HeroProduct({
 			style={{ x: parallaxX, y: parallaxY }}
 			transition={{ duration: 0.8, ease: [0.16, 1, 0.3, 1] }}
 		>
-			<motion.div
+			<m.div
 				animate={floatAnimate}
 				className="relative h-full w-full drop-shadow-[0_30px_24px_rgba(0,0,0,0.55)]"
 				transition={floatTransition}
@@ -375,8 +376,8 @@ function HeroProduct({
 					sizes="(max-width: 1024px) 82vw, 42vw"
 					src={mobileProduct}
 				/>
-			</motion.div>
-		</motion.div>
+			</m.div>
+		</m.div>
 	);
 }
 
@@ -569,54 +570,56 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	};
 
 	return (
-		// biome-ignore lint/a11y/noStaticElementInteractions: parallax decorativo (mouse-only), sem semântica interativa
-		// biome-ignore lint/a11y/noNoninteractiveElementInteractions: idem — efeito visual, teclado/toque não dependem disto
-		<section
-			className="relative h-[88svh] w-full overflow-hidden bg-black lg:h-svh"
-			onMouseLeave={handleMouseLeave}
-			onMouseMove={handleMouseMove}
-		>
-			<Carousel
-				className="h-full w-full"
-				opts={{ loop: true, align: "start" }}
-				setApi={setApi}
+		<LazyMotion features={domAnimation} strict>
+			{/* biome-ignore lint/a11y/noStaticElementInteractions: parallax decorativo (mouse-only), sem semântica interativa */}
+			{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: idem — efeito visual, teclado/toque não dependem disto */}
+			<section
+				className="relative h-[88svh] w-full overflow-hidden bg-black lg:h-svh"
+				onMouseLeave={handleMouseLeave}
+				onMouseMove={handleMouseMove}
 			>
-				<CarouselContent className="ml-0 h-[88svh] lg:h-svh">
-					{slides.map((banner, index) => (
-						<CarouselItem
-							className="relative h-[88svh] pl-0 lg:h-svh"
-							key={banner.id}
-						>
-							<HeroSlideContent
-								banner={banner}
-								isActive={index === selectedIndex}
-								isFirst={index === 0}
-								isH1={index === h1Index}
-								parallaxX={parallaxX}
-								parallaxY={parallaxY}
-								reduceMotion={reduceMotion}
-							/>
-						</CarouselItem>
-					))}
-				</CarouselContent>
-			</Carousel>
+				<Carousel
+					className="h-full w-full"
+					opts={{ loop: true, align: "start" }}
+					setApi={setApi}
+				>
+					<CarouselContent className="ml-0 h-[88svh] lg:h-svh">
+						{slides.map((banner, index) => (
+							<CarouselItem
+								className="relative h-[88svh] pl-0 lg:h-svh"
+								key={banner.id}
+							>
+								<HeroSlideContent
+									banner={banner}
+									isActive={index === selectedIndex}
+									isFirst={index === 0}
+									isH1={index === h1Index}
+									parallaxX={parallaxX}
+									parallaxY={parallaxY}
+									reduceMotion={reduceMotion}
+								/>
+							</CarouselItem>
+						))}
+					</CarouselContent>
+				</Carousel>
 
-			{slides.length > 1 && (
-				<div className="absolute bottom-24 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 lg:bottom-10">
-					{slides.map((banner, index) => (
-						<button
-							aria-label={`Ir para slide ${index + 1}`}
-							className={cn(
-								"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-3 after:right-0 after:left-0 after:content-[''] sm:w-10",
-								index === selectedIndex ? "bg-emach-red" : "bg-white/30"
-							)}
-							key={banner.id}
-							onClick={() => api?.scrollTo(index)}
-							type="button"
-						/>
-					))}
-				</div>
-			)}
-		</section>
+				{slides.length > 1 && (
+					<div className="absolute bottom-24 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 lg:bottom-10">
+						{slides.map((banner, index) => (
+							<button
+								aria-label={`Ir para slide ${index + 1}`}
+								className={cn(
+									"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-3 after:right-0 after:left-0 after:content-[''] sm:w-10",
+									index === selectedIndex ? "bg-emach-red" : "bg-white/30"
+								)}
+								key={banner.id}
+								onClick={() => api?.scrollTo(index)}
+								type="button"
+							/>
+						))}
+					</div>
+				)}
+			</section>
+		</LazyMotion>
 	);
 }
