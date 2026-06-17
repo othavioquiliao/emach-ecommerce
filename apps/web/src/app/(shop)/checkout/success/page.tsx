@@ -1,6 +1,7 @@
 import { CircleCheckBig } from "lucide-react";
 import type { Metadata } from "next";
 import Link from "next/link";
+import { Suspense } from "react";
 
 import { EmachButton } from "@/components/emach-button";
 import { PageContainer } from "@/components/page-container";
@@ -16,10 +17,9 @@ interface SuccessPageProps {
 	searchParams: Promise<{ order?: string }>;
 }
 
-export default async function CheckoutSuccessPage({
+export default function CheckoutSuccessPage({
 	searchParams,
 }: SuccessPageProps) {
-	const { order } = await searchParams;
 	return (
 		<>
 			<SiteHeader />
@@ -40,11 +40,11 @@ export default async function CheckoutSuccessPage({
 					Enviamos a confirmação por e-mail com todos os detalhes da entrega e
 					nota fiscal. Você pode acompanhar o status pelo seu painel.
 				</p>
-				{order && (
-					<div className="mt-6 font-display text-[13px] text-near-black uppercase tracking-[0.14em]">
-						Pedido #{order}
-					</div>
-				)}
+				{/* Só o número do pedido depende de searchParams — buraco dinâmico
+				    mínimo sob Suspense; o resto da página é shell estático. */}
+				<Suspense fallback={null}>
+					<OrderNumber searchParams={searchParams} />
+				</Suspense>
 				<div className="mt-8 flex gap-3">
 					<Link href="/catalog">
 						<EmachButton size="lg" variant="primary">
@@ -59,5 +59,17 @@ export default async function CheckoutSuccessPage({
 				</div>
 			</PageContainer>
 		</>
+	);
+}
+
+async function OrderNumber({ searchParams }: SuccessPageProps) {
+	const { order } = await searchParams;
+	if (!order) {
+		return null;
+	}
+	return (
+		<div className="mt-6 font-display text-[13px] text-near-black uppercase tracking-[0.14em]">
+			Pedido #{order}
+		</div>
 	);
 }
