@@ -27,9 +27,19 @@ const MAX_STATIC_THUMBS = 5;
 
 // Serve a imagem principal otimizada (AVIF/WebP, redimensionada) pelo otimizador
 // do Next — o original em alta-res fica só no zoom. Corta o LCP do PDP, que era a
-// <img> crua do Supabase em tamanho cheio. 1080px cobre a coluna em retina.
-function optimizedSrc(url: string) {
-	return `/_next/image?url=${encodeURIComponent(url)}&w=1080&q=75`;
+// <img> crua do Supabase em tamanho cheio.
+const NEXT_IMG_WIDTHS = [640, 828, 1080, 1200] as const;
+// A galeria é full-width no mobile e ~42vw no desktop (lg:w-1/2 → imagem ~5/6);
+// o browser escolhe a largura do srcSet por este `sizes` (mobile pega 640w em vez
+// de 1080w, baixando ainda mais o LCP no celular).
+const GALLERY_SIZES = "(min-width: 1024px) 42vw, 100vw";
+
+function optimizedSrc(url: string, w = 1080) {
+	return `/_next/image?url=${encodeURIComponent(url)}&w=${w}&q=75`;
+}
+
+function optimizedSrcSet(url: string) {
+	return NEXT_IMG_WIDTHS.map((w) => `${optimizedSrc(url, w)} ${w}w`).join(", ");
 }
 
 interface ThumbButtonProps {
@@ -123,7 +133,12 @@ export function ProductGallery({
 		}
 		return (
 			<InnerImageZoom
-				imgAttributes={{ alt: name, fetchPriority: "high" }}
+				imgAttributes={{
+					alt: name,
+					fetchPriority: "high",
+					sizes: GALLERY_SIZES,
+					srcSet: optimizedSrcSet(activeSlot.url),
+				}}
 				src={optimizedSrc(activeSlot.url)}
 				zoomScale={1}
 				zoomSrc={activeSlot.url}
