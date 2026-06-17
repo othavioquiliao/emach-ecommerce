@@ -8,6 +8,7 @@ import { stockMovement } from "@emach/db/schema/stock-movements";
 import { tool, toolVariant } from "@emach/db/schema/tools";
 import { eq } from "drizzle-orm";
 import { describe, expect, it, vi } from "vitest";
+import { disableGlobalPromos } from "@/lib/test-helpers";
 
 // quoteShipping chama o DB global e a API externa — mockar para os testes de
 // integração do place-order (a lógica de anti-fraude está coberta em
@@ -39,6 +40,7 @@ async function withRollback(
 ): Promise<void> {
 	try {
 		await db.transaction(async (tx) => {
+			await disableGlobalPromos(tx as unknown as typeof db);
 			await fn(tx as unknown as typeof db);
 			throw ROLLBACK;
 		});

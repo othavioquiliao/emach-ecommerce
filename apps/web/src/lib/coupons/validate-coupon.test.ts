@@ -2,6 +2,7 @@ import { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
 import { tool } from "@emach/db/schema/tools";
 import { describe, expect, it } from "vitest";
+import { disableGlobalPromos } from "@/lib/test-helpers";
 import {
 	type CouponLine,
 	publicCouponError,
@@ -15,6 +16,7 @@ async function withRollback(
 ): Promise<void> {
 	try {
 		await db.transaction(async (tx) => {
+			await disableGlobalPromos(tx as unknown as typeof db);
 			await fn(tx as unknown as typeof db);
 			throw ROLLBACK;
 		});
