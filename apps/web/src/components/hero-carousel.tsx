@@ -172,12 +172,12 @@ const LAYOUT_CONFIG: Record<HeroBanner["layout"], LayoutConfig> = {
 		cta: CTA_CORNER_RIGHT,
 		textSide: "left",
 	},
-	// espelho do split: produto esquerda-meio · texto direita-meio · CTA esquerda-baixo
+	// espelho do split: produto esquerda-meio · texto direita-meio · CTA direita-baixo
 	mirror_split: {
 		content:
-			"lg:right-[4%] lg:left-auto lg:bottom-[18%] lg:max-w-[44%] lg:items-end lg:text-right",
+			"lg:right-[4%] lg:left-auto lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:max-w-[44%] lg:items-end lg:text-right",
 		product: "lg:left-[34%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
-		cta: CTA_CORNER_LEFT,
+		cta: CTA_CORNER_RIGHT,
 		textSide: "right",
 	},
 	// produto dominante centro · texto topo-centro · CTA centro-baixo
@@ -188,13 +188,13 @@ const LAYOUT_CONFIG: Record<HeroBanner["layout"], LayoutConfig> = {
 		cta: CTA_CENTER,
 		textSide: "center",
 	},
-	// produto esquerda-meio · texto + CTA agrupados à direita
+	// produto dominante centro · texto topo-centro · CTA direita-baixo (variação do hero_center)
 	text_right: {
 		content:
-			"lg:right-[4%] lg:left-auto lg:top-1/2 lg:bottom-auto lg:-translate-y-1/2 lg:max-w-[44%] lg:items-end lg:text-right",
-		product: "lg:left-[34%] lg:top-1/2 lg:h-[64%] lg:w-[40%]",
-		cta: "inline",
-		textSide: "right",
+			"lg:left-1/2 lg:right-auto lg:top-[8%] lg:bottom-auto lg:-translate-x-1/2 lg:max-w-[70%] lg:items-center lg:text-center",
+		product: "lg:left-1/2 lg:top-1/2 lg:h-[68%] lg:w-[46%]",
+		cta: CTA_CORNER_RIGHT,
+		textSide: "center",
 	},
 };
 
