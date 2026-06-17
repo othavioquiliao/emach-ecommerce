@@ -8,16 +8,19 @@ import {
 	CarouselPrevious,
 } from "@emach/ui/components/carousel";
 import { cn } from "@emach/ui/lib/utils";
+import { Play } from "lucide-react";
 import { useState } from "react";
 import InnerImageZoom from "react-inner-image-zoom";
 import { ProductImage } from "@/components/product-image";
 import "react-inner-image-zoom/es/styles.min.css";
 import "./product-gallery.css";
+import { buildSlots, type GallerySlot, slotKey } from "./gallery-slots";
 
 interface ProductGalleryProps {
 	categorySlug: string;
 	images: { url: string }[];
 	name: string;
+	video?: { url: string; poster: string | null } | null;
 }
 
 const MAX_STATIC_THUMBS = 5;
@@ -28,7 +31,7 @@ interface ThumbButtonProps {
 	isActive: boolean;
 	name: string;
 	onClick: () => void;
-	src: string | undefined;
+	slot: GallerySlot;
 }
 
 function ThumbButton({
@@ -37,11 +40,16 @@ function ThumbButton({
 	isActive,
 	name,
 	onClick,
-	src,
+	slot,
 }: ThumbButtonProps) {
+	const isVideo = slot.kind === "video";
+	const thumbSrc =
+		slot.kind === "video" ? (slot.poster ?? undefined) : slot.url;
+	const label = isVideo ? `${name} — vídeo` : `${name} — imagem ${index + 1}`;
+
 	return (
 		<button
-			aria-label={`${name} — imagem ${index + 1}`}
+			aria-label={label}
 			className={cn(
 				"relative aspect-square w-full cursor-pointer overflow-hidden border-2 bg-image-bg",
 				isActive ? "border-emach-red" : "border-transparent"
@@ -50,11 +58,19 @@ function ThumbButton({
 			type="button"
 		>
 			<ProductImage
-				alt={`${name} — miniatura ${index + 1}`}
+				alt={label}
 				categorySlug={categorySlug}
 				sizes="80px"
-				src={src}
+				src={thumbSrc}
 			/>
+			{isVideo && (
+				<span
+					aria-hidden="true"
+					className="absolute inset-0 flex items-center justify-center bg-black/30"
+				>
+					<Play className="size-6 fill-white text-white drop-shadow" />
+				</span>
+			)}
 		</button>
 	);
 }
@@ -63,23 +79,50 @@ export function ProductGallery({
 	categorySlug,
 	images,
 	name,
+	video,
 }: ProductGalleryProps) {
-	const slots = images.length > 0 ? images.map((i) => i.url) : [undefined];
+	const slots = buildSlots(images, video);
 	const [activeThumb, setActiveThumb] = useState(0);
-	const activeSrc = slots[activeThumb] ?? slots[0];
+	const activeSlot = slots[activeThumb] ?? slots[0];
 	const needsCarousel = slots.length > MAX_STATIC_THUMBS;
 
-	const renderThumb = (src: string | undefined, i: number) => (
+	const renderThumb = (slot: GallerySlot, i: number) => (
 		<ThumbButton
 			categorySlug={categorySlug}
 			index={i}
 			isActive={activeThumb === i}
-			key={src ?? i}
+			key={slotKey(slot)}
 			name={name}
 			onClick={() => setActiveThumb(i)}
-			src={src}
+			slot={slot}
 		/>
 	);
+
+	const renderMainSlot = () => {
+		if (!activeSlot) {
+			return <ProductImage alt={name} categorySlug={categorySlug} priority />;
+		}
+		if (activeSlot.kind === "video") {
+			return (
+				// biome-ignore lint/a11y/useMediaCaption: vídeo de produto sem legendas (v1 lean, issue #137)
+				<video
+					className="h-full w-full bg-image-bg object-contain"
+					controls
+					poster={activeSlot.poster ?? undefined}
+					preload="metadata"
+					src={activeSlot.url}
+				/>
+			);
+		}
+		return (
+			<InnerImageZoom
+				imgAttributes={{ alt: name }}
+				src={activeSlot.url}
+				zoomScale={1}
+				zoomSrc={activeSlot.url}
+			/>
+		);
+	};
 
 	return (
 		<div className="flex w-full flex-col justify-center lg:w-1/2 lg:flex-row lg:gap-3">
@@ -87,7 +130,7 @@ export function ProductGallery({
 				<aside className="order-2 mt-3 md:order-1 md:mt-0 md:w-24">
 					{/* Mobile: grid horizontal */}
 					<div className="grid grid-cols-4 gap-2 lg:hidden">
-						{slots.map((src, i) => renderThumb(src, i))}
+						{slots.map((slot, i) => renderThumb(slot, i))}
 					</div>
 
 					{/* Desktop: coluna vertical — estática ou carrossel */}
@@ -99,9 +142,12 @@ export function ProductGallery({
 								orientation="vertical"
 							>
 								<CarouselContent className="-mt-2 h-[412px]">
-									{slots.map((src, i) => (
-										<CarouselItem className="basis-1/5 pt-2" key={src ?? i}>
-											{renderThumb(src, i)}
+									{slots.map((slot, i) => (
+										<CarouselItem
+											className="basis-1/5 pt-2"
+											key={slotKey(slot)}
+										>
+											{renderThumb(slot, i)}
 										</CarouselItem>
 									))}
 								</CarouselContent>
@@ -110,7 +156,7 @@ export function ProductGallery({
 							</Carousel>
 						) : (
 							<div className="flex flex-col gap-2">
-								{slots.map((src, i) => renderThumb(src, i))}
+								{slots.map((slot, i) => renderThumb(slot, i))}
 							</div>
 						)}
 					</div>
@@ -119,16 +165,7 @@ export function ProductGallery({
 
 			<div className="order-1 lg:order-2 lg:flex-1">
 				<div className="relative aspect-square w-full overflow-hidden bg-image-bg lg:w-5/6">
-					{activeSrc ? (
-						<InnerImageZoom
-							imgAttributes={{ alt: name }}
-							src={activeSrc}
-							zoomScale={1}
-							zoomSrc={activeSrc}
-						/>
-					) : (
-						<ProductImage alt={name} categorySlug={categorySlug} priority />
-					)}
+					{renderMainSlot()}
 				</div>
 			</div>
 		</div>
