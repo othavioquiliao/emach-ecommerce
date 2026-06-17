@@ -132,7 +132,6 @@ interface LayoutConfig {
 
 // Posições do CTA separado no desktop (a base mobile full-width é comum a todos).
 const CTA_CORNER_RIGHT = "lg:right-[4%] lg:bottom-[12%] lg:left-auto lg:w-auto";
-const CTA_CORNER_LEFT = "lg:left-[4%] lg:right-auto lg:bottom-[12%] lg:w-auto";
 const CTA_CENTER =
 	"lg:left-1/2 lg:right-auto lg:bottom-[10%] lg:-translate-x-1/2 lg:w-auto";
 
