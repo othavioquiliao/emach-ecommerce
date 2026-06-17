@@ -14,7 +14,7 @@ import InnerImageZoom from "react-inner-image-zoom";
 import { ProductImage } from "@/components/product-image";
 import "react-inner-image-zoom/es/styles.min.css";
 import "./product-gallery.css";
-import { buildSlots, type GallerySlot } from "./gallery-slots";
+import { buildSlots, type GallerySlot, slotKey } from "./gallery-slots";
 
 interface ProductGalleryProps {
 	categorySlug: string;
@@ -91,7 +91,7 @@ export function ProductGallery({
 			categorySlug={categorySlug}
 			index={i}
 			isActive={activeThumb === i}
-			key={slot.kind === "video" ? `video-${slot.url}` : slot.url}
+			key={slotKey(slot)}
 			name={name}
 			onClick={() => setActiveThumb(i)}
 			slot={slot}
@@ -145,9 +145,7 @@ export function ProductGallery({
 									{slots.map((slot, i) => (
 										<CarouselItem
 											className="basis-1/5 pt-2"
-											key={
-												slot.kind === "video" ? `video-${slot.url}` : slot.url
-											}
+											key={slotKey(slot)}
 										>
 											{renderThumb(slot, i)}
 										</CarouselItem>

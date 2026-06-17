@@ -2,6 +2,10 @@ export type GallerySlot =
 	| { kind: "image"; url: string }
 	| { kind: "video"; url: string; poster: string | null };
 
+export function slotKey(slot: GallerySlot): string {
+	return slot.kind === "video" ? `video-${slot.url}` : slot.url;
+}
+
 export function buildSlots(
 	images: { url: string }[],
 	video: { url: string; poster: string | null } | null | undefined

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildSlots } from "./gallery-slots";
+import { buildSlots, slotKey } from "./gallery-slots";
 
 const imgs = [{ url: "a.jpg" }, { url: "b.jpg" }, { url: "c.jpg" }];
 
@@ -46,5 +46,16 @@ describe("buildSlots", () => {
 			{ kind: "image", url: "b.jpg" },
 			{ kind: "image", url: "c.jpg" },
 		]);
+	});
+});
+
+describe("slotKey", () => {
+	it("imagem usa a url", () => {
+		expect(slotKey({ kind: "image", url: "a.jpg" })).toBe("a.jpg");
+	});
+	it("vídeo usa prefixo video-", () => {
+		expect(slotKey({ kind: "video", url: "v.mp4", poster: null })).toBe(
+			"video-v.mp4"
+		);
 	});
 });
