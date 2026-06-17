@@ -39,12 +39,13 @@ Notas de design (DESIGN.md):
 
 - Adicionar `badgeText` e `countdownTarget` ao `HeroBanner` Pick. A query (`getActiveBanners`, `(shop)/page.tsx`) já faz `select()` de todas as colunas — só parar de descartar. `FALLBACK_BANNERS` recebem ambos como `null`.
 - **Badge:** renderizado no topo do `HeroContentBlock`, **acima do título**. Pílula clara: `bg-white text-near-black`, Barlow Condensed uppercase, tracking ~.06em, radius 2px. Só quando `badgeText` presente. (Não compete com o CTA vermelho.)
-- **Countdown:** novo subcomponente client `HeroCountdown` (propósito único, testável), renderizado no bloco de conteúdo **abaixo do subtítulo**.
-  - **Hidratação:** calcular o tempo restante **só após o mount** (`useEffect` + `setInterval` 1s). Render inicial (server + primeiro paint) **não** mostra número — evita mismatch SSR. Sem `Date.now()` no corpo do render server.
-  - **Formato:** `Xd Xh Xm Ss`, `tabular-nums`, Barlow.
-  - **Expiração:** quando restante ≤ 0, **esconder só o contador**; o slide permanece (sem auto-desativação; staff controla via `isActive`).
-- Extrair a **lógica de formatação/expiração** numa função pura (`formatCountdown(target, now)`) para teste unitário sem DOM.
+- **Countdown:** novo subcomponente client `HeroCountdown` no bloco de conteúdo, **abaixo do subtítulo**. **Reaproveita o util existente** `formatCountdown(remainingMs): CountdownParts` (`@/lib/countdown`, o mesmo que o `PromoCountdown` da home usa) — **não** duplicar a lógica de tempo.
+  - **Hidratação:** mesmo padrão do `PromoCountdown` — estado inicia `null`, calcula **só após o mount** (`useEffect` + `setInterval` 1s, com cleanup). Render inicial (server + primeiro paint) **não** mostra número — evita mismatch SSR.
+  - **Formato:** `Xd Xh Xm Ss`, `tabular-nums`, **branco** (o vermelho da tela é o CTA — DESIGN.md).
+  - **Expiração:** quando `parts.done`, **esconder só o contador**; o slide permanece (sem auto-desativação; staff controla via `isActive`).
 - `prefers-reduced-motion`: o contador continua atualizando (é informação, não decoração); sem animação adicional.
+
+> **As-built:** descoberto durante a execução que `lib/countdown.ts` (+ `CountdownParts`) já existia (PR #62, consumido por `promo-countdown.tsx`). O plano original criava um `formatCountdown(target, now)` duplicado — descartado. O hero reusa o util existente; não há função/teste novos.
 
 ## Fatia F1 — Alinhar os 8 layouts (storefront)
 
@@ -64,6 +65,8 @@ Atualizar `LAYOUT_CONFIG` em `hero-carousel.tsx` para casar com o conjunto canô
 `GRADIENT_BY_SIDE` e `textSide` acompanham as mudanças (ex.: `mirror_split` segue `right`; `text_right` passa a `center`).
 
 **Escala (já implementada, manter):** `productScale`/`ctaScale` (`scale = valor/100`) continuam aplicados — não fazem parte deste diff.
+
+> **As-built (calibração visual):** só `mirror_split` e `text_right` precisaram mudar. `center_bottom` e `center_cta_right` ficaram **inalterados** — o `top-[34%]` com o `-translate-y-1/2` base já coloca o produto no topo-centro (borda superior ~8%); a hipótese de "subir o produto" era desnecessária. Confirmado ciclando um banner descartável pelos 8 layouts na home.
 
 ## Fatia F3 — Guard-rail (dashboard, return-issue) — menor prioridade
 
