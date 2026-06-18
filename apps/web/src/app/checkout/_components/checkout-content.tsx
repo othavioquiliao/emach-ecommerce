@@ -15,7 +15,7 @@ import type { Route } from "next";
 import NextImage from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
@@ -163,13 +163,12 @@ export function CheckoutContent({
 		})();
 	}, [items, reconcile]);
 
-	const { orderItems, subtotal } = useMemo(() => {
-		const sub = items.reduce(
-			(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
-			0
-		);
-		return { orderItems: items, subtotal: sub };
-	}, [items]);
+	// React Compiler memoiza derivações automaticamente — sem useMemo manual.
+	const orderItems = items;
+	const subtotal = items.reduce(
+		(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
+		0
+	);
 
 	const shipping = selectedShippingCents ?? 0;
 	const [coupon, setCoupon] = useState<{

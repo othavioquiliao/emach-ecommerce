@@ -12,14 +12,14 @@ import {
 	Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmachButton } from "@/components/emach-button";
 import { FreightCalculator } from "@/components/freight-calculator";
 import { ProductRating } from "@/components/product-rating";
 import { QuantityPicker } from "@/components/quantity-picker";
 import { SectionLabel } from "@/components/section-label";
-import { useCart } from "@/lib/cart-context";
+import { useCartActions } from "@/lib/cart-context";
 import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtBRL, fmtNumericBRL, numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
@@ -65,16 +65,13 @@ export function ProductInfo({
 	primaryCategorySlug,
 	primaryImageUrl,
 }: ProductInfoProps) {
-	const orderedVariants = useMemo(() => {
-		const sorted = [...variants];
-		sorted.sort((a, b) => {
-			if (a.isDefault !== b.isDefault) {
-				return a.isDefault ? -1 : 1;
-			}
-			return a.sortOrder - b.sortOrder;
-		});
-		return sorted;
-	}, [variants]);
+	// React Compiler memoiza derivações automaticamente — sem useMemo manual.
+	const orderedVariants = [...variants].sort((a, b) => {
+		if (a.isDefault !== b.isDefault) {
+			return a.isDefault ? -1 : 1;
+		}
+		return a.sortOrder - b.sortOrder;
+	});
 
 	const initialVariant = orderedVariants[0];
 	const [selectedVariantId, setSelectedVariantId] = useState<string>(
@@ -84,7 +81,7 @@ export function ProductInfo({
 	const [shared, setShared] = useState(false);
 	const [showSticky, setShowSticky] = useState(false);
 	const buyActionsRef = useRef<HTMLDivElement>(null);
-	const { add, clear } = useCart();
+	const { add, clear } = useCartActions();
 	const router = useRouter();
 
 	// Mostra a barra sticky só depois que a buy box inline foi rolada pra cima
