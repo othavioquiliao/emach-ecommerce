@@ -164,6 +164,16 @@ export const authEcommerce = betterAuth({
 	},
 	session: {
 		modelName: "clientSession",
+		// Cache de sessão em cookie assinado (#perf-dashboard): sem isto, cada
+		// `getSession`/`useSession` faz round-trip ao Supabase. O dashboard valida
+		// a sessão 3× por navegação (layout + page server-side, header client-side)
+		// — com o cache, viram leitura de cookie. Trade-off: revogação de sessão
+		// só vale após `maxAge` (5 min); endpoints sensíveis (troca de senha etc.)
+		// já forçam `disableCookieCache` internamente no Better Auth.
+		cookieCache: {
+			enabled: true,
+			maxAge: 5 * 60,
+		},
 	},
 	account: {
 		modelName: "clientAccount",
