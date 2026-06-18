@@ -730,3 +730,16 @@ html:has(body[style*="overflow: hidden"]),
 html:has(body[style*="overflow-y: hidden"]) {
 	scrollbar-gutter: auto !important;
 }
+
+/* Mesmo lock, OUTRO code-path: popups ANCORADOS (DropdownMenu da conta, Select,
+   Popover) caem no branch "inset scrollbar" do `useScrollLock`, que dimensiona o
+   <body> com `width: calc(100vw - <scrollbar>)` E seta `overflow-y: scroll` no
+   <html>. No Chromium, `overflow-y: scroll` no root faz o `100vw` EXCLUIR a
+   scrollbar, então o calc subtrai a largura da scrollbar DUAS vezes → ~15px de
+   faixa vazia à direita que aparece como uma segunda scrollbar fantasma (só com o
+   popup aberto). `100%` da content-box do <html> já é o valor correto e sem shift.
+   O atributo `data-base-ui-scroll-locked` é setado pela lib só nesse branch (o do
+   Dialog/drawer não seta) — hook estável p/ escopar o override sem afetar a drawer. */
+html[data-base-ui-scroll-locked] body {
+	width: 100% !important;
+}
