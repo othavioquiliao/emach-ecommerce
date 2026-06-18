@@ -109,6 +109,20 @@ _.file = "apps/web/.env"
 
 `.env` continua fonte única. Após mexer: `mise trust` + relançar o `claude` (a interpolação só re-resolve no boot). As 5 skills (`resend:resend`, `react-email`, `email-best-practices`, `resend-cli`, `agent-email-inbox`) funcionam sem key.
 
+## Agent skills
+
+### Issue tracker
+
+Issues e PRDs vivem como GitHub issues (`gh` CLI), repo `othavioquiliao/emach-ecommerce`. PRs externos **não** são superfície de triagem. Ver `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Vocabulário default — os 5 roles canônicos mapeiam 1:1 (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`). Ver `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Multi-context: `CONTEXT-MAP.md` na raiz indexa os bounded contexts; cada `CONTEXT.md` vive em `docs/contexts/<slug>/`. Ver `docs/agents/domain.md`.
+
 ## Onde estão os outros mistakes-logs
 
 | Tópico | Arquivo |

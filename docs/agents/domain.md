@@ -4,7 +4,7 @@ How the engineering skills should consume this repo's domain documentation when 
 
 This is a **multi-context** repo: the EMACH domain is decomposed into bounded contexts in `CONTEXT-MAP.md`. The contexts are **domain contexts, not code folders** — `packages/db/src/schema/` holds tables from every context, so the per-context docs live in a dedicated `docs/contexts/` tree rather than co-located with code.
 
-## Before exploring, read theseS
+## Before exploring, read these
 
 - **`CONTEXT-MAP.md`** at the repo root — lists the bounded contexts, where each `CONTEXT.md` lives, and how the contexts relate. Read it first.
 - The per-context **`CONTEXT.md`** under `docs/contexts/<slug>/` — read the one(s) relevant to the topic.
