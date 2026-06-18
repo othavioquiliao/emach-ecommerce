@@ -6,6 +6,7 @@ import { configDefaults, defineConfig } from "vitest/config";
 // via `bun run --filter=web test`; ficam fora do CI (VITEST_UNIT_ONLY=1) até
 // haver um Postgres efêmero no pipeline.
 const INTEGRATION = [
+	"**/lib/auto-promo.integration.test.ts",
 	"**/checkout/_lib/place-order.test.ts",
 	"**/checkout/_lib/place-order.shipping.test.ts",
 	"**/checkout/_actions/create-order.test.ts",
