@@ -712,7 +712,14 @@
 		   Mode for Web Contents" (Chromium/Brave) force-inverta o site; seções
 		   intencionalmente escuras declaram `color-scheme: dark` localmente. */
 		color-scheme: light;
-		@apply font-sans;
+		/* Canvas do <html> = superfície clara do sistema (#f4f4f4). Sem isto o
+		   html fica transparente e o browser pinta o canvas de BRANCO (default do
+		   color-scheme: light); em qualquer frame de transição em que o <body> não
+		   cobre o viewport (reset de scroll, troca de rota, altura fixa do chrome
+		   do dashboard, swap do Suspense) esse branco vaza = "pisca branca" ao
+		   navegar entre páginas claras. Rotas escuras pintam `bg-near-black` por
+		   cima, então isto não as afeta. */
+		@apply bg-background font-sans;
 	}
 }
 
