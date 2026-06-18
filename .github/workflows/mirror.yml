@@ -1,0 +1,31 @@
+name: Mirror to deploy repo
+
+# Espelha a main deste repo (canônico) para emach-ferramentas/emach-ecommerce,
+# que está conectado à Vercel e tem GitHub Actions desabilitado (só deploya).
+# Sem isso, todo deploy exige um push manual cross-account.
+#
+# Requer o secret MIRROR_TOKEN: um PAT fine-grained da conta emach-ferramentas,
+# com permissão de repositório "Contents: Read and write" + "Workflows: Read and
+# write" (o último é exigido pelo GitHub para pushes que tocam .github/workflows),
+# escopado SÓ ao emach-ferramentas/emach-ecommerce.
+
+on:
+  push:
+    branches: [main]
+
+jobs:
+  mirror:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Push para emach-ferramentas/emach-ecommerce
+        env:
+          MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
+        run: |
+          if [ -z "$MIRROR_TOKEN" ]; then
+            echo "::warning::MIRROR_TOKEN ausente — pulando mirror. Cadastre um PAT fine-grained (Contents+Workflows) da conta emach-ferramentas para ativar."
+            exit 0
+          fi
+          git push "https://x-access-token:${MIRROR_TOKEN}@github.com/emach-ferramentas/emach-ecommerce.git" HEAD:main
