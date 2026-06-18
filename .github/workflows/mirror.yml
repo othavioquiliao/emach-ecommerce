@@ -20,6 +20,10 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          # Sem isto, o checkout grava um http.extraheader com o GITHUB_TOKEN
+          # deste repo, que tem precedência sobre o MIRROR_TOKEN no push e causa
+          # "permission denied" no repo de destino.
+          persist-credentials: false
       - name: Push para emach-ferramentas/emach-ecommerce
         env:
           MIRROR_TOKEN: ${{ secrets.MIRROR_TOKEN }}
