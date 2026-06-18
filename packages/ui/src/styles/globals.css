@@ -100,7 +100,9 @@
 }
 .emach-input::placeholder {
 	font-weight: 400;
-	color: var(--gray-55);
+	/* gray-55 (#969696) reprovava em contraste (2.96:1); gray-60 (#666) = 5.74:1
+	   sobre #fff, ainda claramente "placeholder" vs texto digitado near-black. */
+	color: var(--gray-60);
 }
 .emach-input:hover {
 	border-color: var(--gray-50);
@@ -160,12 +162,14 @@
 }
 .emach-field__hint {
 	font-size: 12px;
-	color: var(--gray-50);
+	color: var(--gray-60);
 }
 .emach-field__error {
 	font-size: 12px;
 	font-weight: 500;
-	color: var(--warning);
+	/* --warning (#F13A2C) reprova WCAG AA (3.3:1) em texto; mensagem de erro é o
+	   texto que MAIS precisa ser legível. --emach-red-hover (#B01E0A) = 6.29:1. */
+	color: var(--emach-red-hover);
 }
 
 .emach-input-group {
@@ -399,6 +403,20 @@
 .emach-cart-item[data-leaving="true"] {
 	pointer-events: none;
 	animation: emach-cart-leave 220ms ease forwards;
+}
+
+/* ---------- Reduced motion: safety net global ----------
+   Neutraliza animações contínuas/decorativas (skeletons, spinners, pulse do
+   badge) p/ quem pede prefers-reduced-motion. Motion intencional já trata isso
+   por componente (hero/auth/category-grid); isto cobre o que escapou. */
+@media (prefers-reduced-motion: reduce) {
+	.animate-pulse,
+	.animate-spin {
+		animation: none !important;
+	}
+	.emach-cart-badge[data-pulse="true"] {
+		animation: none !important;
+	}
 }
 
 /* ---------- Design system backgrounds ---------- */

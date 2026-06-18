@@ -6,7 +6,7 @@ const sectionLabelVariants = cva(
 	{
 		variants: {
 			tone: {
-				default: "text-gray-50",
+				default: "text-gray-60",
 				light: "text-white/70",
 				accent: "text-emach-red",
 			},

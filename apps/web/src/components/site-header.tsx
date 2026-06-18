@@ -53,6 +53,12 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 
 	return (
 		<>
+			<a
+				className="sr-only focus-visible:not-sr-only focus-visible:fixed focus-visible:top-2 focus-visible:left-4 focus-visible:z-50 focus-visible:bg-white focus-visible:px-4 focus-visible:py-2 focus-visible:font-semibold focus-visible:text-near-black focus-visible:text-sm focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2"
+				href="#main-content"
+			>
+				Pular para o conteúdo
+			</a>
 			<header className={headerClass}>
 				<div className="flex items-center gap-2 md:gap-8">
 					<button
@@ -67,7 +73,10 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 						{menuOpen ? <X className="size-6" /> : <Menu className="size-6" />}
 					</button>
 					<Link
-						className={cn(menuOpen && "max-md:hidden")}
+						className={cn(
+							"focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2",
+							menuOpen && "max-md:hidden"
+						)}
 						href="/"
 						onClick={() => setMenuOpen(false)}
 					>
@@ -97,7 +106,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 				<div className="-mr-2.5 flex items-center gap-0.5 text-white">
 					<button
 						aria-label="Buscar"
-						className="flex cursor-pointer items-center p-2.5 text-white/80 hover:text-white"
+						className="flex cursor-pointer items-center p-2.5 text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
 						onClick={() => {
 							setMenuOpen(false);
 							setSearchOpen(true);
@@ -108,7 +117,7 @@ export function SiteHeader({ overlay = false }: { overlay?: boolean }) {
 					</button>
 					<button
 						aria-label={`Carrinho com ${totalCount} itens`}
-						className="flex cursor-pointer items-center p-2.5 text-white/80 hover:text-white"
+						className="flex cursor-pointer items-center p-2.5 text-white/80 hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
 						onClick={() => {
 							setMenuOpen(false);
 							setCartOpen(true);

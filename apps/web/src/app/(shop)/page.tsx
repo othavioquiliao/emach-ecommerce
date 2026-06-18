@@ -139,7 +139,7 @@ export default async function HomePage() {
 		<>
 			<SiteHeader overlay />
 
-			<main>
+			<main id="main-content">
 				<HeroCarousel banners={banners} />
 
 				{rootCategories.length > 0 && (
