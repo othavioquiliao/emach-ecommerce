@@ -133,7 +133,7 @@ export function ReviewSheet({
 							Título (opcional)
 						</span>
 						<input
-							className="h-10 w-full border border-border px-3 text-[14px] outline-none focus:border-near-black"
+							className="h-10 w-full border border-border px-3 text-[14px] outline-none focus:border-near-black focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2"
 							maxLength={120}
 							onChange={(e) => setTitle(e.target.value)}
 							value={title}
@@ -144,7 +144,7 @@ export function ReviewSheet({
 							Sua avaliação
 						</span>
 						<textarea
-							className="min-h-[120px] w-full border border-border p-3 text-[14px] outline-none focus:border-near-black"
+							className="min-h-[120px] w-full border border-border p-3 text-[14px] outline-none focus:border-near-black focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2"
 							maxLength={2000}
 							onChange={(e) => setBody(e.target.value)}
 							value={body}

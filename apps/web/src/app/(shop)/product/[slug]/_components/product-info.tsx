@@ -222,13 +222,13 @@ export function ProductInfo({
 						{fmtNumericBRL(finalAmount)}
 					</span>
 					{discounted != null && (
-						<span className="text-[16px] text-gray-50 tabular-nums line-through">
+						<span className="text-[16px] text-gray-60 tabular-nums line-through">
 							{fmtNumericBRL(selected.priceAmount)}
 						</span>
 					)}
 				</div>
 				{savingsCents > 0 && (
-					<div className="mt-1.5 font-semibold text-[13px] text-success">
+					<div className="mt-1.5 font-semibold text-[13px] text-success-text">
 						Você economiza {fmtBRL(savingsCents)}
 					</div>
 				)}
@@ -238,8 +238,8 @@ export function ProductInfo({
 			</div>
 
 			{orderedVariants.length > 1 && (
-				<div>
-					<div className="mb-2.5 font-semibold text-md">Voltagem</div>
+				<fieldset className="m-0 min-w-0 border-0 p-0">
+					<legend className="mb-2.5 font-semibold text-md">Voltagem</legend>
 					<div className="flex flex-wrap gap-2">
 						{orderedVariants.map((v) => {
 							const variantStock = stockByVariant[v.id] ?? false;
@@ -248,8 +248,9 @@ export function ProductInfo({
 								applyDiscount(v.priceAmount, activePromotion) ?? v.priceAmount;
 							return (
 								<button
+									aria-pressed={isActive}
 									className={cn(
-										"flex min-w-[120px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors",
+										"flex min-w-[120px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2",
 										!variantStock &&
 											"cursor-not-allowed border-gray-20 border-dashed opacity-45",
 										variantStock &&
@@ -288,7 +289,7 @@ export function ProductInfo({
 							);
 						})}
 					</div>
-				</div>
+				</fieldset>
 			)}
 
 			<div className="space-y-3" ref={buyActionsRef}>

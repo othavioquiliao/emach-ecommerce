@@ -74,7 +74,13 @@ export function CartItemRow({
 						{item.name}
 					</Link>
 				) : (
-					<div className="mt-1 font-medium text-[16px]">{item.name}</div>
+					<Link
+						className="mt-1 block font-medium text-[16px] hover:underline"
+						href={`/product/${item.slug}`}
+						onClick={onLinkClick}
+					>
+						{item.name}
+					</Link>
 				)}
 				{showVoltageMeta && (
 					<div

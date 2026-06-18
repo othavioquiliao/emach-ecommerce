@@ -83,7 +83,7 @@ export function RefundSheet({
 							Motivo
 						</span>
 						<select
-							className="h-10 w-full border border-border bg-white px-3 text-[14px] outline-none focus:border-near-black"
+							className="h-10 w-full border border-border bg-white px-3 text-[14px] outline-none focus:border-near-black focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2"
 							disabled={pending}
 							onChange={(e) => setReason(e.target.value as RefundReason)}
 							value={reason}
@@ -100,7 +100,7 @@ export function RefundSheet({
 							Detalhes (opcional)
 						</span>
 						<textarea
-							className="min-h-[120px] w-full border border-border p-3 text-[14px] outline-none focus:border-near-black"
+							className="min-h-[120px] w-full border border-border p-3 text-[14px] outline-none focus:border-near-black focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2"
 							disabled={pending}
 							maxLength={2000}
 							onChange={(e) => setText(e.target.value)}

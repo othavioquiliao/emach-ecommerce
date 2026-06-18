@@ -8,6 +8,7 @@ import type { Route } from "next";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
+import { EmachButton } from "@/components/emach-button";
 import { PageContainer } from "@/components/page-container";
 import { ProductCard } from "@/components/product-card";
 import { ProductImage } from "@/components/product-image";
@@ -164,7 +165,7 @@ export function CatalogContent({
 							Busca: <strong>“{query}”</strong>
 							<button
 								aria-label="Limpar busca"
-								className="ml-1 text-white/60 hover:text-white"
+								className="relative ml-1 flex size-11 items-center justify-center text-white/60 hover:text-white"
 								onClick={() => navigate({ q: null })}
 								type="button"
 							>
@@ -351,25 +352,25 @@ export function CatalogContent({
 
 					{totalPages > 1 && (
 						<div className="mt-8 flex items-center justify-center gap-2">
-							<button
-								className="emach-btn emach-btn--ghost emach-btn--sm"
+							<EmachButton
 								disabled={page <= 1}
 								onClick={() => navigatePage(page - 1)}
-								type="button"
+								size="sm"
+								variant="ghost"
 							>
 								Anterior
-							</button>
+							</EmachButton>
 							<span className="px-3 text-[13px] tabular-nums">
 								Página <strong>{page}</strong> de {totalPages}
 							</span>
-							<button
-								className="emach-btn emach-btn--ghost emach-btn--sm"
+							<EmachButton
 								disabled={page >= totalPages}
 								onClick={() => navigatePage(page + 1)}
-								type="button"
+								size="sm"
+								variant="ghost"
 							>
 								Próxima
-							</button>
+							</EmachButton>
 						</div>
 					)}
 				</div>

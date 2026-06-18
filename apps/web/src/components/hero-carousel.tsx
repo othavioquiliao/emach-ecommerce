@@ -415,7 +415,11 @@ function HeroCountdown({ target }: { target: Date }) {
 		return null;
 	}
 	return (
-		<span className="mt-4 font-display font-semibold text-[15px] text-white tabular-nums tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]">
+		<span
+			aria-live="off"
+			className="mt-4 font-display font-semibold text-[15px] text-white tabular-nums tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]"
+			role="timer"
+		>
 			{parts.days}d {parts.hours}h {parts.minutes}m {parts.seconds}s
 		</span>
 	);
@@ -546,6 +550,8 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	const parallaxY = useSpring(mouseY, PARALLAX_SPRING);
 
 	// Primeiro slide com título vira o <h1> da home; demais títulos viram <h2>.
+	// Quando nenhum banner tem título (ex.: todos os fallbacks têm title:null),
+	// o <h1> sr-only garante que a página nunca fique sem h1 (SEO + a11y).
 	const h1Index = slides.findIndex((b) => b.title != null);
 
 	useEffect(() => {
@@ -561,14 +567,14 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	}, [api]);
 
 	useEffect(() => {
-		if (!api || slides.length < 2) {
+		if (!api || slides.length < 2 || reduceMotion) {
 			return;
 		}
 		const id = window.setInterval(() => {
 			api.scrollNext();
 		}, AUTOPLAY_INTERVAL);
 		return () => window.clearInterval(id);
-	}, [api, slides.length]);
+	}, [api, slides.length, reduceMotion]);
 
 	const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
 		if (reduceMotion) {
@@ -588,13 +594,17 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
 	return (
 		<LazyMotion features={domAnimation} strict>
-			{/* biome-ignore lint/a11y/noStaticElementInteractions: parallax decorativo (mouse-only), sem semântica interativa */}
-			{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: idem — efeito visual, teclado/toque não dependem disto */}
+			{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: parallax decorativo mouse-only na hero; teclado/toque não dependem disto */}
 			<section
+				aria-label="Banner principal"
 				className="relative h-[88svh] w-full overflow-hidden bg-black lg:h-svh"
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
 			>
+				{/* h1 invisível para leitores de tela quando nenhum banner tem título visível */}
+				{h1Index === -1 && (
+					<h1 className="sr-only">EMACH — Ferramentas Profissionais</h1>
+				)}
 				<Carousel
 					className="h-full w-full"
 					opts={{ loop: true, align: "start" }}
@@ -626,7 +636,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 							<button
 								aria-label={`Ir para slide ${index + 1}`}
 								className={cn(
-									"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-3 after:right-0 after:left-0 after:content-[''] sm:w-10",
+									"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-5 after:right-0 after:left-0 after:content-[''] sm:w-10",
 									index === selectedIndex ? "bg-emach-red" : "bg-white/30"
 								)}
 								key={banner.id}

@@ -363,6 +363,7 @@ export function CheckoutContent({
 					>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<TextField
+								autoComplete="name"
 								form={form}
 								label="Nome completo"
 								name="name"
@@ -370,6 +371,7 @@ export function CheckoutContent({
 								transform={onlyLetters}
 							/>
 							<TextField
+								autoComplete="email"
 								form={form}
 								label="E-mail"
 								name="email"
@@ -387,6 +389,7 @@ export function CheckoutContent({
 										label="Telefone"
 									>
 										<input
+											autoComplete="tel"
 											className="emach-input"
 											id="phone"
 											onBlur={field.handleBlur}
@@ -409,6 +412,7 @@ export function CheckoutContent({
 										label="CPF ou CNPJ"
 									>
 										<input
+											autoComplete="off"
 											className="emach-input"
 											id="document"
 											onBlur={field.handleBlur}
@@ -469,6 +473,7 @@ export function CheckoutContent({
 														label="CEP"
 													>
 														<input
+															autoComplete="postal-code"
 															className="emach-input"
 															id="zipCode"
 															onBlur={field.handleBlur}
@@ -484,6 +489,7 @@ export function CheckoutContent({
 												)}
 											</form.Field>
 											<TextField
+												autoComplete="address-line1"
 												form={form}
 												label="Rua"
 												name="newAddress.street"
@@ -492,6 +498,7 @@ export function CheckoutContent({
 										</div>
 										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[160px_1fr]">
 											<TextField
+												autoComplete="address-line2"
 												form={form}
 												label="Número"
 												name="newAddress.number"
@@ -499,6 +506,7 @@ export function CheckoutContent({
 												transform={onlyDigits}
 											/>
 											<TextField
+												autoComplete="off"
 												form={form}
 												label="Complemento"
 												name="newAddress.complement"
@@ -506,6 +514,7 @@ export function CheckoutContent({
 											/>
 										</div>
 										<TextField
+											autoComplete="off"
 											form={form}
 											label="Bairro"
 											name="newAddress.neighborhood"
@@ -513,6 +522,7 @@ export function CheckoutContent({
 										/>
 										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
 											<TextField
+												autoComplete="address-level2"
 												form={form}
 												label="Cidade"
 												name="newAddress.city"
@@ -520,6 +530,7 @@ export function CheckoutContent({
 												transform={onlyLetters}
 											/>
 											<TextField
+												autoComplete="address-level1"
 												form={form}
 												label="Estado"
 												name="newAddress.state"
@@ -658,7 +669,7 @@ export function CheckoutContent({
 									<span>−{fmtBRL(discount)}</span>
 								</div>
 							) : null}
-							<div className="space-y-2">
+							<div aria-atomic="true" aria-live="polite" className="space-y-2">
 								<span className="text-gray-60 text-sm">Frete</span>
 								<ShippingOptions
 									onRetry={() => setQuoteNonce((n) => n + 1)}
@@ -722,6 +733,7 @@ function FieldShell({ children, errors, htmlFor, label }: FieldShellProps) {
 }
 
 interface TextFieldProps {
+	autoComplete?: string;
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack form generic
 	form: any;
 	label: string;
@@ -736,6 +748,7 @@ function TextField({
 	form,
 	label,
 	name,
+	autoComplete,
 	placeholder,
 	type,
 	transform,
@@ -758,6 +771,7 @@ function TextField({
 					label={label}
 				>
 					<input
+						autoComplete={autoComplete}
 						className="emach-input"
 						id={name}
 						onBlur={field.handleBlur}
@@ -810,7 +824,15 @@ function ConsentField({
 				/>
 				<span>
 					{label}
-					{required && <span className="ml-1 text-warning">*</span>}
+					{required && (
+						<span
+							aria-label="obrigatório"
+							className="ml-1 text-warning"
+							role="img"
+						>
+							*
+						</span>
+					)}
 				</span>
 			</label>
 			{touched &&

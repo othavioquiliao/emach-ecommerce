@@ -42,7 +42,8 @@ export function ProductCard({
 		tool.defaultVariant.priceAmount,
 		tool.defaultVariant.discountedAmount
 	);
-	const surfaceBg = surface === "elevated" ? "bg-[#242424]" : "bg-near-black";
+	const surfaceBg =
+		surface === "elevated" ? "bg-surface-elevated" : "bg-near-black";
 
 	const snapshot: CartItemSnapshot = {
 		categoryName: tool.primaryCategory?.name ?? null,
@@ -66,6 +67,7 @@ export function ProductCard({
 				<ProductImage
 					alt={tool.name}
 					categorySlug={categorySlug}
+					sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
 					src={tool.primaryImage?.url}
 					zoom
 				/>

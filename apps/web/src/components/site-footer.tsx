@@ -112,8 +112,8 @@ export async function SiteFooter() {
 					</nav>
 				</div>
 
-				<div className="mt-8 flex flex-col gap-5 border-[#1f1f1f] border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
-					<p className="text-[12px] text-gray-60 leading-relaxed">
+				<div className="mt-8 flex flex-col gap-5 border-white/10 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
+					<p className="text-[12px] text-gray-55 leading-relaxed">
 						<span className="font-medium text-gray-20">
 							EMACH Ferramentas Gerais LTDA
 						</span>

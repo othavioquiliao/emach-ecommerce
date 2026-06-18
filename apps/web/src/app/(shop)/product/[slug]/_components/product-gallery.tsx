@@ -68,7 +68,7 @@ function ThumbButton({
 		<button
 			aria-label={label}
 			className={cn(
-				"relative aspect-square w-full cursor-pointer overflow-hidden border-2 bg-image-bg",
+				"relative aspect-square w-full cursor-pointer overflow-hidden border-2 bg-image-bg focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2",
 				isActive ? "border-emach-red" : "border-transparent"
 			)}
 			onClick={onClick}
@@ -150,7 +150,7 @@ export function ProductGallery({
 		<div className="flex w-full flex-col justify-center lg:w-1/2 lg:flex-row lg:gap-3">
 			{slots.length > 1 && (
 				<aside className="order-2 mt-3 md:order-1 md:mt-0 md:w-24">
-					{/* Mobile: grid horizontal */}
+					{/* Mobile: grid horizontal — wraps naturalmente se >4 slots */}
 					<div className="grid grid-cols-4 gap-2 lg:hidden">
 						{slots.map((slot, i) => renderThumb(slot, i))}
 					</div>

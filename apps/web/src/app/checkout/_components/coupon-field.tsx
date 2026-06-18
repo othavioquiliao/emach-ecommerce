@@ -63,12 +63,16 @@ export function CouponField({
 
 	return (
 		<div className="space-y-1">
-			<span className="font-display text-[11px] text-gray-60 uppercase tracking-[0.12em]">
+			<label
+				className="font-display text-[11px] text-gray-60 uppercase tracking-[0.12em]"
+				htmlFor="coupon-code"
+			>
 				Cupom de desconto
-			</span>
+			</label>
 			<div className="flex gap-2">
 				<input
 					className="h-10 min-w-0 flex-1 border border-border px-3 text-sm uppercase"
+					id="coupon-code"
 					onChange={(e) => setCode(e.target.value)}
 					onKeyDown={(e) => {
 						if (e.key === "Enter") {
@@ -88,7 +92,11 @@ export function CouponField({
 					{loading ? <Loader2 className="h-4 w-4 animate-spin" /> : "Aplicar"}
 				</button>
 			</div>
-			{error ? <p className="text-[12px] text-red-600">{error}</p> : null}
+			{error ? (
+				<p className="text-[12px] text-emach-red-hover" role="alert">
+					{error}
+				</p>
+			) : null}
 		</div>
 	);
 }

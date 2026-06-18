@@ -84,7 +84,7 @@ export function AccountMenu() {
 						</AvatarFallback>
 					</Avatar>
 					<div className="min-w-0">
-						<div className="font-display font-semibold text-[9.5px] text-emach-red uppercase tracking-[0.16em]">
+						<div className="font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.16em]">
 							Minha conta
 						</div>
 						<div className="truncate font-semibold text-[14px] leading-tight">

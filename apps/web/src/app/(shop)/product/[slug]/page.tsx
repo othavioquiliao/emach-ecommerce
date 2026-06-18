@@ -91,44 +91,46 @@ export default async function ProductPage({
 			<ProductJsonLd detail={detail} />
 			<SiteHeader />
 
-			<div className="flex flex-col items-center gap-8 px-5 py-8 sm:px-8 lg:flex-row lg:items-start lg:justify-center lg:gap-10 lg:px-10">
-				<ProductGallery
-					categorySlug={primaryCategorySlug ?? ""}
-					images={detail.images}
-					name={detail.tool.name}
-					video={video}
-				/>
-				<ProductInfo
-					activePromotion={detail.activePromotion}
-					primaryCategoryName={primaryCategoryName}
-					primaryCategorySlug={primaryCategorySlug}
-					primaryImageUrl={primaryImageUrl}
-					reviewStats={detail.reviewStats}
-					stockByVariant={detail.stockByVariant}
+			<main id="main-content">
+				<div className="flex flex-col items-center gap-8 px-5 py-8 sm:px-8 lg:flex-row lg:items-start lg:justify-center lg:gap-10 lg:px-10">
+					<ProductGallery
+						categorySlug={primaryCategorySlug ?? ""}
+						images={detail.images}
+						name={detail.tool.name}
+						video={video}
+					/>
+					<ProductInfo
+						activePromotion={detail.activePromotion}
+						primaryCategoryName={primaryCategoryName}
+						primaryCategorySlug={primaryCategorySlug}
+						primaryImageUrl={primaryImageUrl}
+						reviewStats={detail.reviewStats}
+						stockByVariant={detail.stockByVariant}
+						tool={detail.tool}
+						variants={detail.variants}
+					/>
+				</div>
+
+				<ProductSpecs
+					attributes={detail.attributes}
+					categoryName={primaryCategoryName}
 					tool={detail.tool}
-					variants={detail.variants}
 				/>
-			</div>
 
-			<ProductSpecs
-				attributes={detail.attributes}
-				categoryName={primaryCategoryName}
-				tool={detail.tool}
-			/>
-
-			<RelatedProducts
-				categoryPath={detail.primaryCategory?.path ?? null}
-				toolId={detail.tool.id}
-			/>
-
-			<Suspense fallback={<ReviewsSkeleton />}>
-				<ProductReviewsSection
-					pathname={`/product/${slug}`}
-					reviewStats={detail.reviewStats}
-					searchParams={searchParams}
+				<RelatedProducts
+					categoryPath={detail.primaryCategory?.path ?? null}
 					toolId={detail.tool.id}
 				/>
-			</Suspense>
+
+				<Suspense fallback={<ReviewsSkeleton />}>
+					<ProductReviewsSection
+						pathname={`/product/${slug}`}
+						reviewStats={detail.reviewStats}
+						searchParams={searchParams}
+						toolId={detail.tool.id}
+					/>
+				</Suspense>
+			</main>
 		</>
 	);
 }

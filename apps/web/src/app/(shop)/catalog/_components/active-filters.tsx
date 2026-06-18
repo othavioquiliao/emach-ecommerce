@@ -20,23 +20,23 @@ export function ActiveFilters({
 
 	return (
 		<div className="mb-4 flex flex-wrap items-center gap-2">
-			<span className="mr-0.5 font-bold font-display text-[11px] text-gray-50 uppercase tracking-[0.12em]">
+			<span className="mr-0.5 font-bold font-display text-[11px] text-gray-60 uppercase tracking-[0.12em]">
 				Filtros
 			</span>
 			{filters.map((f) => (
 				<span
-					className="inline-flex items-center gap-2 rounded-[2px] border border-border bg-white py-1 pr-1.5 pl-2.5 text-[12.5px] text-near-black"
+					className="inline-flex items-center gap-1 rounded-[2px] border border-border bg-white py-0 pr-0 pl-2.5 text-[12.5px] text-near-black"
 					key={f.id}
 				>
 					{f.kind && (
-						<span className="font-display text-[10px] text-gray-50 uppercase tracking-[0.1em]">
+						<span className="font-display text-[10px] text-gray-60 uppercase tracking-[0.1em]">
 							{f.kind}
 						</span>
 					)}
 					<span>{f.value}</span>
 					<button
 						aria-label={`Remover filtro ${f.kind || f.value}`}
-						className="flex size-4 items-center justify-center text-gray-50 transition-colors hover:text-near-black"
+						className="flex size-11 items-center justify-center text-gray-60 transition-colors hover:text-near-black"
 						onClick={() => onRemove(f.remove)}
 						type="button"
 					>

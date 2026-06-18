@@ -22,7 +22,7 @@ export function StatusStepper({
 		<div
 			className={cn(
 				"flex items-start border-t px-[18px] pt-5 pb-4",
-				dark ? "border-white/12 bg-white/[0.035]" : "border-border bg-[#fafafa]"
+				dark ? "border-white/12 bg-white/[0.035]" : "border-border bg-gray-10"
 			)}
 		>
 			{steps.map((step, idx) => (
@@ -71,7 +71,7 @@ function nodeClass(state: StepState, dark: boolean): string {
 	}
 	return dark
 		? "border-white/25 bg-transparent text-[#888]"
-		: "border-border bg-white text-gray-50";
+		: "border-border bg-white text-gray-60";
 }
 
 function labelClass(state: StepState, dark: boolean): string {
@@ -84,7 +84,7 @@ function labelClass(state: StepState, dark: boolean): string {
 	if (state === "done") {
 		return dark ? "text-white/70" : "text-near-black/70";
 	}
-	return dark ? "text-[#888]" : "text-gray-50";
+	return dark ? "text-[#888]" : "text-gray-60";
 }
 
 function segClass(prevState: StepState, dark: boolean): string {

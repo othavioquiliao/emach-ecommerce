@@ -20,23 +20,18 @@ export function HeaderNav() {
 	const currentCat = searchParams.get("cat");
 	const [urlHash, setUrlHash] = useState("");
 
+	// Sync hash on mount and on in-page hash navigation.
 	useEffect(() => {
 		const readHash = () => setUrlHash(window.location.hash);
-
 		readHash();
 		window.addEventListener("hashchange", readHash);
-
-		const orig = history.pushState.bind(history);
-		history.pushState = (...args: Parameters<typeof history.pushState>) => {
-			orig(...args);
-			setTimeout(readHash, 0);
-		};
-
-		return () => {
-			window.removeEventListener("hashchange", readHash);
-			history.pushState = orig;
-		};
+		return () => window.removeEventListener("hashchange", readHash);
 	}, []);
+
+	// Reset hash when the pathname changes (cross-route navigation clears the hash).
+	useEffect(() => {
+		setUrlHash(window.location.hash);
+	}, [pathname]);
 
 	return (
 		<nav className="flex items-center gap-[22px]">

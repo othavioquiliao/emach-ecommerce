@@ -54,8 +54,10 @@ export function ProductCarousel({
 		);
 	}
 
+	const total = tools.length;
+
 	return (
-		<Carousel opts={{ loop: true, align: "start" }}>
+		<Carousel aria-label={title} opts={{ loop: true, align: "start" }}>
 			<SectionHeader
 				actions={
 					<div className="hidden items-center gap-2 md:flex">
@@ -69,8 +71,9 @@ export function ProductCarousel({
 			/>
 			{/* pt-2: folga pro hover-lift do card não ser cortado pelo overflow-hidden do track */}
 			<CarouselContent className="-ml-5 pt-2">
-				{tools.map((tool) => (
+				{tools.map((tool, i) => (
 					<CarouselItem
+						aria-label={`Slide ${i + 1} de ${total}`}
 						className="pl-5 sm:basis-1/2 lg:basis-1/4"
 						key={tool.id}
 					>

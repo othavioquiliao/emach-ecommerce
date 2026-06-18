@@ -62,7 +62,7 @@ export async function RelatedProducts({
 	}
 
 	return (
-		<section className="pt-16 pb-20">
+		<section aria-label="Produtos relacionados" className="pt-16 pb-20">
 			{/* Mesma coluna alinhada ao topo (galeria w-1/2 + buy box w-[480px]). */}
 			<div className="mx-auto w-[calc(50%_+_480px)] max-w-[calc(100%_-_2.5rem)]">
 				<h2 className="mb-6 font-display font-medium text-[28px]">

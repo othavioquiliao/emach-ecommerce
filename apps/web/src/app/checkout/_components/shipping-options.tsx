@@ -30,17 +30,17 @@ export function ShippingOptions({
 }: ShippingOptionsProps) {
 	if (status === "idle") {
 		return (
-			<p className="text-muted-foreground text-sm">
+			<p className="text-gray-60 text-sm">
 				Informe o CEP para calcular o frete.
 			</p>
 		);
 	}
 	if (status === "loading") {
-		return <p className="text-muted-foreground text-sm">Calculando frete…</p>;
+		return <p className="text-gray-60 text-sm">Calculando frete…</p>;
 	}
 	if (status === "negotiate") {
 		return (
-			<p className="text-muted-foreground text-sm">
+			<p className="text-gray-60 text-sm">
 				Este pedido contém item de transporte especial. O frete será combinado
 				diretamente — entre em contato para concluir a compra.
 			</p>
@@ -49,11 +49,11 @@ export function ShippingOptions({
 	if (status === "error") {
 		return (
 			<div className="space-y-2">
-				<p className="text-destructive text-sm">
+				<p className="text-destructive text-sm" role="alert">
 					Não foi possível calcular o frete.
 				</p>
 				<Button
-					className="h-9 rounded-none"
+					className="h-11 rounded-none"
 					onClick={onRetry}
 					type="button"
 					variant="outline"
@@ -65,7 +65,7 @@ export function ShippingOptions({
 	}
 	if (options.length === 0) {
 		return (
-			<p className="text-muted-foreground text-sm">
+			<p className="text-gray-60 text-sm">
 				Nenhuma opção de frete para este CEP.
 			</p>
 		);
@@ -74,18 +74,22 @@ export function ShippingOptions({
 		<RadioGroup
 			className="gap-2"
 			onValueChange={(value) => onSelect(Number(value))}
-			value={selectedId ?? undefined}
+			value={selectedId === null ? undefined : String(selectedId)}
 		>
 			{options.map((opt) => (
 				<label
 					className="flex cursor-pointer items-center justify-between border border-border p-3 text-sm"
+					htmlFor={`ship-${opt.serviceId}`}
 					key={opt.serviceId}
 				>
 					<span className="flex items-center gap-3">
-						<RadioGroupItem value={opt.serviceId} />
+						<RadioGroupItem
+							id={`ship-${opt.serviceId}`}
+							value={String(opt.serviceId)}
+						/>
 						<span>
 							<span className="font-medium">{opt.name}</span>{" "}
-							<span className="text-muted-foreground">
+							<span className="text-gray-60">
 								· {opt.company} · {opt.deliveryDays} dia(s)
 							</span>
 						</span>

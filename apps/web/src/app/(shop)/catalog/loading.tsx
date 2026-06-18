@@ -14,13 +14,13 @@ export default function Loading() {
 			</section>
 			<PageContainer className="grid animate-pulse grid-cols-1 gap-0 py-8 lg:grid-cols-[260px_1fr] lg:gap-10">
 				<aside className="hidden space-y-4 lg:block">
-					<div className="h-3 w-24 bg-gray-10" />
+					<div className="h-3 w-24 bg-gray-20" />
 					{[0, 1, 2, 3, 4].map((i) => (
-						<div className="h-4 w-full bg-gray-10" key={i} />
+						<div className="h-4 w-full bg-gray-20" key={i} />
 					))}
 				</aside>
 				<div>
-					<div className="mb-6 h-10 w-full bg-gray-10" />
+					<div className="mb-6 h-10 w-full bg-gray-20" />
 					<div className="grid grid-cols-2 gap-4 sm:gap-6 lg:grid-cols-3">
 						{Array.from({ length: 9 }).map((_, i) => (
 							<ProductCardSkeleton key={i} />

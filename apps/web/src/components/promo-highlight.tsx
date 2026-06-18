@@ -17,7 +17,7 @@ export function PromoHighlight({
 	voltagesByTool,
 }: PromoHighlightProps) {
 	return (
-		<section className="bg-black text-white">
+		<section aria-label="Promoções" className="bg-black text-white">
 			<PageContainer className="px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
 				<div className="flex flex-col gap-8 md:flex-row md:items-end md:justify-between">
 					<div className="flex flex-col gap-3">

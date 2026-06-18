@@ -37,6 +37,9 @@
 	/* Surfaces */
 	--black: #000;
 	--image-bg: #ececec;
+	/* Surface escura "elevada" (ProductCard surface="elevated" sobre fundo escuro,
+	   ex.: PromoHighlight) — um degrau acima do near-black (#181818). */
+	--surface-elevated: #242424;
 
 	/* Cinema/editorial dark gradient stops */
 	--cinema-1: #2a2a2a;
@@ -421,6 +424,14 @@
 	.emach-cart-badge[data-pulse="true"] {
 		animation: none !important;
 	}
+	/* Saída do item do carrinho: a remoção é dirigida por setTimeout (LEAVE_MS em
+	   use-remove-with-undo), não por animationend — então neutralizar a animação
+	   aqui não quebra a remoção. */
+	.emach-cart-item,
+	.emach-cart-item[data-leaving="true"] {
+		transition: none !important;
+		animation: none !important;
+	}
 }
 
 /* ---------- Design system backgrounds ---------- */
@@ -655,6 +666,7 @@
 	--color-dark-red: #b01e0a;
 	--color-success: var(--success);
 	--color-success-text: var(--success-text);
+	--color-surface-elevated: var(--surface-elevated);
 	--color-warning: var(--warning);
 	--color-info: var(--info);
 	--color-amber: var(--amber);

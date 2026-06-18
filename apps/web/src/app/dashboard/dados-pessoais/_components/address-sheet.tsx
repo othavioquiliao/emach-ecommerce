@@ -143,7 +143,7 @@ export function AddressSheet({ mode, onClose }: AddressSheetProps) {
 					<SheetTitle className="font-semibold text-[20px] text-near-black">
 						{isEdit ? "Editar endereço" : "Novo endereço"}
 					</SheetTitle>
-					<SheetDescription className="text-[13px] text-gray-50">
+					<SheetDescription className="text-[13px] text-gray-60">
 						Preencha os dados de entrega.
 					</SheetDescription>
 				</SheetHeader>
@@ -413,7 +413,7 @@ function FieldShell({ children, errors, htmlFor, label }: FieldShellProps) {
 			<Label
 				className={cn(
 					"font-display font-semibold text-[11px] uppercase tracking-[0.14em]",
-					error ? "text-destructive" : "text-gray-50"
+					error ? "text-destructive" : "text-gray-60"
 				)}
 				htmlFor={htmlFor}
 			>
