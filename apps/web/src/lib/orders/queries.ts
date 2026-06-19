@@ -2,8 +2,9 @@ import { db } from "@emach/db";
 import type { OrderStatus } from "@emach/db/schema/orders";
 import { order, orderItem, orderStatusHistory } from "@emach/db/schema/orders";
 import { review } from "@emach/db/schema/reviews";
-import { toolImage } from "@emach/db/schema/tools";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
+
+import { primaryImageByToolId } from "@/lib/tool-images";
 
 export interface OrderPreviewItem {
 	id: string;
@@ -69,31 +70,6 @@ export interface OrderDetailData {
 	reviewedToolIds: string[];
 }
 
-/** Mapa toolId -> URL da imagem primária (menor sortOrder). */
-async function primaryImageByToolId(
-	toolIds: string[]
-): Promise<Map<string, string>> {
-	if (toolIds.length === 0) {
-		return new Map();
-	}
-	const rows = await db
-		.select({
-			toolId: toolImage.toolId,
-			url: toolImage.url,
-			sortOrder: toolImage.sortOrder,
-		})
-		.from(toolImage)
-		.where(inArray(toolImage.toolId, toolIds))
-		.orderBy(asc(toolImage.toolId), asc(toolImage.sortOrder));
-	const map = new Map<string, string>();
-	for (const r of rows) {
-		if (!map.has(r.toolId)) {
-			map.set(r.toolId, r.url); // primeira = menor sortOrder
-		}
-	}
-	return map;
-}
-
 export async function listClientOrders(
 	clientId: string
 ): Promise<OrderListItem[]> {
@@ -114,6 +90,7 @@ export async function listClientOrders(
 		.where(inArray(orderItem.orderId, orderIds));
 
 	const imageByTool = await primaryImageByToolId(
+		db,
 		Array.from(new Set(items.map((i) => i.toolId)))
 	);
 
@@ -167,6 +144,7 @@ export async function getClientOrderDetail(
 		.where(eq(orderItem.orderId, orderId));
 
 	const imageByTool = await primaryImageByToolId(
+		db,
 		Array.from(new Set(items.map((i) => i.toolId)))
 	);
 

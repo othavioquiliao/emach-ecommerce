@@ -2,13 +2,10 @@ import { db } from "@emach/db";
 import { category, toolCategory } from "@emach/db/schema/categories";
 import { stockLevel } from "@emach/db/schema/inventory";
 import { order, orderItem } from "@emach/db/schema/orders";
-import {
-	tool,
-	toolImage,
-	toolVariant,
-	type Voltage,
-} from "@emach/db/schema/tools";
-import { and, asc, eq, inArray, sql } from "drizzle-orm";
+import { tool, toolVariant, type Voltage } from "@emach/db/schema/tools";
+import { and, eq, inArray, sql } from "drizzle-orm";
+
+import { primaryImageByToolId } from "@/lib/tool-images";
 
 export interface RebuyItem {
 	available: boolean;
@@ -53,7 +50,7 @@ export async function getRebuyItems(
 	const variantIds = items.map((i) => i.variantId);
 	const toolIds = Array.from(new Set(items.map((i) => i.toolId)));
 
-	const [variants, tools, images, cats, stock] = await Promise.all([
+	const [variants, tools, imageByTool, cats, stock] = await Promise.all([
 		db
 			.select({
 				id: toolVariant.id,
@@ -68,11 +65,7 @@ export async function getRebuyItems(
 			.select({ id: tool.id, name: tool.name, slug: tool.slug })
 			.from(tool)
 			.where(inArray(tool.id, toolIds)),
-		db
-			.select({ toolId: toolImage.toolId, url: toolImage.url })
-			.from(toolImage)
-			.where(inArray(toolImage.toolId, toolIds))
-			.orderBy(asc(toolImage.toolId), asc(toolImage.sortOrder)),
+		primaryImageByToolId(db, toolIds),
 		db
 			.select({
 				toolId: toolCategory.toolId,
@@ -94,12 +87,6 @@ export async function getRebuyItems(
 
 	const variantById = new Map(variants.map((v) => [v.id, v]));
 	const toolById = new Map(tools.map((t) => [t.id, t]));
-	const imageByTool = new Map<string, string>();
-	for (const im of images) {
-		if (!imageByTool.has(im.toolId)) {
-			imageByTool.set(im.toolId, im.url);
-		}
-	}
 	const catByTool = new Map<string, { name: string; slug: string }>();
 	for (const c of cats) {
 		if (!catByTool.has(c.toolId)) {
