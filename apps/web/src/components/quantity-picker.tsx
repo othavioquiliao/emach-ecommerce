@@ -23,7 +23,9 @@ export const QuantityPicker = ({
 }: QuantityPickerProps) => {
 	const decrement = () => onChange(Math.max(min, value - 1));
 	const increment = () => onChange(Math.min(max, value + 1));
-	const cell = size === "sm" ? "h-8 w-7" : "h-10 w-8";
+	// Touch target ≥44px (WCAG 2.5.5 / padrão do projeto p/ mobile). `sm` (drawer)
+	// fica em 40px por densidade — acima do piso WCAG 2.2 AA (24px).
+	const cell = size === "sm" ? "size-10" : "size-11";
 
 	return (
 		<div className={cn("flex items-center", className)}>

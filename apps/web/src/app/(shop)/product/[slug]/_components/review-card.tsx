@@ -51,9 +51,9 @@ export function ReviewCard({
 				</time>
 			</header>
 			{review.title && (
-				<h4 className="mb-1 font-semibold text-[14px] text-white">
+				<h3 className="mb-1 font-semibold text-[14px] text-white">
 					{review.title}
-				</h4>
+				</h3>
 			)}
 			{review.body && (
 				<p className="text-[13.5px] text-white/72 leading-relaxed">

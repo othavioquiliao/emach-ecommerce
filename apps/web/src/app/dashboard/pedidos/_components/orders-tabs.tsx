@@ -37,7 +37,7 @@ export function OrdersTabs({ orders }: { orders: OrderListItem[] }) {
 						value={tab}
 					>
 						<span>{ORDER_TAB_LABEL[tab]}</span>
-						<span className="ml-1.5 font-normal text-gray-50">
+						<span className="ml-1.5 font-normal text-gray-60">
 							{counts[tab]}
 						</span>
 					</TabsTrigger>

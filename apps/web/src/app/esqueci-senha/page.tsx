@@ -40,7 +40,7 @@ export default function ForgotPasswordPage() {
 				<h1 className="font-display font-medium text-[32px] text-near-black leading-tight">
 					Esqueci a senha
 				</h1>
-				<p className="mt-3 text-[14px] text-gray-50">
+				<p className="mt-3 text-[14px] text-gray-60">
 					Informe seu e-mail. Se houver uma conta, enviaremos um link para
 					redefinir sua senha.
 				</p>
@@ -97,9 +97,9 @@ export default function ForgotPasswordPage() {
 					</form.Subscribe>
 				</form>
 
-				<div className="mt-6 text-[13px] text-gray-50">
+				<div className="mt-6 text-[13px]">
 					<Link
-						className="text-emach-red hover:underline"
+						className="text-emach-red-hover hover:underline"
 						href={{ pathname: "/login" }}
 					>
 						Voltar para o login

@@ -12,7 +12,7 @@ import type { ComponentProps } from "react";
 import { PageContainer } from "@/components/page-container";
 
 const navLinkClassName =
-	"rounded-[2px] font-display font-medium text-[14px] text-gray-20 uppercase tracking-[0.06em] no-underline transition-colors duration-150 ease-out hover:text-emach-red focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3";
+	"rounded-[2px] font-display font-medium text-[14px] text-gray-20 uppercase tracking-[0.06em] no-underline transition-colors duration-150 ease-out hover:text-emach-red-on-dark focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emach-red focus-visible:ring-offset-2 focus-visible:ring-offset-cinema-3";
 
 const navLinks: { href: Route; label: string }[] = [
 	{ href: "/catalog", label: "Catálogo" },
@@ -112,8 +112,8 @@ export async function SiteFooter() {
 					</nav>
 				</div>
 
-				<div className="mt-8 flex flex-col gap-5 border-[#1f1f1f] border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
-					<p className="text-[12px] text-gray-60 leading-relaxed">
+				<div className="mt-8 flex flex-col gap-5 border-white/10 border-t pt-5 sm:flex-row sm:items-center sm:justify-between">
+					<p className="text-[12px] text-gray-55 leading-relaxed">
 						<span className="font-medium text-gray-20">
 							EMACH Ferramentas Gerais LTDA
 						</span>

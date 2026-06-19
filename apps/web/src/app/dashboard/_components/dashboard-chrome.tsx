@@ -14,7 +14,10 @@ export async function DashboardChrome({
 	const session = await requireCurrentClient();
 
 	return (
-		<main className="grid h-[calc(100vh-3.5rem)] w-full grid-cols-1 md:grid-cols-[260px_1fr]">
+		<main
+			className="grid h-[calc(100vh-3.5rem)] w-full grid-cols-1 md:grid-cols-[260px_1fr]"
+			id="main-content"
+		>
 			<DashboardSidebar
 				userEmail={session.user.email}
 				userImage={session.user.image}

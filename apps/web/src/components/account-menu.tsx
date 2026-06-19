@@ -65,7 +65,7 @@ export function AccountMenu() {
 							src={session.user.image}
 						/>
 					)}
-					<AvatarFallback className="flex items-center border-emach-red bg-white/10 text-md text-white">
+					<AvatarFallback className="flex items-center border-emach-red bg-white/10 text-base text-white">
 						{getInitials(session.user.name ?? "")}
 					</AvatarFallback>
 				</Avatar>
@@ -84,7 +84,7 @@ export function AccountMenu() {
 						</AvatarFallback>
 					</Avatar>
 					<div className="min-w-0">
-						<div className="font-display font-semibold text-[9.5px] text-emach-red uppercase tracking-[0.16em]">
+						<div className="font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.16em]">
 							Minha conta
 						</div>
 						<div className="truncate font-semibold text-[14px] leading-tight">

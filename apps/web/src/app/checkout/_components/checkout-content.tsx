@@ -15,7 +15,7 @@ import type { Route } from "next";
 import NextImage from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import z from "zod";
 import { createOrderAction } from "@/app/checkout/_actions/create-order";
@@ -163,13 +163,12 @@ export function CheckoutContent({
 		})();
 	}, [items, reconcile]);
 
-	const { orderItems, subtotal } = useMemo(() => {
-		const sub = items.reduce(
-			(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
-			0
-		);
-		return { orderItems: items, subtotal: sub };
-	}, [items]);
+	// React Compiler memoiza derivações automaticamente — sem useMemo manual.
+	const orderItems = items;
+	const subtotal = items.reduce(
+		(sum, item) => sum + numericToCents(item.priceAmount) * item.quantity,
+		0
+	);
 
 	const shipping = selectedShippingCents ?? 0;
 	const [coupon, setCoupon] = useState<{
@@ -364,6 +363,7 @@ export function CheckoutContent({
 					>
 						<div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
 							<TextField
+								autoComplete="name"
 								form={form}
 								label="Nome completo"
 								name="name"
@@ -371,6 +371,7 @@ export function CheckoutContent({
 								transform={onlyLetters}
 							/>
 							<TextField
+								autoComplete="email"
 								form={form}
 								label="E-mail"
 								name="email"
@@ -388,6 +389,7 @@ export function CheckoutContent({
 										label="Telefone"
 									>
 										<input
+											autoComplete="tel"
 											className="emach-input"
 											id="phone"
 											onBlur={field.handleBlur}
@@ -410,6 +412,7 @@ export function CheckoutContent({
 										label="CPF ou CNPJ"
 									>
 										<input
+											autoComplete="off"
 											className="emach-input"
 											id="document"
 											onBlur={field.handleBlur}
@@ -470,6 +473,7 @@ export function CheckoutContent({
 														label="CEP"
 													>
 														<input
+															autoComplete="postal-code"
 															className="emach-input"
 															id="zipCode"
 															onBlur={field.handleBlur}
@@ -485,6 +489,7 @@ export function CheckoutContent({
 												)}
 											</form.Field>
 											<TextField
+												autoComplete="address-line1"
 												form={form}
 												label="Rua"
 												name="newAddress.street"
@@ -493,6 +498,7 @@ export function CheckoutContent({
 										</div>
 										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[160px_1fr]">
 											<TextField
+												autoComplete="address-line2"
 												form={form}
 												label="Número"
 												name="newAddress.number"
@@ -500,6 +506,7 @@ export function CheckoutContent({
 												transform={onlyDigits}
 											/>
 											<TextField
+												autoComplete="off"
 												form={form}
 												label="Complemento"
 												name="newAddress.complement"
@@ -507,6 +514,7 @@ export function CheckoutContent({
 											/>
 										</div>
 										<TextField
+											autoComplete="off"
 											form={form}
 											label="Bairro"
 											name="newAddress.neighborhood"
@@ -514,6 +522,7 @@ export function CheckoutContent({
 										/>
 										<div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_120px]">
 											<TextField
+												autoComplete="address-level2"
 												form={form}
 												label="Cidade"
 												name="newAddress.city"
@@ -521,6 +530,7 @@ export function CheckoutContent({
 												transform={onlyLetters}
 											/>
 											<TextField
+												autoComplete="address-level1"
 												form={form}
 												label="Estado"
 												name="newAddress.state"
@@ -659,7 +669,7 @@ export function CheckoutContent({
 									<span>−{fmtBRL(discount)}</span>
 								</div>
 							) : null}
-							<div className="space-y-2">
+							<div aria-atomic="true" aria-live="polite" className="space-y-2">
 								<span className="text-gray-60 text-sm">Frete</span>
 								<ShippingOptions
 									onRetry={() => setQuoteNonce((n) => n + 1)}
@@ -705,15 +715,30 @@ interface FieldShellProps {
 }
 
 function FieldShell({ children, errors, htmlFor, label }: FieldShellProps) {
+	const errorId = `${htmlFor}-error`;
+	const hasError = errors.some((e) => e?.message);
 	return (
 		<div className="emach-field">
 			<label className="emach-field__label" htmlFor={htmlFor}>
 				{label}
 			</label>
-			{children}
+			{hasError
+				? React.cloneElement(
+						children as React.ReactElement<React.HTMLAttributes<HTMLElement>>,
+						{
+							"aria-describedby": errorId,
+						}
+					)
+				: children}
 			{errors.map((error, idx) =>
 				error?.message ? (
-					<span className="emach-field__error" key={`${error.message}-${idx}`}>
+					<span
+						aria-live="polite"
+						className="emach-field__error"
+						id={idx === 0 ? errorId : undefined}
+						key={`${error.message}-${idx}`}
+						role="alert"
+					>
 						{error.message}
 					</span>
 				) : null
@@ -723,6 +748,7 @@ function FieldShell({ children, errors, htmlFor, label }: FieldShellProps) {
 }
 
 interface TextFieldProps {
+	autoComplete?: string;
 	// biome-ignore lint/suspicious/noExplicitAny: tanstack form generic
 	form: any;
 	label: string;
@@ -737,6 +763,7 @@ function TextField({
 	form,
 	label,
 	name,
+	autoComplete,
 	placeholder,
 	type,
 	transform,
@@ -759,6 +786,7 @@ function TextField({
 					label={label}
 				>
 					<input
+						autoComplete={autoComplete}
 						className="emach-input"
 						id={name}
 						onBlur={field.handleBlur}
@@ -811,14 +839,22 @@ function ConsentField({
 				/>
 				<span>
 					{label}
-					{required && <span className="ml-1 text-warning">*</span>}
+					{required && (
+						<span
+							aria-label="obrigatório"
+							className="ml-1 text-emach-red-hover"
+							role="img"
+						>
+							*
+						</span>
+					)}
 				</span>
 			</label>
 			{touched &&
 				errors.map((error, idx) =>
 					error?.message ? (
 						<p
-							className="mt-1 text-warning text-xs"
+							className="mt-1 text-emach-red-hover text-xs"
 							key={`${error.message}-${idx}`}
 						>
 							{error.message}

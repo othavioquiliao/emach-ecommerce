@@ -4,7 +4,7 @@ import { useRouter } from "next/navigation";
 import { useTransition } from "react";
 import { toast } from "sonner";
 import { EmachButton } from "@/components/emach-button";
-import { useCart } from "@/lib/cart-context";
+import { useCartActions } from "@/lib/cart-context";
 import { rebuyAction } from "../../_actions/orders";
 
 export function RebuyButton({
@@ -14,7 +14,7 @@ export function RebuyButton({
 	orderId: string;
 	variant?: "outline" | "outline-light" | "primary" | "ghost";
 }) {
-	const { add } = useCart();
+	const { add } = useCartActions();
 	const [pending, start] = useTransition();
 	const router = useRouter();
 

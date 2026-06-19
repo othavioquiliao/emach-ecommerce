@@ -135,7 +135,7 @@ export function OrderTracking({
 			/>
 
 			<button
-				aria-controls="order-history"
+				{...(open ? { "aria-controls": "order-history" } : {})}
 				aria-expanded={open}
 				className={cn(
 					"inline-flex items-center gap-1.5 font-semibold text-[13px] text-white/65 hover:text-white",

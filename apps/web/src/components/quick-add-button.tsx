@@ -2,7 +2,7 @@
 
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
-import { useCart } from "@/lib/cart-context";
+import { useCartActions } from "@/lib/cart-context";
 import type { CartItemSnapshot } from "@/lib/cart-store";
 
 interface QuickAddButtonProps {
@@ -16,7 +16,7 @@ interface QuickAddButtonProps {
  * igual ao fluxo da página de produto.
  */
 export function QuickAddButton({ className, item }: QuickAddButtonProps) {
-	const { add } = useCart();
+	const { add } = useCartActions();
 
 	return (
 		<button

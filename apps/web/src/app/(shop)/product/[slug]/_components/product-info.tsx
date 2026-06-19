@@ -12,14 +12,14 @@ import {
 	Zap,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { toast } from "sonner";
 import { EmachButton } from "@/components/emach-button";
 import { FreightCalculator } from "@/components/freight-calculator";
 import { ProductRating } from "@/components/product-rating";
 import { QuantityPicker } from "@/components/quantity-picker";
 import { SectionLabel } from "@/components/section-label";
-import { useCart } from "@/lib/cart-context";
+import { useCartActions } from "@/lib/cart-context";
 import type { CartItemSnapshot } from "@/lib/cart-store";
 import { fmtBRL, fmtNumericBRL, numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
@@ -65,16 +65,13 @@ export function ProductInfo({
 	primaryCategorySlug,
 	primaryImageUrl,
 }: ProductInfoProps) {
-	const orderedVariants = useMemo(() => {
-		const sorted = [...variants];
-		sorted.sort((a, b) => {
-			if (a.isDefault !== b.isDefault) {
-				return a.isDefault ? -1 : 1;
-			}
-			return a.sortOrder - b.sortOrder;
-		});
-		return sorted;
-	}, [variants]);
+	// React Compiler memoiza derivações automaticamente — sem useMemo manual.
+	const orderedVariants = [...variants].sort((a, b) => {
+		if (a.isDefault !== b.isDefault) {
+			return a.isDefault ? -1 : 1;
+		}
+		return a.sortOrder - b.sortOrder;
+	});
 
 	const initialVariant = orderedVariants[0];
 	const [selectedVariantId, setSelectedVariantId] = useState<string>(
@@ -84,7 +81,7 @@ export function ProductInfo({
 	const [shared, setShared] = useState(false);
 	const [showSticky, setShowSticky] = useState(false);
 	const buyActionsRef = useRef<HTMLDivElement>(null);
-	const { add, clear } = useCart();
+	const { add, clear } = useCartActions();
 	const router = useRouter();
 
 	// Mostra a barra sticky só depois que a buy box inline foi rolada pra cima
@@ -225,13 +222,13 @@ export function ProductInfo({
 						{fmtNumericBRL(finalAmount)}
 					</span>
 					{discounted != null && (
-						<span className="text-[16px] text-gray-50 tabular-nums line-through">
+						<span className="text-[16px] text-gray-60 tabular-nums line-through">
 							{fmtNumericBRL(selected.priceAmount)}
 						</span>
 					)}
 				</div>
 				{savingsCents > 0 && (
-					<div className="mt-1.5 font-semibold text-[13px] text-success">
+					<div className="mt-1.5 font-semibold text-[13px] text-success-text">
 						Você economiza {fmtBRL(savingsCents)}
 					</div>
 				)}
@@ -241,8 +238,8 @@ export function ProductInfo({
 			</div>
 
 			{orderedVariants.length > 1 && (
-				<div>
-					<div className="mb-2.5 font-semibold text-md">Voltagem</div>
+				<fieldset className="m-0 min-w-0 border-0 p-0">
+					<legend className="mb-2.5 font-semibold text-base">Voltagem</legend>
 					<div className="flex flex-wrap gap-2">
 						{orderedVariants.map((v) => {
 							const variantStock = stockByVariant[v.id] ?? false;
@@ -251,8 +248,9 @@ export function ProductInfo({
 								applyDiscount(v.priceAmount, activePromotion) ?? v.priceAmount;
 							return (
 								<button
+									aria-pressed={isActive}
 									className={cn(
-										"flex min-w-[120px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors",
+										"flex min-w-[120px] flex-col gap-1 border-2 px-4 py-3 text-left transition-colors focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2",
 										!variantStock &&
 											"cursor-not-allowed border-gray-20 border-dashed opacity-45",
 										variantStock &&
@@ -272,8 +270,10 @@ export function ProductInfo({
 											{v.voltage ?? "Padrão"}
 										</span>
 										{!variantStock && (
-											<span className="border border-emach-red/60 px-1.5 font-display text-[9px] text-emach-red uppercase tracking-[0.08em]">
-												Esgotado
+											<span className="opacity-100">
+												<span className="border border-emach-red/60 px-1.5 font-display text-[9px] text-emach-red-hover uppercase tracking-[0.08em]">
+													Esgotado
+												</span>
 											</span>
 										)}
 									</span>
@@ -291,7 +291,7 @@ export function ProductInfo({
 							);
 						})}
 					</div>
-				</div>
+				</fieldset>
 			)}
 
 			<div className="space-y-3" ref={buyActionsRef}>

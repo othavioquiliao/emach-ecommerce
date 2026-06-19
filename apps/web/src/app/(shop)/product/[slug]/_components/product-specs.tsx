@@ -53,14 +53,14 @@ export function ProductSpecs({
 		rest.length % 2 === 0 ? rest.length - 2 : rest.length - 1;
 
 	return (
-		<section className="py-14">
+		<section aria-label="Especificações do produto" className="py-14">
 			{/* Largura alinhada ao topo (galeria w-1/2 + buy box w-[480px],
 			    centrados) — replica 50vw + 480px, com teto p/ telas estreitas. */}
 			<div className="mx-auto w-[calc(50%_+_480px)] max-w-[calc(100%_-_2.5rem)]">
 				<div className="mb-5 flex items-baseline justify-between gap-6">
 					<SectionLabel tone="accent">Ficha da ferramenta</SectionLabel>
 					{categoryName && (
-						<span className="font-display font-semibold text-[11.5px] text-gray-50 uppercase tracking-[0.1em]">
+						<span className="font-display font-semibold text-[11.5px] text-gray-60 uppercase tracking-[0.1em]">
 							{categoryName}
 						</span>
 					)}
@@ -73,7 +73,7 @@ export function ProductSpecs({
 				)}
 
 				{attributes.length === 0 ? (
-					<p className="text-[15px] text-gray-50">
+					<p className="text-[15px] text-gray-60">
 						Nenhuma especificação cadastrada.
 					</p>
 				) : (
@@ -112,7 +112,7 @@ export function ProductSpecs({
 
 						{rest.length > 0 && (
 							<div className="mt-3.5 bg-near-black text-white">
-								<div className="border-white/15 border-b px-6 py-4">
+								<div className="border-white/25 border-b px-6 py-4">
 									<SectionLabel tone="accent">
 										Especificações completas
 									</SectionLabel>
@@ -120,7 +120,7 @@ export function ProductSpecs({
 								<div className="grid grid-cols-1 sm:grid-cols-2">
 									{rest.map((attr, i) => (
 										<div
-											className={`flex items-baseline justify-between gap-4 border-white/12 border-b px-6 py-3.5 ${
+											className={`flex items-baseline justify-between gap-4 border-white/25 border-b px-6 py-3.5 ${
 												i % 2 === 0 ? "sm:border-r" : ""
 											} ${i >= lastRowStart ? "sm:border-b-0" : ""} ${
 												i === rest.length - 1 ? "max-sm:border-b-0" : ""

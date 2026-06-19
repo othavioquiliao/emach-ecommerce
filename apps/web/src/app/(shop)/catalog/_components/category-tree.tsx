@@ -52,6 +52,12 @@ export function CategoryTree({
 		const isActive = node.slug === activeSlug;
 		const count = counts?.[node.id];
 		const indent = 4 + depth * 14;
+		let linkClass = "text-gray-60";
+		if (isActive) {
+			linkClass = "font-bold text-emach-red-deep";
+		} else if (depth === 0) {
+			linkClass = "font-semibold text-near-black";
+		}
 
 		return (
 			<div key={node.id}>
@@ -62,7 +68,7 @@ export function CategoryTree({
 							aria-label={
 								isOpen ? `Recolher ${node.name}` : `Expandir ${node.name}`
 							}
-							className="flex size-6 shrink-0 items-center justify-center text-gray-50 hover:text-near-black"
+							className="flex size-6 shrink-0 items-center justify-center text-gray-60 hover:text-near-black"
 							onClick={() => toggle(node.id)}
 							type="button"
 						>
@@ -80,11 +86,7 @@ export function CategoryTree({
 						aria-current={isActive ? "page" : undefined}
 						className={cn(
 							"flex flex-1 items-center gap-2 py-1.5 pr-2 text-left text-[14px] transition-colors hover:text-near-black",
-							isActive
-								? "font-bold text-emach-red-deep"
-								: depth === 0
-									? "font-semibold text-near-black"
-									: "text-gray-60"
+							linkClass
 						)}
 						onClick={() => select(node)}
 						style={{ paddingLeft: `${indent}px` }}
@@ -92,7 +94,7 @@ export function CategoryTree({
 					>
 						<span className="flex-1">{node.name}</span>
 						{count != null && (
-							<span className="text-[11px] text-gray-50 tabular-nums">
+							<span className="text-[11px] text-gray-60 tabular-nums">
 								{count}
 							</span>
 						)}
@@ -121,17 +123,17 @@ export function CategoryTree({
 			>
 				Todas
 			</button>
-			{tree.map((root) =>
-				activePath.has(root.id) ? (
-					<div className="border-emach-red border-l-2" key={root.id}>
-						{renderNode(root, 0)}
-					</div>
-				) : (
-					<div className="border-l-2 border-l-transparent" key={root.id}>
-						{renderNode(root, 0)}
-					</div>
-				)
-			)}
+			{tree.map((root) => (
+				<div className="relative" key={root.id}>
+					{activePath.has(root.id) && (
+						<span
+							aria-hidden="true"
+							className="absolute top-0 left-0 h-full w-0.5 bg-emach-red"
+						/>
+					)}
+					{renderNode(root, 0)}
+				</div>
+			))}
 		</nav>
 	);
 }

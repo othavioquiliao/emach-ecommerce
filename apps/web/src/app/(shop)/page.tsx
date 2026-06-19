@@ -139,11 +139,11 @@ export default async function HomePage() {
 		<>
 			<SiteHeader overlay />
 
-			<main>
+			<main id="main-content">
 				<HeroCarousel banners={banners} />
 
 				{rootCategories.length > 0 && (
-					<section className="bg-gray-10">
+					<section aria-label="Categorias" className="bg-gray-10">
 						<PageContainer className="px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
 							<SectionHeader
 								label="Categorias"
@@ -167,7 +167,10 @@ export default async function HomePage() {
 				)}
 
 				{recentTools.length > 0 && (
-					<section className="bg-gray-10 px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
+					<section
+						aria-label="Novidades"
+						className="bg-gray-10 px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18"
+					>
 						<PageContainer>
 							<ProductCarousel
 								label="Novidades"

@@ -38,7 +38,7 @@ export function StickyBuyBar({
 			className={cn(
 				// z-20: acima do conteúdo, abaixo do menu mobile (z-25) — senão a barra
 				// aparece sobre o menu fullscreen aberto no produto.
-				"fixed inset-x-0 bottom-0 z-20 border-border border-t bg-white pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_rgba(0,0,0,0.06)] transition-transform duration-300 ease-out lg:hidden",
+				"fixed inset-x-0 bottom-0 z-20 border-border border-t bg-near-black pb-[env(safe-area-inset-bottom)] shadow-[0_-6px_20px_rgba(0,0,0,0.18)] transition-transform duration-300 ease-out lg:hidden",
 				visible ? "translate-y-0" : "pointer-events-none translate-y-full"
 			)}
 			// `inert` quando oculta tira o botão do tab-order/a11y-tree — sem ele o
@@ -56,10 +56,10 @@ export function StickyBuyBar({
 				</div>
 
 				<div className="min-w-0 flex-1">
-					<div className="truncate font-display font-semibold text-[10px] text-gray-60 uppercase tracking-[0.12em]">
+					<div className="truncate font-display font-semibold text-[10px] text-white/55 uppercase tracking-[0.12em]">
 						{variantLabel}
 					</div>
-					<div className="whitespace-nowrap font-bold font-display text-[21px] text-near-black tabular-nums leading-[1.05]">
+					<div className="whitespace-nowrap font-bold font-display text-[21px] text-white tabular-nums leading-[1.05]">
 						{priceLabel}
 					</div>
 				</div>

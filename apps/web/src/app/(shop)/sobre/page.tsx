@@ -126,7 +126,7 @@ export default async function AboutPage() {
 		<>
 			<SiteHeader />
 
-			<main className="bg-gray-10">
+			<main className="bg-gray-10" id="main-content">
 				<section className="relative min-h-[calc(100svh-56px)] overflow-hidden bg-black text-white">
 					<div
 						aria-hidden="true"

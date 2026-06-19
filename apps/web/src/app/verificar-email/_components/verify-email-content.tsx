@@ -33,13 +33,17 @@ export function VerifyEmailContent() {
 
 	return (
 		<main className="flex min-h-svh items-center justify-center bg-gray-10 px-6 py-20">
-			<div className="w-full max-w-[400px] text-center">
+			<div
+				aria-atomic="true"
+				aria-live="polite"
+				className="w-full max-w-[400px] text-center"
+			>
 				{status === "loading" && (
 					<>
 						<h1 className="font-display font-medium text-[28px] text-near-black">
 							Verificando…
 						</h1>
-						<p className="mt-3 text-[14px] text-gray-50">
+						<p className="mt-3 text-[14px] text-gray-60">
 							Aguarde enquanto confirmamos seu e-mail.
 						</p>
 					</>
@@ -49,9 +53,15 @@ export function VerifyEmailContent() {
 						<h1 className="font-display font-medium text-[28px] text-near-black">
 							E-mail confirmado
 						</h1>
-						<p className="mt-3 text-[14px] text-gray-50">
+						<p className="mt-3 text-[14px] text-gray-60">
 							Redirecionando para o painel…
 						</p>
+						<Link
+							className="mt-6 inline-block text-[13px] text-emach-red-hover hover:underline"
+							href={{ pathname: "/login" }}
+						>
+							Ir para o login agora
+						</Link>
 					</>
 				)}
 				{status === "error" && (
@@ -59,12 +69,12 @@ export function VerifyEmailContent() {
 						<h1 className="font-display font-medium text-[28px] text-near-black">
 							Link inválido
 						</h1>
-						<p className="mt-3 text-[14px] text-gray-50">
+						<p className="mt-3 text-[14px] text-gray-60">
 							Este link é inválido ou expirou. Faça login para reenviar o e-mail
 							de confirmação.
 						</p>
 						<Link
-							className="mt-6 inline-block text-[13px] text-emach-red hover:underline"
+							className="mt-6 inline-block text-[13px] text-emach-red-hover hover:underline"
 							href={{ pathname: "/login" }}
 						>
 							Ir para o login

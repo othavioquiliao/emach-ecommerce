@@ -58,11 +58,11 @@ export function ResetPasswordForm() {
 					<h1 className="font-display font-medium text-[32px] text-near-black leading-tight">
 						Link inválido
 					</h1>
-					<p className="mt-3 text-[14px] text-gray-50">
+					<p className="mt-3 text-[14px] text-gray-60">
 						Este link está incompleto. Solicite um novo e-mail de redefinição.
 					</p>
 					<Link
-						className="mt-6 inline-block text-[13px] text-emach-red hover:underline"
+						className="mt-6 inline-block text-[13px] text-emach-red-hover hover:underline"
 						href={{ pathname: "/esqueci-senha" }}
 					>
 						Solicitar novo link
@@ -73,12 +73,12 @@ export function ResetPasswordForm() {
 	}
 
 	return (
-		<main className="flex min-h-svh items-center justify-center bg-white px-6 py-20">
+		<main className="flex min-h-svh items-center justify-center bg-gray-10 px-6 py-20">
 			<div className="w-full max-w-[400px]">
 				<h1 className="font-display font-medium text-[32px] text-near-black leading-tight">
 					Redefinir senha
 				</h1>
-				<p className="mt-3 text-[14px] text-gray-50">
+				<p className="mt-3 text-[14px] text-gray-60">
 					Crie uma nova senha para sua conta.
 				</p>
 

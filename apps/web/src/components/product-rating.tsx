@@ -28,7 +28,7 @@ export function ProductRating({
 					return (
 						<Star
 							className={
-								isFilled ? "fill-foreground text-foreground" : "text-gray-30"
+								isFilled ? "fill-foreground text-foreground" : "text-gray-20"
 							}
 							key={position}
 							size={size}

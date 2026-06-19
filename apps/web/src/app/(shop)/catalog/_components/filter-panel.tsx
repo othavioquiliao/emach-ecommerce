@@ -60,6 +60,7 @@ export function FilterPanel({
 				<div className="mb-2.5 font-semibold text-[13px]">Faixa de preço</div>
 				<div className="flex items-center gap-2">
 					<input
+						aria-label="Preço mínimo"
 						className="emach-input emach-input--sm w-full"
 						inputMode="numeric"
 						onBlur={onApplyPrice}
@@ -75,6 +76,7 @@ export function FilterPanel({
 					/>
 					<span className="text-[13px] text-gray-60">—</span>
 					<input
+						aria-label="Preço máximo"
 						className="emach-input emach-input--sm w-full"
 						inputMode="numeric"
 						onBlur={onApplyPrice}

@@ -19,12 +19,18 @@ export function ReviewItemButton({
 	const [open, setOpen] = useState(false);
 	if (reviewed) {
 		return (
-			<span className="font-semibold text-[12px] text-success">Avaliado ✓</span>
+			<span className="font-semibold text-[12px] text-success-on-dark">
+				Avaliado ✓
+			</span>
 		);
 	}
 	return (
 		<>
-			<EmachButton onClick={() => setOpen(true)} size="sm" variant="outline">
+			<EmachButton
+				onClick={() => setOpen(true)}
+				size="sm"
+				variant="outline-light"
+			>
 				Avaliar
 			</EmachButton>
 			<ReviewSheet

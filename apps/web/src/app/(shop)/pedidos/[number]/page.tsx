@@ -62,7 +62,7 @@ export default function OrderConfirmationPage({
 
 function OrderConfirmationSkeleton() {
 	return (
-		<main>
+		<main id="main-content">
 			<PageContainer className="py-12">
 				<div className="h-[60vh] w-full animate-pulse bg-gray-20/40" />
 			</PageContainer>
@@ -98,7 +98,7 @@ async function OrderConfirmationContent({
 	const address = (orderRow.shippingAddress ?? {}) as AddressSnapshot;
 
 	return (
-		<main>
+		<main id="main-content">
 			<PageContainer className="py-12">
 				<div className="mb-8">
 					<div className="font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.14em]">

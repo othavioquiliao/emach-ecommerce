@@ -167,11 +167,7 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 		query.trim().length >= 2 && !isLoading && results.length === 0;
 
 	return (
-		<div
-			aria-modal="true"
-			className="fixed inset-0 z-100 flex items-start justify-center bg-black/60 pt-20"
-			role="dialog"
-		>
+		<div className="fixed inset-0 z-100 flex items-start justify-center bg-black/60 pt-20">
 			<button
 				aria-label="Fechar busca"
 				className="absolute inset-0 cursor-default border-none bg-transparent"
@@ -179,8 +175,11 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 				type="button"
 			/>
 			<div
+				aria-label="Busca de produtos"
+				aria-modal="true"
 				className="relative w-[720px] max-w-[90%] rounded-[2px] bg-white p-7"
 				ref={dialogRef}
+				role="dialog"
 			>
 				<div className="flex items-center gap-3 border-border border-b pb-3">
 					<Search className="text-near-black" size={20} />
@@ -202,7 +201,15 @@ export function SearchOverlay({ open, onClose }: SearchOverlayProps) {
 					</button>
 				</div>
 
-				<div className="mt-4">
+				<div aria-live="polite" className="mt-4">
+					<span className="sr-only">
+						{!isLoading && query.trim().length >= 2 && results.length === 0
+							? "Nenhum resultado encontrado"
+							: ""}
+						{!isLoading && query.trim().length >= 2 && results.length > 0
+							? `${results.length} resultado${results.length === 1 ? "" : "s"} encontrado${results.length === 1 ? "" : "s"}`
+							: ""}
+					</span>
 					{results.length === 0 && !query && (
 						<div className="space-y-5">
 							{recent.length > 0 && (

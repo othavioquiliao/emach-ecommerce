@@ -14,7 +14,7 @@ function VerifyEmailFallback() {
 				<h1 className="font-display font-medium text-[28px] text-near-black">
 					Verificando…
 				</h1>
-				<p className="mt-3 text-[14px] text-gray-50">
+				<p className="mt-3 text-[14px] text-gray-60">
 					Aguarde enquanto confirmamos seu e-mail.
 				</p>
 			</div>

@@ -515,7 +515,12 @@ function DocumentCard({
 	return (
 		<CardShell>
 			<form className="w-full" onSubmit={handleSubmit}>
-				<FieldLabel>Documento</FieldLabel>
+				<label
+					className="font-display font-semibold text-[12px] text-gray-50 uppercase tracking-[0.14em]"
+					htmlFor="document-input"
+				>
+					{accountType === "PJ" ? "CNPJ" : "CPF"}
+				</label>
 				<ToggleGroup
 					className="mt-2 mb-3 inline-flex rounded-none border border-white/30 text-white"
 					onValueChange={handleAccountTypeChange}
@@ -537,6 +542,7 @@ function DocumentCard({
 				<Input
 					autoFocus
 					className="rounded-none border-white/20 bg-white/5 text-[15px] text-white placeholder:text-gray-50"
+					id="document-input"
 					onChange={(e) => setValue(maskCpfCnpj(e.target.value))}
 					placeholder={
 						accountType === "PJ" ? "00.000.000/0000-00" : "000.000.000-00"

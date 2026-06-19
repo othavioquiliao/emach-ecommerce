@@ -26,7 +26,7 @@ export function StarRating({ rating, className, size = 13 }: StarRatingProps) {
 						className={
 							isFilled
 								? "fill-emach-red text-emach-red"
-								: "fill-transparent text-gray-30"
+								: "fill-transparent text-gray-20"
 						}
 						key={position}
 						size={size}

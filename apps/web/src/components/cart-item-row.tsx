@@ -74,7 +74,13 @@ export function CartItemRow({
 						{item.name}
 					</Link>
 				) : (
-					<div className="mt-1 font-medium text-[16px]">{item.name}</div>
+					<Link
+						className="mt-1 block font-medium text-[16px] hover:underline"
+						href={`/product/${item.slug}`}
+						onClick={onLinkClick}
+					>
+						{item.name}
+					</Link>
 				)}
 				{showVoltageMeta && (
 					<div
@@ -90,6 +96,7 @@ export function CartItemRow({
 					<div className="mt-3 flex flex-wrap items-center gap-4">
 						<QuantityPicker onChange={onQuantityChange} value={item.quantity} />
 						<button
+							aria-label={`Remover ${item.name} do carrinho`}
 							className="cursor-pointer border-none bg-transparent text-[12px] text-gray-60 underline hover:text-near-black"
 							onClick={onRemove}
 							type="button"

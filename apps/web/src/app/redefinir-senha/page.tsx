@@ -14,7 +14,7 @@ function ResetPasswordFallback() {
 				<h1 className="font-display font-medium text-[32px] text-near-black leading-tight">
 					Redefinir senha
 				</h1>
-				<p className="mt-3 text-[14px] text-gray-50">Carregando…</p>
+				<p className="mt-3 text-[14px] text-gray-60">Carregando…</p>
 			</div>
 		</main>
 	);

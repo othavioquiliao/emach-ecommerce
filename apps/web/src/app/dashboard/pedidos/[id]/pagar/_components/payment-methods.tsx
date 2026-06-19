@@ -96,12 +96,14 @@ export function PaymentMethods({
 				<TabsContent className="pt-5" value="cartao">
 					<div className="space-y-3 border border-border p-6">
 						<input
+							aria-describedby="card-soon"
 							className="h-10 w-full border border-border px-3 text-[14px]"
 							disabled
 							placeholder="Número do cartão"
 						/>
 						<div className="flex gap-3">
 							<input
+								aria-describedby="card-soon"
 								className="h-10 w-full border border-border px-3 text-[14px]"
 								disabled
 								placeholder="Validade"
@@ -112,7 +114,7 @@ export function PaymentMethods({
 								placeholder="CVV"
 							/>
 						</div>
-						<p className="text-[12px] text-gray-50">
+						<p className="text-[12px] text-gray-60" id="card-soon">
 							Pagamento com cartão estará disponível em breve.
 						</p>
 					</div>

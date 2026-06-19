@@ -2,7 +2,7 @@ import { cn } from "@emach/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const emachButtonVariants = cva(
-	"inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[2px] border border-transparent font-sans font-semibold tracking-[0.04em] transition-all duration-180 disabled:pointer-events-none disabled:opacity-60",
+	"inline-flex cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-[2px] border border-transparent font-sans font-semibold tracking-[0.04em] transition-all duration-180 focus-visible:outline-2 focus-visible:outline-emach-red focus-visible:outline-offset-2 disabled:pointer-events-none disabled:opacity-60",
 	{
 		variants: {
 			variant: {

@@ -82,6 +82,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 							<Link
 								className={cn(
 									"relative block py-1 font-display font-semibold text-[clamp(40px,13vw,52px)] uppercase leading-[1.06] tracking-[0.01em] transition-colors",
+									"focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2",
 									active ? "text-white" : "text-white/55 hover:text-white"
 								)}
 								href={link.href}
@@ -105,7 +106,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 				{session?.user ? (
 					<div className="flex items-center gap-4 font-display text-[16px] uppercase tracking-[0.08em]">
 						<Link
-							className="text-white/80 transition-colors hover:text-white"
+							className="text-white/80 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
 							href="/dashboard"
 							onClick={onClose}
 						>
@@ -115,7 +116,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 							·
 						</span>
 						<button
-							className="cursor-pointer text-white/80 uppercase transition-colors hover:text-white"
+							className="cursor-pointer text-white/80 uppercase transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
 							onClick={handleSignOut}
 							type="button"
 						>
@@ -125,7 +126,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 				) : (
 					<div className="flex items-center gap-4 font-display text-[16px] uppercase tracking-[0.08em]">
 						<Link
-							className="text-white/80 transition-colors hover:text-white"
+							className="text-white/80 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
 							href="/login"
 							onClick={onClose}
 						>
@@ -135,7 +136,7 @@ export function MobileMenu({ open, onClose }: MobileMenuProps) {
 							·
 						</span>
 						<Link
-							className="text-white/80 transition-colors hover:text-white"
+							className="text-white/80 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
 							href="/login"
 							onClick={onClose}
 						>

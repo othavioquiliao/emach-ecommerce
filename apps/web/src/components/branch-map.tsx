@@ -14,10 +14,6 @@ interface Props {
 	pins: BranchPin[];
 }
 
-const REDUCE_MOTION =
-	typeof window !== "undefined" &&
-	window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
 export function BranchMap({
 	pins,
 	mapUri,
@@ -27,9 +23,19 @@ export function BranchMap({
 }: Props) {
 	const [hovered, setHovered] = useState<string | null>(null);
 	const [paused, setPaused] = useState(false);
+	const [reduceMotion, setReduceMotion] = useState(false);
+
+	// Reage a mudanças em runtime (ex.: usuário alterna preferência no SO).
+	useEffect(() => {
+		const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+		setReduceMotion(mq.matches);
+		const onChange = (e: MediaQueryListEvent) => setReduceMotion(e.matches);
+		mq.addEventListener("change", onChange);
+		return () => mq.removeEventListener("change", onChange);
+	}, []);
 
 	useEffect(() => {
-		if (REDUCE_MOTION || paused || pins.length < 2) {
+		if (reduceMotion || paused || pins.length < 2) {
 			return;
 		}
 		const timer = setInterval(() => {
@@ -39,7 +45,7 @@ export function BranchMap({
 			});
 		}, CYCLE_MS);
 		return () => clearInterval(timer);
-	}, [paused, pins]);
+	}, [reduceMotion, paused, pins]);
 
 	useEffect(() => {
 		if (!hovered) {
@@ -55,9 +61,9 @@ export function BranchMap({
 				row.offsetTop -
 				list.offsetTop -
 				(list.clientHeight - row.clientHeight) / 2,
-			behavior: REDUCE_MOTION ? "auto" : "smooth",
+			behavior: reduceMotion ? "auto" : "smooth",
 		});
-	}, [hovered]);
+	}, [hovered, reduceMotion]);
 
 	function activate(id: string) {
 		setPaused(true);
@@ -97,7 +103,7 @@ export function BranchMap({
 					{pins.map((p) => (
 						<a
 							aria-label={`EMACH ${p.name} — ${p.address}`}
-							className="absolute flex h-7 w-7 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
+							className="absolute flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center"
 							href={p.mapsUrl}
 							key={p.id}
 							onBlur={resume}

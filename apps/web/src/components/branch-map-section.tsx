@@ -19,8 +19,16 @@ import {
 } from "@/lib/branches";
 import { log } from "@/lib/evlog";
 
-const BranchMap = dynamic(() =>
-	import("@/components/branch-map").then((m) => m.BranchMap)
+const BranchMap = dynamic(
+	() => import("@/components/branch-map").then((m) => m.BranchMap),
+	{
+		loading: () => (
+			<div
+				aria-hidden="true"
+				className="flex flex-1 animate-pulse items-center justify-center bg-cinema-3/50"
+			/>
+		),
+	}
 );
 
 export async function BranchMapSection() {
@@ -67,7 +75,10 @@ export async function BranchMapSection() {
 	const [, , mapWidth, mapHeight] = BRAZIL_VIEWBOX.split(" ").map(Number);
 
 	return (
-		<section className="overflow-hidden border-emach-red border-y-2 bg-cinema-3 text-white [color-scheme:dark]">
+		<section
+			aria-label="Onde estamos"
+			className="overflow-hidden border-emach-red border-y-2 bg-cinema-3 text-white [color-scheme:dark]"
+		>
 			<PageContainer className="grid min-h-110 grid-cols-1 px-0 md:grid-cols-[36%_1fr]">
 				<div className="flex flex-col justify-center gap-4 px-5 py-12 sm:px-10 sm:py-16 md:px-16">
 					<SectionLabel tone="accent">Onde estamos</SectionLabel>

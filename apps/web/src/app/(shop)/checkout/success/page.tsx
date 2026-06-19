@@ -26,9 +26,10 @@ export default function CheckoutSuccessPage({
 			<PageContainer
 				as="main"
 				className="flex flex-col items-center py-28 text-center"
+				id="main-content"
 			>
 				<div className="flex size-[72px] items-center justify-center rounded-full bg-success/10">
-					<CircleCheckBig className="text-success" size={32} />
+					<CircleCheckBig className="text-success-text" size={32} />
 				</div>
 				<div className="mt-6 font-display font-semibold text-[11px] text-emach-red uppercase tracking-[0.14em]">
 					Pedido confirmado

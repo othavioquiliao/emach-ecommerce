@@ -146,7 +146,7 @@ export function LoginBrandPanel() {
 								width: "clamp(320px, 38vw, 620px)",
 								height: "clamp(320px, 38vw, 620px)",
 								background:
-									"radial-gradient(circle, rgba(230,0,18,0.28) 0%, rgba(230,0,18,0.08) 42%, transparent 70%)",
+									"radial-gradient(circle, rgb(from var(--emach-red) r g b / 0.28) 0%, rgb(from var(--emach-red) r g b / 0.08) 42%, transparent 70%)",
 								filter: "blur(48px)",
 							}}
 							transition={glowTransition}

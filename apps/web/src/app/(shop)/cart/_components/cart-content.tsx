@@ -28,7 +28,7 @@ export function CartContent() {
 
 	if (items.length === 0) {
 		return (
-			<PageContainer as="main" className="py-20 text-center">
+			<PageContainer as="main" className="py-20 text-center" id="main-content">
 				<div className="mx-auto mb-6 flex size-20 items-center justify-center rounded-full bg-gray-10">
 					<ShoppingBag className="text-gray-50" size={32} />
 				</div>
@@ -49,7 +49,11 @@ export function CartContent() {
 	}
 
 	return (
-		<PageContainer as="main" className="max-w-[1080px] pt-10 pb-20">
+		<PageContainer
+			as="main"
+			className="max-w-[1080px] pt-10 pb-20"
+			id="main-content"
+		>
 			<h1 className="mb-2 font-display font-medium text-[40px] tracking-[-0.01em]">
 				Carrinho
 			</h1>
@@ -92,7 +96,7 @@ export function CartContent() {
 							</div>
 						</div>
 
-						<Separator className="mt-4 bg-white/12" />
+						<Separator className="mt-4 bg-white/25" />
 						<div className="mt-4 flex items-baseline justify-between">
 							<span className="font-bold font-display text-[14px] uppercase tracking-[0.1em]">
 								TOTAL

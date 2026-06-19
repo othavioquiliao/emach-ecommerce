@@ -20,7 +20,7 @@ export function DashboardNavMobile() {
 					return (
 						<Link
 							className={cn(
-								"whitespace-nowrap border-transparent border-b-[3px] px-3 py-3.5 font-semibold text-[13px] tracking-[0.04em]",
+								"inline-flex min-h-11 items-center whitespace-nowrap border-transparent border-b-[3px] px-3 font-semibold text-[13px] tracking-[0.04em]",
 								active
 									? "border-b-emach-red text-white"
 									: "text-gray-50 hover:text-white"
@@ -34,7 +34,7 @@ export function DashboardNavMobile() {
 				}
 				return (
 					<button
-						className="whitespace-nowrap border-transparent border-b-[3px] px-3 py-3.5 font-semibold text-[13px] text-gray-50 tracking-[0.04em] hover:text-white"
+						className="inline-flex min-h-11 items-center whitespace-nowrap border-transparent border-b-[3px] px-3 font-semibold text-[13px] text-gray-50 tracking-[0.04em] hover:text-white"
 						key={item.label}
 						onClick={() => toast.info(`${item.label}: em breve`)}
 						type="button"

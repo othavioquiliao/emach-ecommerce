@@ -18,7 +18,7 @@ import {
 	useReducedMotion,
 	useSpring,
 } from "framer-motion";
-import { ArrowRight } from "lucide-react";
+import { ArrowRight, Pause, Play } from "lucide-react";
 import type { Route } from "next";
 import Image from "next/image";
 import Link from "next/link";
@@ -415,7 +415,11 @@ function HeroCountdown({ target }: { target: Date }) {
 		return null;
 	}
 	return (
-		<span className="mt-4 font-display font-semibold text-[15px] text-white tabular-nums tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]">
+		<span
+			aria-live="off"
+			className="mt-4 font-display font-semibold text-[15px] text-white tabular-nums tracking-wide drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]"
+			role="timer"
+		>
 			{parts.days}d {parts.hours}h {parts.minutes}m {parts.seconds}s
 		</span>
 	);
@@ -538,6 +542,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	const slides = banners.length > 0 ? banners : FALLBACK_BANNERS;
 	const [api, setApi] = useState<CarouselApi>();
 	const [selectedIndex, setSelectedIndex] = useState(0);
+	const [paused, setPaused] = useState(false);
 	const reduceMotion = useReducedMotion() ?? false;
 
 	const mouseX = useMotionValue(0);
@@ -546,6 +551,8 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	const parallaxY = useSpring(mouseY, PARALLAX_SPRING);
 
 	// Primeiro slide com título vira o <h1> da home; demais títulos viram <h2>.
+	// Quando nenhum banner tem título (ex.: todos os fallbacks têm title:null),
+	// o <h1> sr-only garante que a página nunca fique sem h1 (SEO + a11y).
 	const h1Index = slides.findIndex((b) => b.title != null);
 
 	useEffect(() => {
@@ -561,14 +568,14 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	}, [api]);
 
 	useEffect(() => {
-		if (!api || slides.length < 2) {
+		if (!api || slides.length < 2 || reduceMotion || paused) {
 			return;
 		}
 		const id = window.setInterval(() => {
 			api.scrollNext();
 		}, AUTOPLAY_INTERVAL);
 		return () => window.clearInterval(id);
-	}, [api, slides.length]);
+	}, [api, slides.length, reduceMotion, paused]);
 
 	const handleMouseMove = (e: React.MouseEvent<HTMLElement>) => {
 		if (reduceMotion) {
@@ -588,13 +595,17 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 
 	return (
 		<LazyMotion features={domAnimation} strict>
-			{/* biome-ignore lint/a11y/noStaticElementInteractions: parallax decorativo (mouse-only), sem semântica interativa */}
-			{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: idem — efeito visual, teclado/toque não dependem disto */}
+			{/* biome-ignore lint/a11y/noNoninteractiveElementInteractions: parallax decorativo mouse-only na hero; teclado/toque não dependem disto */}
 			<section
+				aria-label="Banner principal"
 				className="relative h-[88svh] w-full overflow-hidden bg-black lg:h-svh"
 				onMouseLeave={handleMouseLeave}
 				onMouseMove={handleMouseMove}
 			>
+				{/* h1 invisível para leitores de tela quando nenhum banner tem título visível */}
+				{h1Index === -1 && (
+					<h1 className="sr-only">EMACH — Ferramentas Profissionais</h1>
+				)}
 				<Carousel
 					className="h-full w-full"
 					opts={{ loop: true, align: "start" }}
@@ -624,9 +635,10 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 					<div className="absolute bottom-24 left-1/2 z-30 flex -translate-x-1/2 items-center gap-2 lg:bottom-10">
 						{slides.map((banner, index) => (
 							<button
-								aria-label={`Ir para slide ${index + 1}`}
+								aria-current={index === selectedIndex ? "true" : undefined}
+								aria-label={`Slide ${index + 1} de ${slides.length}`}
 								className={cn(
-									"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-3 after:right-0 after:left-0 after:content-[''] sm:w-10",
+									"relative h-[4px] w-8 cursor-pointer transition-colors duration-200 after:absolute after:-inset-y-5 after:right-0 after:left-0 after:content-[''] focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2 sm:w-10",
 									index === selectedIndex ? "bg-emach-red" : "bg-white/30"
 								)}
 								key={banner.id}
@@ -634,6 +646,25 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 								type="button"
 							/>
 						))}
+						{!reduceMotion && (
+							<button
+								aria-label={
+									paused
+										? "Retomar troca automática de slides"
+										: "Pausar troca automática de slides"
+								}
+								aria-pressed={paused}
+								className="relative ml-2 flex size-11 items-center justify-center text-white/70 transition-colors hover:text-white focus-visible:outline-2 focus-visible:outline-white focus-visible:outline-offset-2"
+								onClick={() => setPaused((p) => !p)}
+								type="button"
+							>
+								{paused ? (
+									<Play className="size-4" />
+								) : (
+									<Pause className="size-4" />
+								)}
+							</button>
+						)}
 					</div>
 				)}
 			</section>

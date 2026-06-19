@@ -45,7 +45,9 @@ export function PromoCountdown({ endsAt }: PromoCountdownProps) {
 			</span>
 			<div
 				aria-label="Tempo restante da oferta"
+				aria-live="off"
 				className="flex items-start gap-3 tabular-nums"
+				role="timer"
 			>
 				{UNITS.map((u, i) => (
 					<div className="flex items-start gap-3" key={u.key}>

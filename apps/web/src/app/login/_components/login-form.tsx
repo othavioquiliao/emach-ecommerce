@@ -25,7 +25,7 @@ import { LoginBrandPanel } from "./login-brand-panel";
 import { PasswordInput } from "./password-input";
 
 const TRIGGER_CLASS =
-	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-50 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent";
+	"h-auto flex-1 whitespace-nowrap border-none px-0 py-3.5 font-semibold text-[14px] text-gray-60 hover:text-near-black data-active:text-near-black focus-visible:ring-0 focus-visible:border-transparent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-emach-red";
 
 function sanitizeRedirect(raw: string | null): string {
 	if (!raw?.startsWith("/") || raw.startsWith("//") || raw.startsWith("/\\")) {
@@ -173,6 +173,7 @@ export function LoginForm() {
 
 						<TabsContent value="sign-in">
 							<form
+								aria-label="Entrar"
 								className="flex flex-col gap-3.5 pt-8"
 								onSubmit={(e) => {
 									e.preventDefault();
@@ -194,14 +195,16 @@ export function LoginForm() {
 												type="email"
 												value={field.state.value}
 											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
+											<div aria-atomic="true" aria-live="polite">
+												{field.state.meta.errors.map((error) => (
+													<span
+														className="emach-field__error"
+														key={error?.message}
+													>
+														{error?.message}
+													</span>
+												))}
+											</div>
 										</label>
 									)}
 								</signInForm.Field>
@@ -218,14 +221,16 @@ export function LoginForm() {
 												placeholder="••••••••"
 												value={field.state.value}
 											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
+											<div aria-atomic="true" aria-live="polite">
+												{field.state.meta.errors.map((error) => (
+													<span
+														className="emach-field__error"
+														key={error?.message}
+													>
+														{error?.message}
+													</span>
+												))}
+											</div>
 										</label>
 									)}
 								</signInForm.Field>
@@ -239,7 +244,7 @@ export function LoginForm() {
 										Lembrar de mim
 									</label>
 									<Link
-										className="emach-ghost-btn font-semibold text-emach-red text-sm"
+										className="emach-ghost-btn font-semibold text-emach-red-hover text-sm"
 										href={{ pathname: "/esqueci-senha" }}
 									>
 										Esqueci a senha
@@ -270,6 +275,7 @@ export function LoginForm() {
 
 						<TabsContent value="sign-up">
 							<form
+								aria-label="Criar conta"
 								className="flex flex-col gap-3.5 pt-8"
 								onSubmit={(e) => {
 									e.preventDefault();
@@ -290,14 +296,16 @@ export function LoginForm() {
 												placeholder="João da Silva"
 												value={field.state.value}
 											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
+											<div aria-atomic="true" aria-live="polite">
+												{field.state.meta.errors.map((error) => (
+													<span
+														className="emach-field__error"
+														key={error?.message}
+													>
+														{error?.message}
+													</span>
+												))}
+											</div>
 										</label>
 									)}
 								</signUpForm.Field>
@@ -316,14 +324,16 @@ export function LoginForm() {
 												type="email"
 												value={field.state.value}
 											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
+											<div aria-atomic="true" aria-live="polite">
+												{field.state.meta.errors.map((error) => (
+													<span
+														className="emach-field__error"
+														key={error?.message}
+													>
+														{error?.message}
+													</span>
+												))}
+											</div>
 										</label>
 									)}
 								</signUpForm.Field>
@@ -346,14 +356,16 @@ export function LoginForm() {
 												placeholder="(11) 99999-9999"
 												value={field.state.value}
 											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
+											<div aria-atomic="true" aria-live="polite">
+												{field.state.meta.errors.map((error) => (
+													<span
+														className="emach-field__error"
+														key={error?.message}
+													>
+														{error?.message}
+													</span>
+												))}
+											</div>
 										</label>
 									)}
 								</signUpForm.Field>
@@ -370,14 +382,16 @@ export function LoginForm() {
 												placeholder="••••••••"
 												value={field.state.value}
 											/>
-											{field.state.meta.errors.map((error) => (
-												<span
-													className="emach-field__error"
-													key={error?.message}
-												>
-													{error?.message}
-												</span>
-											))}
+											<div aria-atomic="true" aria-live="polite">
+												{field.state.meta.errors.map((error) => (
+													<span
+														className="emach-field__error"
+														key={error?.message}
+													>
+														{error?.message}
+													</span>
+												))}
+											</div>
 										</label>
 									)}
 								</signUpForm.Field>
@@ -406,7 +420,7 @@ export function LoginForm() {
 					</Tabs>
 
 					{/* Divider */}
-					<div className="my-5 flex items-center gap-3 text-[12px] text-gray-50">
+					<div className="my-5 flex items-center gap-3 text-[12px] text-gray-60">
 						<Separator className="flex-1" />
 						ou
 						<Separator className="flex-1" />
