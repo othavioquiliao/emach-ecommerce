@@ -2,7 +2,7 @@ import { cn } from "@emach/ui/lib/utils";
 import { cva, type VariantProps } from "class-variance-authority";
 
 const sectionLabelVariants = cva(
-	"font-display font-semibold text-md uppercase tracking-[0.14em]",
+	"font-display font-semibold text-base uppercase tracking-[0.14em]",
 	{
 		variants: {
 			tone: {

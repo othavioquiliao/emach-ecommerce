@@ -239,7 +239,7 @@ export function ProductInfo({
 
 			{orderedVariants.length > 1 && (
 				<fieldset className="m-0 min-w-0 border-0 p-0">
-					<legend className="mb-2.5 font-semibold text-md">Voltagem</legend>
+					<legend className="mb-2.5 font-semibold text-base">Voltagem</legend>
 					<div className="flex flex-wrap gap-2">
 						{orderedVariants.map((v) => {
 							const variantStock = stockByVariant[v.id] ?? false;

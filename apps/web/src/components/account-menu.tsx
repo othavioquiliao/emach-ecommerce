@@ -65,7 +65,7 @@ export function AccountMenu() {
 							src={session.user.image}
 						/>
 					)}
-					<AvatarFallback className="flex items-center border-emach-red bg-white/10 text-md text-white">
+					<AvatarFallback className="flex items-center border-emach-red bg-white/10 text-base text-white">
 						{getInitials(session.user.name ?? "")}
 					</AvatarFallback>
 				</Avatar>
