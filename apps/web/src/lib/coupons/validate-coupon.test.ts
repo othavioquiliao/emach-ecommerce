@@ -1,8 +1,7 @@
 import { db } from "@emach/db";
 import { promotion, promotionTool } from "@emach/db/schema/promotions";
-import { tool } from "@emach/db/schema/tools";
 import { describe, expect, it } from "vitest";
-import { disableGlobalPromos } from "@/lib/test-helpers";
+import { disableGlobalPromos, seedTool } from "@/lib/test-helpers";
 import {
 	type CouponLine,
 	publicCouponError,
@@ -26,19 +25,6 @@ async function withRollback(
 			throw err;
 		}
 	}
-}
-
-async function seedTool(tx: typeof db): Promise<string> {
-	const toolId = crypto.randomUUID();
-	await tx.insert(tool).values({
-		id: toolId,
-		name: `Tool ${toolId}`,
-		weightKg: "1.000",
-		lengthCm: "10.00",
-		widthCm: "10.00",
-		heightCm: "10.00",
-	});
-	return toolId;
 }
 
 interface PromoOpts {

@@ -5,8 +5,10 @@ import type {
 	RefundStatus,
 } from "@emach/db/schema/orders";
 import { order, orderItem, refundRequest } from "@emach/db/schema/orders";
-import { toolImage } from "@emach/db/schema/tools";
-import { and, asc, desc, eq, inArray } from "drizzle-orm";
+import { and, desc, eq, inArray } from "drizzle-orm";
+
+import { primaryImageByToolId } from "@/lib/tool-images";
+
 import { isActiveRefund } from "./status";
 
 export interface RefundPreviewItem {
@@ -37,31 +39,6 @@ export type RefundRequestRow = typeof refundRequest.$inferSelect;
 /** Pedido elegível a devolução: enviado ou entregue. */
 export function isRefundEligibleStatus(status: OrderStatus): boolean {
 	return status === "shipped" || status === "delivered";
-}
-
-/** Mapa toolId -> URL da imagem primária (menor sortOrder). */
-async function primaryImageByToolId(
-	toolIds: string[]
-): Promise<Map<string, string>> {
-	if (toolIds.length === 0) {
-		return new Map();
-	}
-	const rows = await db
-		.select({
-			toolId: toolImage.toolId,
-			url: toolImage.url,
-			sortOrder: toolImage.sortOrder,
-		})
-		.from(toolImage)
-		.where(inArray(toolImage.toolId, toolIds))
-		.orderBy(asc(toolImage.toolId), asc(toolImage.sortOrder));
-	const map = new Map<string, string>();
-	for (const r of rows) {
-		if (!map.has(r.toolId)) {
-			map.set(r.toolId, r.url);
-		}
-	}
-	return map;
 }
 
 /** Devoluções do cliente, mais recentes primeiro, com preview dos itens do pedido. */
@@ -108,6 +85,7 @@ export async function listClientRefunds(
 		.where(inArray(orderItem.orderId, orderIds));
 
 	const imageByTool = await primaryImageByToolId(
+		db,
 		Array.from(new Set(items.map((i) => i.toolId)))
 	);
 

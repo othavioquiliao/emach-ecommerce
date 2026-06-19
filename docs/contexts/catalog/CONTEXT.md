@@ -26,6 +26,10 @@ _Avoid_: Spec, Especificação, Feature
 O fornecedor de quem um **Tool** é adquirido.
 _Avoid_: Vendor, Fabricante (o fabricante é `manufacturer_name`, um campo livre — não é o **Supplier**)
 
+**Primary image** (imagem primária):
+A imagem que representa um **Tool** nas listagens do storefront (previews de pedido, devolução e recompra): a primeira por `sortOrder`. É um atributo do **Tool**, não da **Category** — um **Tool** classificado em mais de uma **Category** (X e Y) exibe a mesma imagem primária sob qualquer uma delas.
+_Avoid_: thumbnail, foto principal
+
 ## Relationships
 
 - Um **Tool** tem uma ou mais **Variants**; exatamente uma é a **Variant** padrão
