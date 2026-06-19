@@ -28,6 +28,7 @@ import {
 	type emachButtonVariants,
 } from "@/components/emach-button";
 import { type CountdownParts, formatCountdown } from "@/lib/countdown";
+import { useIsDesktop } from "@/lib/use-is-desktop";
 
 /**
  * Subconjunto de `banner` que o hero consome. Inclui badge e countdown
@@ -305,15 +306,14 @@ function HeroBackground({
 
 // Glow vermelho — assinatura cinematográfica. O pulse (repaint de blur(40px) por
 // frame) é caro no mobile — anima só no desktop; no mobile fica estático.
-function HeroGlow({ reduceMotion }: { reduceMotion: boolean }) {
-	const [isDesktop, setIsDesktop] = useState(false);
-	useEffect(() => {
-		const mq = window.matchMedia("(min-width: 1024px)");
-		const update = () => setIsDesktop(mq.matches);
-		update();
-		mq.addEventListener("change", update);
-		return () => mq.removeEventListener("change", update);
-	}, []);
+// `isDesktop` vem de cima (um listener no HeroCarousel, não um por slide).
+function HeroGlow({
+	isDesktop,
+	reduceMotion,
+}: {
+	isDesktop: boolean;
+	reduceMotion: boolean;
+}) {
 	const animated = !reduceMotion && isDesktop;
 	return (
 		<m.div
@@ -497,6 +497,7 @@ function HeroContentBlock({
 interface HeroSlideContentProps {
 	banner: HeroBanner;
 	isActive: boolean;
+	isDesktop: boolean;
 	isFirst: boolean;
 	isH1: boolean;
 	parallaxX: MotionValue<number>;
@@ -507,6 +508,7 @@ interface HeroSlideContentProps {
 function HeroSlideContent({
 	banner,
 	isActive,
+	isDesktop,
 	isFirst,
 	isH1,
 	parallaxX,
@@ -519,7 +521,7 @@ function HeroSlideContent({
 		<div className="absolute inset-0">
 			<HeroBackground banner={banner} isFirst={isFirst} />
 
-			<HeroGlow reduceMotion={reduceMotion} />
+			<HeroGlow isDesktop={isDesktop} reduceMotion={reduceMotion} />
 
 			{/* Gradiente de legibilidade — só quando há texto overlay a proteger.
 			    Sem título/subtítulo (fallback, "imagem pura"), a arte fica intacta. */}
@@ -576,6 +578,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 	const [selectedIndex, setSelectedIndex] = useState(0);
 	const [paused, setPaused] = useState(false);
 	const reduceMotion = useReducedMotion() ?? false;
+	const isDesktop = useIsDesktop();
 
 	const mouseX = useMotionValue(0);
 	const mouseY = useMotionValue(0);
@@ -652,6 +655,7 @@ export function HeroCarousel({ banners }: { banners: HeroBanner[] }) {
 								<HeroSlideContent
 									banner={banner}
 									isActive={index === selectedIndex}
+									isDesktop={isDesktop}
 									isFirst={index === 0}
 									isH1={index === h1Index}
 									parallaxX={parallaxX}

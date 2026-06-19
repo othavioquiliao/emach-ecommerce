@@ -11,6 +11,7 @@ import {
 } from "framer-motion";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { useIsDesktop } from "@/lib/use-is-desktop";
 
 const PRODUCTS = [
 	"/images/hero-imagens/emach_hero_01_product.png",
@@ -19,18 +20,6 @@ const PRODUCTS = [
 ] as const;
 
 const CAROUSEL_MS = 3800;
-
-function useIsDesktop() {
-	const [isDesktop, setIsDesktop] = useState(false);
-	useEffect(() => {
-		const mq = window.matchMedia("(min-width: 1024px)");
-		const update = () => setIsDesktop(mq.matches);
-		update();
-		mq.addEventListener("change", update);
-		return () => mq.removeEventListener("change", update);
-	}, []);
-	return isDesktop;
-}
 
 function FloatingTool({
 	float,
