@@ -28,6 +28,7 @@ import {
 	type emachButtonVariants,
 } from "@/components/emach-button";
 import { type CountdownParts, formatCountdown } from "@/lib/countdown";
+import { resolveHeroSpecs } from "@/lib/hero-specs";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 
 /**
@@ -44,6 +45,7 @@ export type HeroBanner = Pick<
 	| "productImageMobileUrl"
 	| "title"
 	| "subtitle"
+	| "specs"
 	| "altText"
 	| "badgeText"
 	| "ctaLabel"
@@ -70,6 +72,7 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		productImageMobileUrl: null,
 		title: null,
 		subtitle: null,
+		specs: null,
 		altText: "EMACH — Potência redefinida",
 		ctaLabel: "Ver Catálogo",
 		ctaHref: "/catalog",
@@ -89,6 +92,7 @@ const FALLBACK_BANNERS: HeroBanner[] = [
 		productImageMobileUrl: null,
 		title: null,
 		subtitle: null,
+		specs: null,
 		altText: "EMACH — Linha profissional",
 		ctaLabel: "Ver Catálogo",
 		ctaHref: "/catalog",
@@ -447,6 +451,35 @@ function HeroCountdown({ target }: { target: Date }) {
 	);
 }
 
+// Ficha técnica do hero (#158): valores de banner.specs como <ul> semântico, em
+// vez de queimados na arte. "FICHA TÉCNICA" é label fixo de render (não vem no
+// dado). null/[]/só-vazios = sem painel. Tratamento inline com "·" (DESIGN.md
+// §10): leve, não compete com o vermelho do CTA. O "·" é decorativo (CSS before);
+// o label visual é aria-hidden pra não duplicar com o aria-label da lista.
+function HeroSpecs({ specs }: { specs: string[] | null }) {
+	const values = resolveHeroSpecs(specs);
+	if (values.length === 0) {
+		return null;
+	}
+	return (
+		<div className="mt-4 max-w-[44ch] font-display text-[13px] text-white/90 uppercase tracking-[0.08em] drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[15px]">
+			<span aria-hidden="true" className="text-white/55">
+				Ficha técnica
+			</span>
+			<ul aria-label="Ficha técnica" className="inline">
+				{values.map((spec) => (
+					<li
+						className="inline before:mx-1.5 before:text-white/40 before:content-['·']"
+						key={spec}
+					>
+						{spec}
+					</li>
+				))}
+			</ul>
+		</div>
+	);
+}
+
 // Bloco de conteúdo: título + régua + subtítulo (+ CTA inline).
 function HeroContentBlock({
 	banner,
@@ -479,6 +512,7 @@ function HeroContentBlock({
 					<span aria-hidden="true" className="my-4 h-[3px] w-16 bg-emach-red" />
 				</>
 			)}
+			<HeroSpecs specs={banner.specs} />
 			{banner.subtitle && (
 				<p className="max-w-[44ch] font-sans text-[15px] text-white/85 drop-shadow-[0_2px_10px_rgba(0,0,0,0.85)] lg:text-[17px]">
 					{banner.subtitle}
@@ -516,7 +550,9 @@ function HeroSlideContent({
 	reduceMotion,
 }: HeroSlideContentProps) {
 	const cfg = LAYOUT_CONFIG[banner.layout];
-	const hasText = Boolean(banner.title || banner.subtitle);
+	const hasText = Boolean(
+		banner.title || banner.subtitle || resolveHeroSpecs(banner.specs).length > 0
+	);
 	return (
 		<div className="absolute inset-0">
 			<HeroBackground banner={banner} isFirst={isFirst} />
