@@ -60,6 +60,15 @@ import {
 } from "./schema/promotions";
 import { review, reviewRelations } from "./schema/reviews";
 import {
+	carrier,
+	carrierRate,
+	carrierRateRelations,
+	carrierRelations,
+	carrierZone,
+	carrierZoneRelations,
+	shippingBox,
+} from "./schema/shipping";
+import {
 	stockMovement,
 	stockMovementRelations,
 } from "./schema/stock-movements";
@@ -80,6 +89,12 @@ const schema = {
 	attributeDefinitionRelations,
 	branch,
 	branchRelations,
+	carrier,
+	carrierRate,
+	carrierRateRelations,
+	carrierRelations,
+	carrierZone,
+	carrierZoneRelations,
 	category,
 	categoryRelations,
 	client,
@@ -109,6 +124,7 @@ const schema = {
 	reviewRelations,
 	session,
 	sessionRelations,
+	shippingBox,
 	stockLevel,
 	stockLevelRelations,
 	stockMovement,
