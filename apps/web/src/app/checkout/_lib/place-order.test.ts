@@ -13,16 +13,19 @@ import { disableGlobalPromos } from "@/lib/test-helpers";
 // quoteShipping chama o DB global e a API externa — mockar para os testes de
 // integração do place-order (a lógica de anti-fraude está coberta em
 // place-order.shipping.test.ts).
-vi.mock("@/lib/superfrete/quote", () => ({
-	quoteShipping: vi.fn().mockResolvedValue([
-		{
-			serviceId: 1,
-			name: "SEDEX",
-			company: "Correios",
-			priceCents: 2000,
-			deliveryDays: 1,
-		},
-	]),
+vi.mock("@/lib/shipping/quote", () => ({
+	quoteShipping: vi.fn().mockResolvedValue({
+		negotiate: false,
+		options: [
+			{
+				carrierId: "carrier-1",
+				name: "SEDEX",
+				company: "Correios",
+				priceCents: 2000,
+				deliveryDays: 1,
+			},
+		],
+	}),
 }));
 
 import { type CreateOrderInput, placeOrder } from "./place-order";

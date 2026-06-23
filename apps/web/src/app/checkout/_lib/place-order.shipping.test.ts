@@ -1,8 +1,8 @@
 import { describe, expect, it, vi } from "vitest";
 
-vi.mock("@/lib/superfrete/quote", () => ({ quoteShipping: vi.fn() }));
+vi.mock("@/lib/shipping/quote", () => ({ quoteShipping: vi.fn() }));
 
-import { quoteShipping } from "@/lib/superfrete/quote";
+import { quoteShipping } from "@/lib/shipping/quote";
 import { assertShippingQuoted } from "./place-order";
 
 describe("assertShippingQuoted", () => {
@@ -11,7 +11,7 @@ describe("assertShippingQuoted", () => {
 			negotiate: false,
 			options: [
 				{
-					serviceId: 2,
+					carrierId: "carrier-1",
 					name: "SEDEX",
 					company: "Correios",
 					priceCents: 3596,
@@ -29,7 +29,7 @@ describe("assertShippingQuoted", () => {
 	});
 
 	it("fail-open: API indisponível não bloqueia, marca shippingUnverified (#97)", async () => {
-		vi.mocked(quoteShipping).mockRejectedValue(new Error("SuperFrete 503"));
+		vi.mocked(quoteShipping).mockRejectedValue(new Error("Shipping API 503"));
 		await expect(
 			assertShippingQuoted({
 				shippingCents: 9999,
@@ -44,7 +44,7 @@ describe("assertShippingQuoted", () => {
 			negotiate: false,
 			options: [
 				{
-					serviceId: 2,
+					carrierId: "carrier-1",
 					name: "SEDEX",
 					company: "Correios",
 					priceCents: 3596,
