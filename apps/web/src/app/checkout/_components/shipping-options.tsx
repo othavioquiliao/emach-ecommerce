@@ -90,7 +90,10 @@ export function ShippingOptions({
 						<span>
 							<span className="font-medium">{opt.name}</span>{" "}
 							<span className="text-gray-60">
-								· {opt.company} · {opt.deliveryDays} dia(s)
+								·{" "}
+								{opt.deliveryDays > 0
+									? `${opt.deliveryDays} dia(s)`
+									: "Prazo a confirmar"}
 							</span>
 						</span>
 					</span>

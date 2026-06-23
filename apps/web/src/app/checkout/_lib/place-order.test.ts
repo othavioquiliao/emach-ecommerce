@@ -20,7 +20,6 @@ vi.mock("@/lib/shipping/quote", () => ({
 			{
 				carrierId: "carrier-1",
 				name: "SEDEX",
-				company: "Correios",
 				priceCents: 2000,
 				deliveryDays: 1,
 			},

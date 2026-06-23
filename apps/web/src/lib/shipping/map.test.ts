@@ -20,14 +20,12 @@ describe("mapQuoteResult", () => {
 			{
 				carrierId: "c1",
 				name: "Alfa",
-				company: "Alfa",
 				priceCents: 3000,
 				deliveryDays: 0,
 			},
 			{
 				carrierId: "c2",
 				name: "Beta",
-				company: "Beta",
 				priceCents: 5050,
 				deliveryDays: 3,
 			},

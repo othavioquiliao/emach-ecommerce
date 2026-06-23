@@ -138,12 +138,7 @@ export function FreightCalculator({
 							key={option.carrierId}
 						>
 							<div>
-								<div className="font-semibold text-[13px]">
-									{option.name}
-									{option.company ? (
-										<span className="text-gray-60"> · {option.company}</span>
-									) : null}
-								</div>
+								<div className="font-semibold text-[13px]">{option.name}</div>
 								<div className="text-[12px] text-gray-60">
 									{option.deliveryDays > 0
 										? `${option.deliveryDays} dia(s) úteis`

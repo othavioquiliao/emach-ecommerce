@@ -13,7 +13,6 @@ describe("assertShippingQuoted", () => {
 				{
 					carrierId: "carrier-1",
 					name: "SEDEX",
-					company: "Correios",
 					priceCents: 3596,
 					deliveryDays: 1,
 				},
@@ -46,7 +45,6 @@ describe("assertShippingQuoted", () => {
 				{
 					carrierId: "carrier-1",
 					name: "SEDEX",
-					company: "Correios",
 					priceCents: 3596,
 					deliveryDays: 1,
 				},

@@ -11,7 +11,6 @@ export function mapQuoteResult(result: QuoteResult): {
 		.map((o) => ({
 			carrierId: o.carrierId,
 			name: o.carrierName,
-			company: o.carrierName,
 			priceCents: Math.round(o.amount * 100),
 			deliveryDays: o.deliveryDays ?? 0,
 		}))
