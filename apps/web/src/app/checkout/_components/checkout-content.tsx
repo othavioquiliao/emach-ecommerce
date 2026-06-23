@@ -30,7 +30,7 @@ import { EmachButton, emachButtonVariants } from "@/components/emach-button";
 import { authClient } from "@/lib/auth-client";
 import { useCart } from "@/lib/cart-context";
 import { fmtBRL, numericToCents } from "@/lib/format";
-import type { ShippingOption } from "@/lib/superfrete/types";
+import type { ShippingOption } from "@/lib/shipping/types";
 import { addressFieldsSchema } from "@/lib/validators/address";
 
 const NEW_ADDRESS_ID = "__new__";
@@ -110,14 +110,14 @@ export function CheckoutContent({
 
 	const [shippingStatus, setShippingStatus] = useState<ShippingStatus>("idle");
 	const [shippingOptions, setShippingOptions] = useState<ShippingOption[]>([]);
-	const [selectedServiceId, setSelectedServiceId] = useState<number | null>(
+	const [selectedCarrierId, setSelectedCarrierId] = useState<string | null>(
 		null
 	);
 	const [destinationCep, setDestinationCep] = useState("");
 	const [quoteNonce, setQuoteNonce] = useState(0);
 
 	const selectedShippingCents =
-		shippingOptions.find((o) => o.serviceId === selectedServiceId)
+		shippingOptions.find((o) => o.carrierId === selectedCarrierId)
 			?.priceCents ?? null;
 
 	const defaultAddressId =
@@ -266,7 +266,7 @@ export function CheckoutContent({
 		if (destinationCep.length !== 8 || items.length === 0) {
 			setShippingStatus("idle");
 			setShippingOptions([]);
-			setSelectedServiceId(null);
+			setSelectedCarrierId(null);
 			return;
 		}
 		let cancelled = false;
@@ -282,11 +282,11 @@ export function CheckoutContent({
 			}
 			if (result.ok) {
 				setShippingOptions(result.options);
-				setSelectedServiceId(result.options[0]?.serviceId ?? null);
+				setSelectedCarrierId(result.options[0]?.carrierId ?? null);
 				setShippingStatus(result.negotiate ? "negotiate" : "ready");
 			} else {
 				setShippingOptions([]);
-				setSelectedServiceId(null);
+				setSelectedCarrierId(null);
 				setShippingStatus("error");
 			}
 		}, 600);
@@ -673,9 +673,9 @@ export function CheckoutContent({
 								<span className="text-gray-60 text-sm">Frete</span>
 								<ShippingOptions
 									onRetry={() => setQuoteNonce((n) => n + 1)}
-									onSelect={setSelectedServiceId}
+									onSelect={setSelectedCarrierId}
 									options={shippingOptions}
-									selectedId={selectedServiceId}
+									selectedId={selectedCarrierId}
 									status={shippingStatus}
 								/>
 							</div>

@@ -4,7 +4,7 @@ import { Button } from "@emach/ui/components/button";
 import { RadioGroup, RadioGroupItem } from "@emach/ui/components/radio-group";
 
 import { fmtBRL } from "@/lib/format";
-import type { ShippingOption } from "@/lib/superfrete/types";
+import type { ShippingOption } from "@/lib/shipping/types";
 
 export type ShippingStatus =
 	| "idle"
@@ -15,9 +15,9 @@ export type ShippingStatus =
 
 interface ShippingOptionsProps {
 	onRetry: () => void;
-	onSelect: (serviceId: number) => void;
+	onSelect: (carrierId: string) => void;
 	options: ShippingOption[];
-	selectedId: number | null;
+	selectedId: string | null;
 	status: ShippingStatus;
 }
 
@@ -73,19 +73,19 @@ export function ShippingOptions({
 	return (
 		<RadioGroup
 			className="gap-2"
-			onValueChange={(value) => onSelect(Number(value))}
-			value={selectedId === null ? undefined : String(selectedId)}
+			onValueChange={(value) => onSelect(value)}
+			value={selectedId ?? undefined}
 		>
 			{options.map((opt) => (
 				<label
 					className="flex cursor-pointer items-center justify-between border border-border p-3 text-sm"
-					htmlFor={`ship-${opt.serviceId}`}
-					key={opt.serviceId}
+					htmlFor={`ship-${opt.carrierId}`}
+					key={opt.carrierId}
 				>
 					<span className="flex items-center gap-3">
 						<RadioGroupItem
-							id={`ship-${opt.serviceId}`}
-							value={String(opt.serviceId)}
+							id={`ship-${opt.carrierId}`}
+							value={opt.carrierId}
 						/>
 						<span>
 							<span className="font-medium">{opt.name}</span>{" "}
