@@ -6,8 +6,8 @@ import { z } from "zod";
 import { getClientIp } from "@/lib/client-ip";
 import { log } from "@/lib/evlog";
 import { RATE_LIMIT_MESSAGE, shippingLimiter } from "@/lib/rate-limit";
-import { quoteShipping } from "@/lib/superfrete/quote";
-import type { ShippingOption } from "@/lib/superfrete/types";
+import { quoteShipping } from "@/lib/shipping/quote";
+import type { ShippingOption } from "@/lib/shipping/types";
 
 const inputSchema = z.object({
 	destinationCep: z

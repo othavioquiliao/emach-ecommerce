@@ -6,7 +6,7 @@ import { useState } from "react";
 import { quoteShippingAction } from "@/app/checkout/_actions/quote-shipping";
 import { EmachButton } from "@/components/emach-button";
 import { fmtBRL } from "@/lib/format";
-import type { ShippingOption } from "@/lib/superfrete/types";
+import type { ShippingOption } from "@/lib/shipping/types";
 
 interface FreightCalculatorProps {
 	className?: string;
@@ -135,15 +135,10 @@ export function FreightCalculator({
 					{state.options.map((option) => (
 						<li
 							className="flex items-center justify-between py-2.5"
-							key={option.serviceId}
+							key={option.carrierId}
 						>
 							<div>
-								<div className="font-semibold text-[13px]">
-									{option.name}
-									{option.company ? (
-										<span className="text-gray-60"> · {option.company}</span>
-									) : null}
-								</div>
+								<div className="font-semibold text-[13px]">{option.name}</div>
 								<div className="text-[12px] text-gray-60">
 									{option.deliveryDays > 0
 										? `${option.deliveryDays} dia(s) úteis`

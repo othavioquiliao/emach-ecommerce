@@ -20,7 +20,7 @@ import {
 import { log } from "@/lib/evlog";
 import { numericToCents } from "@/lib/format";
 import { effectiveAutoDiscountCents } from "@/lib/promotions";
-import { quoteShipping } from "@/lib/superfrete/quote";
+import { quoteShipping } from "@/lib/shipping/quote";
 import { addressFieldsSchema } from "@/lib/validators/address";
 
 const PRICE_TOLERANCE_CENTS = 1;

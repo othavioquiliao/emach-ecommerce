@@ -24,10 +24,6 @@ export const serverSchema = {
 		.default("development"),
 	SUPABASE_SERVICE_ROLE_KEY: z.string().min(1),
 	NEXT_PUBLIC_SUPABASE_URL: z.url(),
-	SUPERFRETE_TOKEN: z.string().min(1),
-	SUPERFRETE_BASE_URL: z.url(),
-	SUPERFRETE_USER_AGENT: z.string().min(1),
-	DEFAULT_BRANCH_ID: z.string().min(1),
 	// Upstash Redis (REST) — storage do rate limit serverless (#91 auth,
 	// #94 checkout). Opcionais: ausentes → fallback in-memory em dev/local;
 	// obrigatórias na prática em produção (Vercel).
