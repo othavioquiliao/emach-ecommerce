@@ -157,7 +157,7 @@ export default async function HomePage() {
 					</section>
 				)}
 
-				{featuredPromotion && (
+				{featuredPromotion && featuredPromotion.tools.length >= 2 && (
 					<PromoHighlight
 						promotion={featuredPromotion}
 						voltagesByTool={voltagesByTool}

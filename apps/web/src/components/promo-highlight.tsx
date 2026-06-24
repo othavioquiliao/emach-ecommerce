@@ -5,7 +5,9 @@ import { emachButtonVariants } from "@/components/emach-button";
 import { PageContainer } from "@/components/page-container";
 import { ProductGrid } from "@/components/product-grid";
 import { PromoCountdown } from "@/components/promo-countdown";
+import { PromoProductCard } from "@/components/promo-product-card";
 import { SectionLabel } from "@/components/section-label";
+import { selectPromoLayout } from "@/lib/promo-card-helpers";
 
 interface PromoHighlightProps {
 	promotion: PromotionWithTools;
@@ -16,6 +18,11 @@ export function PromoHighlight({
 	promotion,
 	voltagesByTool,
 }: PromoHighlightProps) {
+	const layout = selectPromoLayout(promotion.tools.length);
+	if (layout === "hidden") {
+		return null;
+	}
+
 	return (
 		<section aria-label="Promoções" className="bg-black text-white">
 			<PageContainer className="px-5 py-12 sm:px-10 sm:py-14 lg:px-14 lg:py-18">
@@ -32,11 +39,38 @@ export function PromoHighlight({
 				</div>
 
 				<div className="pt-10">
-					<ProductGrid
-						surface="elevated"
-						tools={promotion.tools}
-						voltagesByTool={voltagesByTool}
-					/>
+					{layout === "pair" && (
+						<div className="grid grid-cols-1 gap-5 md:grid-cols-2">
+							{promotion.tools.map((tool, i) => (
+								<PromoProductCard
+									key={tool.id}
+									mirrored={i === 1}
+									tool={tool}
+									voltages={voltagesByTool?.get(tool.id)}
+								/>
+							))}
+						</div>
+					)}
+
+					{layout === "trio" && (
+						<div className="grid grid-cols-1 gap-5 md:grid-cols-3">
+							{promotion.tools.map((tool) => (
+								<PromoProductCard
+									key={tool.id}
+									tool={tool}
+									voltages={voltagesByTool?.get(tool.id)}
+								/>
+							))}
+						</div>
+					)}
+
+					{layout === "grid" && (
+						<ProductGrid
+							surface="elevated"
+							tools={promotion.tools}
+							voltagesByTool={voltagesByTool}
+						/>
+					)}
 				</div>
 
 				<div className="mt-10 flex justify-center">
