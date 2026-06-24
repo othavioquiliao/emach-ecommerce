@@ -20,6 +20,9 @@ describe("selectPromoLayout", () => {
 		expect(selectPromoLayout(4)).toBe("grid");
 		expect(selectPromoLayout(5)).toBe("grid");
 	});
+	it("trata contagem negativa como hidden", () => {
+		expect(selectPromoLayout(-1)).toBe("hidden");
+	});
 });
 
 describe("computeDiscountPercent", () => {
@@ -43,5 +46,8 @@ describe("computeSavings", () => {
 	});
 	it("preserva centavos", () => {
 		expect(computeSavings("100.50", "90.25")).toBe(10.25);
+	});
+	it("retorna null quando discounted é igual ao price", () => {
+		expect(computeSavings("100", "100")).toBeNull();
 	});
 });
