@@ -146,7 +146,7 @@ export function PromoProductCard({
 					</div>
 					{savings != null && savings > 0 && (
 						<span className="inline-flex w-fit items-center rounded-[2px] bg-white/10 px-2 py-1 font-bold font-display text-[11px] text-white uppercase tracking-[0.06em]">
-							Economize {fmtNumericBRL(String(savings))}
+							Economize {fmtNumericBRL(savings.toFixed(2))}
 						</span>
 					)}
 				</div>
