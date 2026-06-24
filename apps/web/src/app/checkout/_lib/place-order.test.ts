@@ -86,6 +86,7 @@ async function seedMultiBranch(
 		id: variantId,
 		toolId,
 		sku: `SKU-${variantId}`,
+		barcode: `BARCODE-${variantId}`,
 		priceAmount: "100.00",
 		isDefault: true,
 	});
@@ -123,6 +124,7 @@ async function seedSecondVariant(
 		id: variantId,
 		toolId,
 		sku: `SKU-${variantId}`,
+		barcode: `BARCODE-${variantId}`,
 		priceAmount: "100.00",
 		isDefault: true,
 	});
@@ -197,6 +199,7 @@ describe("placeOrder (multi-filial)", () => {
 				.where(eq(orderItem.orderId, result.orderId));
 			expect(items).toHaveLength(1);
 			expect(items[0]?.quantity).toBe(2);
+			expect(items[0]?.barcode).toBe(`BARCODE-${variantId}`);
 
 			const stocks = await tx
 				.select()

@@ -204,6 +204,7 @@ interface PreparedLine {
 		id: string;
 		toolId: string;
 		sku: string;
+		barcode: string;
 		voltage: "127V" | "220V" | "Bivolt" | "380V" | null;
 		priceAmount: string;
 		visibleOnSite: boolean;
@@ -223,6 +224,7 @@ async function prepareLines(
 				id: toolVariant.id,
 				toolId: toolVariant.toolId,
 				sku: toolVariant.sku,
+				barcode: toolVariant.barcode,
 				voltage: toolVariant.voltage,
 				priceAmount: toolVariant.priceAmount,
 				visibleOnSite: toolVariant.visibleOnSite,
@@ -582,6 +584,7 @@ export async function placeOrder(
 			toolId: line.tool.id,
 			variantId: line.variant.id,
 			sku: line.variant.sku,
+			barcode: line.variant.barcode,
 			name: line.tool.name,
 			model: line.tool.model,
 			voltage: line.variant.voltage,

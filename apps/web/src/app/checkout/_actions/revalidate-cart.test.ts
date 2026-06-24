@@ -40,6 +40,7 @@ async function seedToolWithVariant(
 		id: variantId,
 		toolId,
 		sku: `SKU-${variantId}`,
+		barcode: `BARCODE-${variantId}`,
 		priceAmount: price,
 	});
 	return { toolId, variantId };
